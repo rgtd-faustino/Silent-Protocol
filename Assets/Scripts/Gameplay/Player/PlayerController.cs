@@ -1,15 +1,16 @@
 using UnityEngine;
+using UnityEngine.ProBuilder.MeshOperations;
 
 public class PlayerController : MonoBehaviour {
     private CharacterController cc;
     [SerializeField] float speed = 6;
     public Transform cameraTransform;
-    private int crouchDistance = 4;
     private CameraScript camScript;
     private float originalHeight;
     private float gravity = -9.81f;
     private float yVelocity = 0f;
     private Animator animator;
+    private bool isCrouching;
 
     void Start() {
         cc = GetComponent<CharacterController>();
@@ -35,14 +36,29 @@ public class PlayerController : MonoBehaviour {
 
         // Crouch
         if (Input.GetKeyDown(KeyCode.LeftControl)) {
-            cc.height = originalHeight / 2;
-            cameraTransform.localPosition = new Vector3(0, crouchDistance / 2, 0);
-            animator.SetBool("Crouch", true);
+            isCrouching = !isCrouching;
+            animator.SetBool("Crouch", isCrouching);
         }
-        if (Input.GetKeyUp(KeyCode.LeftControl)) {
-            cc.height = originalHeight;
-            cameraTransform.localPosition = new Vector3(0, crouchDistance, 0);
-            animator.SetBool("Crouch", false);
+
+        // Ajuste do CharacterController consoante direção e crouch
+        if (isCrouching) {
+
+
+            if (x != 0 && z == 0) { // lados
+                cc.height = 1.37f;
+                cc.center = new Vector3(0, 0.67f, 0);
+
+            } else if (z != 0) { // frente, trás e diagonal
+                cc.height = 1.43f;
+                cc.center = new Vector3(0, 0.7f, 0);
+
+            } else { // parado
+                cc.height = 0.94f;
+                cc.center = new Vector3(0, 0.46f, 0);
+            }
+        } else {
+            cc.height = 1.8f;
+            cc.center = new Vector3(0, 0.86f, 0);
         }
 
         // Gravidade
