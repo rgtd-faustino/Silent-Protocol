@@ -3,7 +3,8 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class PlayerController : MonoBehaviour {
     private CharacterController cc;
-    [SerializeField] float speed = 6;
+    [SerializeField] float NORMAL_SPEED = 6f;
+    [SerializeField] float CROUCH_SPEED = 4f;
     public Transform cameraTransform;
     private CameraScript camScript;
     private float originalHeight;
@@ -11,6 +12,18 @@ public class PlayerController : MonoBehaviour {
     private float yVelocity = 0f;
     private Animator animator;
     private bool isCrouching;
+    public bool canMoveRotate = true;
+
+    public static PlayerController Instance;
+
+    void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
     void Start() {
         cc = GetComponent<CharacterController>();
@@ -20,11 +33,14 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
+        if (canMoveRotate == false)
+            return;
+
         // Movimento
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         Vector3 move = transform.right * x + transform.forward * z;
-        cc.Move(speed * Time.deltaTime * move);
+        cc.Move((isCrouching ? CROUCH_SPEED : NORMAL_SPEED) * Time.deltaTime * move);
 
         // Animação
         animator.SetFloat("X", x);
