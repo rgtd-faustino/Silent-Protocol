@@ -7,7 +7,6 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] float CROUCH_SPEED = 4f;
     public Transform cameraTransform;
     private CameraScript camScript;
-    private float originalHeight;
     private float gravity = -9.81f;
     private float yVelocity = 0f;
     private Animator animator;
@@ -28,7 +27,6 @@ public class PlayerController : MonoBehaviour {
     void Start() {
         cc = GetComponent<CharacterController>();
         camScript = cameraTransform.GetComponent<CameraScript>();
-        originalHeight = cc.height;
         animator = GetComponent<Animator>();
     }
 
@@ -36,30 +34,25 @@ public class PlayerController : MonoBehaviour {
         if (canMoveRotate == false)
             return;
 
-        // Movimento
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         Vector3 move = transform.right * x + transform.forward * z;
         cc.Move((isCrouching ? CROUCH_SPEED : NORMAL_SPEED) * Time.deltaTime * move);
 
-        // Animação
         animator.SetFloat("X", x);
         animator.SetFloat("Z", z);
 
-        // Rotação horizontal
+        // para rodar a acamara
         float mouseX = Input.GetAxis("Mouse X") * camScript.mouseSensitivity * Time.deltaTime;
         transform.Rotate(Vector3.up * mouseX);
 
-        // Crouch
         if (Input.GetKeyDown(KeyCode.LeftControl)) {
             isCrouching = !isCrouching;
             animator.SetBool("Crouch", isCrouching);
         }
 
-        // Ajuste do CharacterController consoante direção e crouch
+        // mudar o tamanho do CharacterController consoante a direção e crouch animation
         if (isCrouching) {
-
-
             if (x != 0 && z == 0) { // lados
                 cc.height = 1.37f;
                 cc.center = new Vector3(0, 0.67f, 0);
@@ -77,7 +70,7 @@ public class PlayerController : MonoBehaviour {
             cc.center = new Vector3(0, 0.86f, 0);
         }
 
-        // Gravidade
+        // adicionar a gravidade
         yVelocity += gravity * Time.deltaTime;
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
     }

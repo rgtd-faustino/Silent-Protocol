@@ -30,6 +30,11 @@ public class LockScript : InteractableObject {
         }
     }
 
+    // sincroniza o estado quando a view é fechada pelo jogador em si em vez do código ter sido adivinhado
+    public void SyncViewClosed() {
+        isViewOpen = false;
+    }
+
 
     // chamado pelo UIManager quando os 5 dígitos forem introduzidos e retorna true se correto
     public bool TryCode(int[] attempt) {

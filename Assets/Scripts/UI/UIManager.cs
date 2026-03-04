@@ -18,7 +18,6 @@ public class UIManager : MonoBehaviour {
     private int currentIndexDigit = 0;
 
 
-
     public static UIManager Instance;
 
 
@@ -48,6 +47,7 @@ public class UIManager : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+
     }
 
 
@@ -93,9 +93,34 @@ public class UIManager : MonoBehaviour {
             b.interactable = interactable;
     }
 
+    public bool IsLockViewOpen() {
+        return openLockView.activeSelf;
+    }
 
     public void OnDigitPressed(int digit) {
-        if (currentLock == null || currentIndexDigit >= 5) 
+        if (currentLock == null)
+            return;
+
+        // se clicou no botão de sair fecha a view e volta a jogar
+        if (digit == -1) {
+            currentLock.SyncViewClosed();
+            CloseLockView();
+            ChangeCursorState(CursorLockMode.Locked);
+            PlayerController.Instance.canMoveRotate = true;
+            return;
+        }
+
+        // se clicou no botão de apagar remove o último dígito introduzido
+        if (digit == -2) {
+            if (currentIndexDigit > 0) {
+                currentIndexDigit--;
+                UpdateLockDisplay();
+            }
+            return;
+        }
+
+        // se já tem 5 dígitos introduzidos
+        if (currentIndexDigit >= 5)
             return;
 
         currentCodeTry[currentIndexDigit++] = digit;
@@ -109,12 +134,14 @@ public class UIManager : MonoBehaviour {
         }
     }
 
-    private System.Collections.IEnumerator CorrectCodeDelay() {
+    private IEnumerator CorrectCodeDelay() {
         yield return new WaitForSeconds(1f);
+
         currentLock.DropLock(); // cai após o delay
         CloseLockView();
         ChangeCursorState(CursorLockMode.Locked);
         PlayerController.Instance.canMoveRotate = true;
+
         // reset leds e display para quando a view abrir noutra porta
         SetLed(redLed, 0.5f);
         SetLed(greenLed, 0.5f);
@@ -123,6 +150,7 @@ public class UIManager : MonoBehaviour {
 
     private IEnumerator WrongCodeDelay() {
         yield return new WaitForSeconds(1f);
+
         SetLed(redLed, 0.5f);
         SetLed(greenLed, 0.5f);
         ResetInput();
@@ -135,4 +163,8 @@ public class UIManager : MonoBehaviour {
         currentIndexDigit = 0;
         currentCodeTry = new int[5];
     }
+
+
+
+
 }

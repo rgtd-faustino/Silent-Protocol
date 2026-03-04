@@ -14,11 +14,26 @@ public class CameraScript : MonoBehaviour {
     public LayerMask interactableLayer;
     private KeyCode interactKey = KeyCode.E;
     private InteractableObject currentTarget;
+    private LockScript currentLock;
+
 
     void Start() {
     }
 
     void Update() {
+        // se a lock view está aberta e o jogador clica no E então fecha a view
+        if (UIManager.Instance.IsLockViewOpen() && Input.GetKeyDown(interactKey)) {
+            // se for o cadeado então damos sync
+            if (currentLock != null) {
+                currentLock.SyncViewClosed();
+            }
+
+            UIManager.Instance.CloseLockView();
+            UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
+            PlayerController.Instance.canMoveRotate = true;
+            return;
+        }
+
         if (PlayerController.Instance.canMoveRotate == false)
             return;
 
@@ -45,11 +60,13 @@ public class CameraScript : MonoBehaviour {
 
     void DetectInteractable() {
         Ray ray = new Ray(transform.position, transform.forward);
+
         if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, interactableLayer)) {
             InteractableObject target = hit.collider.GetComponent<InteractableObject>();
             if (target != null) {
                 if (target != currentTarget) { // só atualiza se mudou
                     currentTarget = target;
+                    currentLock = target as LockScript; // guardamos a referencia no current lock se for o target for um cadeado para depois podermos dar sync se o jogador quiser sair da view
                     UIManager.Instance.ShowTooltip();
                 }
                 return;
@@ -59,6 +76,7 @@ public class CameraScript : MonoBehaviour {
         if (currentTarget != null) { // só esconde se havia algo antes
             UIManager.Instance.HideTooltip();
             currentTarget = null;
+            currentLock = null;
         }
     }
 }
