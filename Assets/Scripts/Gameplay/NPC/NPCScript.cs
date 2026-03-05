@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class NPCScript : MonoBehaviour {
@@ -9,25 +10,30 @@ public class NPCScript : MonoBehaviour {
 
     void Start() {
         playerTransform = NPCManager.Instance.player;
+        StartCoroutine(FOVCheckRoutine());
     }
 
-    void Update() {
-        if (IsPlayerInFOV()) {
-            float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-            int suspicionLevel = GetSuspicionLevelByDistance(distanceToPlayer);
+    private IEnumerator FOVCheckRoutine() {
+        WaitForSeconds wait = new WaitForSeconds(0.1f);
+        while (true) {
+            if (PlayerController.Instance.inSusPlace && IsPlayerInFOV()) {
+                float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+                int suspicionLevel = GetSuspicionLevelByDistance(distanceToPlayer);
 
-            if (suspicionLevel > 0) {
-                SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel);
+                if (suspicionLevel > 0) {
+                    SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel);
+                }
+            } else {
+                // se saiu do FOV, para de aumentar suspeita
+                SuspicionManager.Instance.StopIncreasingSuspicion();
             }
-        } else {
-            // se saiu do FOV, para de aumentar suspeita
-            SuspicionManager.Instance.StopIncreasingSuspicion();
+            yield return wait;
         }
     }
 
     private bool IsPlayerInFOV() {
         Vector3 directionToPlayer = (playerTransform.position - transform.position).normalized;
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+        float distanceToPlayer = (transform.position - playerTransform.position).magnitude;
 
         // se está dentro do alcance
         if (distanceToPlayer > fovRange) {
@@ -57,6 +63,4 @@ public class NPCScript : MonoBehaviour {
             return 1;
         }
     }
-
-
 }

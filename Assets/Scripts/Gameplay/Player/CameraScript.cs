@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class CameraScript : MonoBehaviour {
@@ -18,6 +19,7 @@ public class CameraScript : MonoBehaviour {
 
 
     void Start() {
+        StartCoroutine(DetectInteractableRoutine());
     }
 
     void Update() {
@@ -42,8 +44,6 @@ public class CameraScript : MonoBehaviour {
         xRotation = Mathf.Clamp(xRotation, -90f, 90f); // limita para não virar demasiado
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        DetectInteractable();
-
         if (currentTarget != null && Input.GetKeyDown(interactKey))
             currentTarget.Interact();
     }
@@ -56,6 +56,15 @@ public class CameraScript : MonoBehaviour {
         // smooth para não tremer
         // subimos 0.12 para a câmara ficar ao nível dos olhos
         transform.position = Vector3.Lerp(transform.position, headBone.position + Vector3.up * 0.12f, smoothSpeed * Time.deltaTime);
+    }
+
+    // meter corrotina 1/10 segundos
+    private IEnumerator DetectInteractableRoutine() {
+        WaitForSeconds wait = new WaitForSeconds(0.1f);
+        while (true) {
+            DetectInteractable();
+            yield return wait;
+        }
     }
 
     void DetectInteractable() {

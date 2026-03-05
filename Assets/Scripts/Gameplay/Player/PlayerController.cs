@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour {
     private Animator animator;
     private bool isCrouching;
     public bool canMoveRotate = true;
+    [HideInInspector] public bool inSusPlace = false; // para se o jogador estiver num sitio que não é suposto
 
     public static PlayerController Instance;
 
@@ -73,5 +74,18 @@ public class PlayerController : MonoBehaviour {
         // adicionar a gravidade
         yVelocity += gravity * Time.deltaTime;
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
+    }
+
+
+    private void OnTriggerEnter(Collider other) {
+        if (other.CompareTag("SusPlace")) {
+            inSusPlace = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other) {
+        if (other.CompareTag("SusPlace")) {
+            inSusPlace = false;
+        }
     }
 }
