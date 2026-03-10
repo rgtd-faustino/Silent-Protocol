@@ -12,6 +12,10 @@ public class PlayerController : MonoBehaviour {
     private Animator animator;
     private bool isCrouching;
     public bool canMoveRotate = true;
+    private TimeManager tm;
+
+    
+
     [HideInInspector] public bool inSusPlace = false; // para se o jogador estiver num sitio que não é suposto
 
     public static PlayerController Instance;
@@ -34,6 +38,7 @@ public class PlayerController : MonoBehaviour {
     void Update() {
         if (canMoveRotate == false)
             return;
+        
 
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
@@ -50,6 +55,10 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.LeftControl)) {
             isCrouching = !isCrouching;
             animator.SetBool("Crouch", isCrouching);
+        }
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            TimeManager.Instance.TrySleep();
         }
 
         // mudar o tamanho do CharacterController consoante a direção e crouch animation
@@ -75,7 +84,10 @@ public class PlayerController : MonoBehaviour {
         yVelocity += gravity * Time.deltaTime;
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
     }
+    private void Sleep()
+    {
 
+    }
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("SusPlace")) {
