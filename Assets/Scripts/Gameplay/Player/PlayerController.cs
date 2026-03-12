@@ -56,10 +56,8 @@ public class PlayerController : MonoBehaviour {
             isCrouching = !isCrouching;
             animator.SetBool("Crouch", isCrouching);
         }
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            TimeManager.Instance.TrySleep();
-        }
+
+
 
         // mudar o tamanho do CharacterController consoante a direção e crouch animation
         if (isCrouching) {

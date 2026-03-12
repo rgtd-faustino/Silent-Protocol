@@ -8,9 +8,9 @@ public class TimeManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [SerializeField] private float daySpeed = 1f; // minutos do jogo por segundo real (dia)
     [SerializeField] private float nightSpeed = 2f; // noite é 2x mais rápida
-    private float debugSpeedMultiplier =1000f;// so para ver se esta a funcionar depois tirar!
+    private float debugSpeedMultiplier = 1f;// so para ver se esta a funcionar depois tirar!
     [HideInInspector] public bool isNight = false;
-   
+
     private float currentMinutes = 0f; // minutos do jogo
     private float dayStartMinute = 480f; // 8:00 (08:00 = 8*60)
     private float nightStartMinute = 1320f; // 22:00
@@ -51,23 +51,22 @@ public class TimeManager : MonoBehaviour {
 
         // 10 minutos reais = 1 hora no jogo (60 minutos)
         // portanto 1 segundo real = 0.1 minutos do jogo
-        float deltaMinutes = speedMultiplier * 0.1f * Time.deltaTime*debugSpeedMultiplier;
+        float deltaMinutes = speedMultiplier * 0.1f * Time.deltaTime * debugSpeedMultiplier;
 
         currentMinutes += deltaMinutes;
-       
+
         //a cada hora que passou aumenta uma hora no sono acumulado 
         accumulatedSleep += deltaMinutes / 60f;
 
 
-        if (currentMinutes >= dayEndMinute)
-        {
+        if (currentMinutes >= dayEndMinute) {
             currentMinutes = 0f;
         }
 
         // se passou para noite
         if (currentMinutes >= nightStartMinute && !isNight) {
             isNight = true;
-            
+
         }
 
         /*
@@ -81,15 +80,14 @@ public class TimeManager : MonoBehaviour {
         apartir das 8h da manha ent começa supostamente o dia as 8h.
         Ao tirar isto tive que arranjar um maneira do relogio estar sempre a contar e eu fiz o seguinte, se forem 24h passa a 0 outra vez(No inicio do udpate)
          */
-        
 
-        if (currentMinutes >= dayStartMinute && currentMinutes < nightStartMinute && isNight)// quando o relogio esta nas 8h é de dia logo n pode dormir
-        {
+        // quando o relogio esta nas 8h é de dia logo n pode dormir
+        if (currentMinutes >= dayStartMinute && currentMinutes < nightStartMinute && isNight) {
             isNight = false;
-            
+
         }
-        switch (GetSleepStage())
-        {
+
+        switch (GetSleepStage()) {
             case 0:
                 Debug.Log("Tou Fixe");
                 break;
@@ -112,12 +110,19 @@ public class TimeManager : MonoBehaviour {
         UpdateDisplay();
     }
 
+    public float GetMaxSleepHours() {
+        if (currentMinutes < dayStartMinute)
+            return (dayStartMinute - currentMinutes) / 60f;
+        else
+            return (dayEndMinute - currentMinutes + dayStartMinute) / 60f;
+    }
+
     private void UpdateDisplay() {
         timeDisplay.text = GetTimeDisplay();
     }
 
 
-  
+
 
     public string GetTimeDisplay() {
         int hours = (int)(currentMinutes / 60f);
@@ -125,13 +130,12 @@ public class TimeManager : MonoBehaviour {
         // para ficar formatado como as horas do relógio, tostring é para meter dois digitos
         return hours.ToString("00") + ":" + minutes.ToString("00");
     }
-    
 
-  
+
+
 
     // Fiz esta funcao para ajudar no playerController dormir, assim qq que seja a hora se ele for dormir acorda as 8h.
-    public void SetCurrentMinutes(float time)
-    {
+    public void SetCurrentMinutes(float time) {
         currentMinutes = time;
     }
 
@@ -139,57 +143,48 @@ public class TimeManager : MonoBehaviour {
 
 
     //funcao para dormir
-    public void TrySleep()
-    {
-        if (isNight)
-        {
-            float time = currentMinutes;
-            float wakeUp = dayStartMinute; // 8:00
-            float sleepHours;
+    public void TrySleep(float sleepHours = 0) {
+        float time = currentMinutes;
+        float wakeUp = dayStartMinute; // 8:00
 
+        // pronto uhm eu n entendi bem o que querias fazer aqui mas como o jogador é que decide quantas horas ele vai dormir eu passo por parâmetro o número q o jogador quer
+        // mas para não ignorar o teu código eu deixo o aqui à mesma e assim se n meteres um valor no parâmetro o teu código é usado
+        if (sleepHours == 0) {
             // calcular quantas horas dormiu
             if (time < wakeUp)
                 sleepHours = (wakeUp - time) / 60f;
             else
                 sleepHours = ((dayEndMinute - time) + wakeUp) / 60f;
-
-            
-            // eu fiz com que o sono acumulado n for maior que 24 horas pk se ficares acordado 48 horas e dormires tipo 6 horas
-            // o sono acumulado fica com 43 acomuladas e isso n era nem realista nem otimo para a gameplay. entao para ficar mais realista 
-            //fiz assim 
-            float effectiveSleep = Mathf.Min(accumulatedSleep, 24f);
-
-            //se dormires mais que 7 horas as horas acumuladas voltam a 0 
-            if (sleepHours >= 7f)
-            {
-                accumulatedSleep = 0f;
-            }
-            else
-            {
-                accumulatedSleep = effectiveSleep - sleepHours;
-
-                if (accumulatedSleep < 0)
-                    accumulatedSleep = 0;
-            }
-
-
-            
-            SetCurrentMinutes(wakeUp);
-
-            Debug.Log("Dormiu " + sleepHours + " horas");
-            Debug.Log("Sono acumulado: " + accumulatedSleep);
         }
-        else
-        {
-            Debug.Log("Ainda não posso dormir");
+
+
+        // eu fiz com que o sono acumulado n for maior que 24 horas pk se ficares acordado 48 horas e dormires tipo 6 horas
+        // o sono acumulado fica com 43 acomuladas e isso n era nem realista nem otimo para a gameplay. entao para ficar mais realista 
+        //fiz assim 
+        float effectiveSleep = Mathf.Min(accumulatedSleep, 24f);
+
+        //se dormires mais que 7 horas as horas acumuladas voltam a 0 
+        if (sleepHours >= 7f) {
+            accumulatedSleep = 0f;
+
+        } else {
+            accumulatedSleep = effectiveSleep - sleepHours;
+
+            if (accumulatedSleep < 0)
+                accumulatedSleep = 0;
         }
-       
+
+
+
+        SetCurrentMinutes(wakeUp);
+
+        Debug.Log("Dormiu " + sleepHours + " horas");
+        Debug.Log("Sono acumulado: " + accumulatedSleep);
     }
 
 
     // fazer as coisas da camara 
-    public int GetSleepStage()
-    {
+    public int GetSleepStage() {
         if (accumulatedSleep < 19) return 0;
         if (accumulatedSleep < 42) return 1;
         if (accumulatedSleep < 50) return 2;
