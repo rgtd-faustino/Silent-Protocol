@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using static NPCScript;
 public class SuspicionManager : MonoBehaviour {
     public static SuspicionManager Instance;
     [SerializeField] private Slider suspicionSlider;
@@ -11,6 +12,17 @@ public class SuspicionManager : MonoBehaviour {
     private float timeSinceLastIncrease = 0f; // timer desde última detecção
     private bool isDecaying = false;
 
+    // estes eventos funcionam como listas de funções e quando são chamados todas as funções são chamadas
+    public static event System.Action<SuspicionState> OnStateChanged; // so aceita funções que tenham (SuspicionState state) como parâmetro
+    private SuspicionState currentState = SuspicionState.None;
+
+    public enum SuspicionState {
+        None,
+        Attention,
+        Investigation,
+        Expulsion
+    }
+
     void Awake() {
         if (Instance != null && Instance != this) {
             Destroy(gameObject);
@@ -19,9 +31,11 @@ public class SuspicionManager : MonoBehaviour {
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+
     private void Start() {
 
     }
+
     void Update() {
         // se o jogador estiver a ficar suspeito aumentamos de acordo com o rate atual (mudado de acordo com a distancia ao NPC por enquanto
         if (currentIncreaseRate > 0) {
@@ -56,10 +70,31 @@ public class SuspicionManager : MonoBehaviour {
                 }
             }
         }
+
+        CheckStateChange();
+    }
+
+    private void CheckStateChange() {
+        float ratio = suspicionSlider.value / suspicionSlider.maxValue;
+
+        SuspicionState newState;
+
+        if (ratio >= 1f)
+            newState = SuspicionState.Expulsion;
+        else if (ratio >= 0.66f)
+            newState = SuspicionState.Investigation;
+        else if (ratio >= 0.33f)
+            newState = SuspicionState.Attention;
+        else newState = SuspicionState.None;
+
+        if (newState != currentState) {
+            currentState = newState;
+            OnStateChanged.Invoke(currentState); // invoke é o que chama o evento
+        }
     }
 
 
-    public void IncreaseSuspicion(int level) {
+    public void IncreaseSuspicion(float level) {
         if (level < 1 || level > 3) 
             return; // niveis de velocidade de ganhar suspeita
 
