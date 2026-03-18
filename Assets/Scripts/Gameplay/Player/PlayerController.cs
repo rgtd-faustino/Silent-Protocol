@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour {
         //para beber cafe
         if (Input.GetKeyDown(KeyCode.B))
         {
-            TimeManager.Instance.Coffe();
+            TimeManager.Instance.Coffee();
             Debug.Log("Bebeu café");
         }
 

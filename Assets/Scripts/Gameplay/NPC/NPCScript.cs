@@ -1,8 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using static SuspicionManager;
-using static UnityEditor.Rendering.ShadowCascadeGUI;
-using static UnityEngine.CullingGroup;
 
 public class NPCScript : MonoBehaviour {
 

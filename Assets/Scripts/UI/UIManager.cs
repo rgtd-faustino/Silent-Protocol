@@ -94,27 +94,29 @@ public class UIManager : MonoBehaviour {
         string[] parts = raw.Split(':'); // o jogador mete sempre em formato HH:MM então dividimos aí
 
         if (parts.Length != 2 || !int.TryParse(parts[0], out int h) || !int.TryParse(parts[1], out int m)) {
-            ShowSleepError("Formato inválido. Usa HH:MM (ex: 08:30)");
+            ShowSleepError("Formato inválido. Usa HH:MM (ex: 07:30)");
             return;
         }
 
-        if (h < 0 || m < 0 || m >= 60) {
-            ShowSleepError("Horas entre 0-23, minutos entre 00-59");
+        if (h < 0 || h > 23 || m < 0 || m >= 60) {
+            ShowSleepError("Hora inválida");
             return;
         }
 
-        float hours = h + m / 60f;
+        float currentTimeInHours = TimeManager.Instance.GetCurrentTimeInHours();
+        float wakeUpTimeInHours = h + m / 60f;
+
+        // se a hora de acordar já passou hoje, assume que é amanhã
+        if (wakeUpTimeInHours <= currentTimeInHours)
+            wakeUpTimeInHours += 24f;
+
+        float hours = wakeUpTimeInHours - currentTimeInHours;
         float maxHours = TimeManager.Instance.GetMaxSleepHours();
-
-        if (hours <= 0f) {
-            ShowSleepError("Tens de dormir pelo menos alguns minutos");
-            return;
-        }
 
         if (hours > maxHours) {
             int maxH = Mathf.FloorToInt(maxHours);
             int maxM = Mathf.FloorToInt((maxHours - maxH) * 60f);
-            ShowSleepError($"Não podes dormir mais de {maxH}h {maxM:00}m, acordarias depois das 08:00");
+            ShowSleepError($"Não podes acordar após as 08:00. Máximo {maxH}h {maxM:00}m de sono");
             return;
         }
 
@@ -137,6 +139,8 @@ public class UIManager : MonoBehaviour {
     }
 
     private IEnumerator SleepSequence(float hours) {
+        float wakeUpTimeInHours = TimeManager.Instance.GetCurrentTimeInHours() + hours; // guarda antes da animação
+
         // troca para o painel da animação
         sleepInputPanel.SetActive(false);
         sleepAnimPanel.SetActive(true);
@@ -172,6 +176,8 @@ public class UIManager : MonoBehaviour {
         // aplica o sono
         if (currentBed != null)
             currentBed.OnSleepConfirmed(hours);
+
+        TimeManager.Instance.Sleep(wakeUpTimeInHours);
 
         // fecha tudo
         sleepUI.SetActive(false);

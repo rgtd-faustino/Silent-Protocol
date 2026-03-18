@@ -15,7 +15,7 @@ public class BedScript : InteractableObject {
     }
 
     public void OnSleepConfirmed(float hours) {
-        TimeManager.Instance.TrySleep(hours);
+        TimeManager.Instance.Sleep(hours);
     }
 
     public override void Interact() {
