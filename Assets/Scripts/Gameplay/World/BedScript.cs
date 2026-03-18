@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.ProBuilder.Shapes;
 
 public class BedScript : InteractableObject {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -24,5 +25,7 @@ public class BedScript : InteractableObject {
         //} else {
         //    Debug.Log("Se calhar só posso dormir quando for de noite...");
         //}
+        //TimeManager.Instance.Sleep();
+
     }
 }

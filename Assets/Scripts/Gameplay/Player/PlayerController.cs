@@ -57,6 +57,14 @@ public class PlayerController : MonoBehaviour {
             animator.SetBool("Crouch", isCrouching);
         }
 
+        //para beber cafe
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            TimeManager.Instance.Coffe();
+            Debug.Log("Bebeu café");
+        }
+
+
 
 
         // mudar o tamanho do CharacterController consoante a direção e crouch animation

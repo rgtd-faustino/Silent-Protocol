@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEditor.SceneManagement;
+using System.Collections.Generic;
 
 public class TimeManager : MonoBehaviour {
     public static TimeManager Instance;
@@ -8,7 +9,7 @@ public class TimeManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [SerializeField] private float daySpeed = 1f; // minutos do jogo por segundo real (dia)
     [SerializeField] private float nightSpeed = 2f; // noite é 2x mais rápida
-    private float debugSpeedMultiplier = 1f;// so para ver se esta a funcionar depois tirar!
+    private float debugSpeedMultiplier = 200f;// so para ver se esta a funcionar depois tirar!
     [HideInInspector] public bool isNight = false;
 
     private float currentMinutes = 0f; // minutos do jogo
@@ -17,16 +18,14 @@ public class TimeManager : MonoBehaviour {
     private float dayEndMinute = 1440f; // 24:00 (fim do dia) , n sei se faz sentido
 
     private float accumulatedSleep; // variavel para ver o tempo que ele está acordado sem dormir
-    /*
-    O accumulated Sleep funciona da seguinte maneira se tiveres 8 horas de sono (pelo menos) a variavel retira 10f (8h-22h = 10h)
-    ao valor do accumulatedSleep.
-    O accumulatedSleep sobe 1 a cada hora que passa do dia.
 
-    O objetivo é ter 3 estagios, se as horas acumuladas ultrapassarem as 24 horas ficas sem poder fazer alguma coisa que ainda n sei oq é
-    se ultrapassarem as 48 horas vais tendo black outs randoms, aumentando a tua suspeita, pois os outros precebem.
-    se ultrapassares as 56 horas tens 2 majors black outs, onde o tempo passa uns 10 a 15 minutos, oq aumenta em muito a tua suspeita, 
-    e ao 3 so dormes e acordas passado 8 horas. Se isso acontecer dependendo do teu nivel de suspeita é gameover.
-     */
+    private int coffeTaken = 0;
+    private float speedMultiplier;
+    private List<StatusEffect> activeEffects = new List<StatusEffect>();
+
+    private float sleepPrintTimer = 0f; // contador para print do sono
+    private float sleepPrintInterval = 5f; // print a cada 5 segundos
+
 
 
 
@@ -44,71 +43,43 @@ public class TimeManager : MonoBehaviour {
         UpdateDisplay();
     }
 
-    void Update() {
-        // determina a velocidade atual (dia ou noite)
-        float speedMultiplier = isNight ? nightSpeed : daySpeed;
-
-
-        // 10 minutos reais = 1 hora no jogo (60 minutos)
-        // portanto 1 segundo real = 0.1 minutos do jogo
-        float deltaMinutes = speedMultiplier * 0.1f * Time.deltaTime * debugSpeedMultiplier;
-
+    void Update()
+    {
+        float deltaMinutes = (isNight ? nightSpeed : daySpeed) * 0.1f * Time.deltaTime * debugSpeedMultiplier;
         currentMinutes += deltaMinutes;
-
-        //a cada hora que passou aumenta uma hora no sono acumulado 
         accumulatedSleep += deltaMinutes / 60f;
-
-
-        if (currentMinutes >= dayEndMinute) {
+        if (currentMinutes >= dayEndMinute)
+        {
             currentMinutes = 0f;
         }
 
-        // se passou para noite
-        if (currentMinutes >= nightStartMinute && !isNight) {
-            isNight = true;
+        
+        currentMinutes %= 1440f;
 
+        // Atualiza efeitos
+        for (int i = activeEffects.Count - 1; i >= 0; i--)
+        {
+            if (activeEffects[i].UpdateEffect(deltaMinutes))
+                activeEffects.RemoveAt(i);
         }
 
-        /*
-        // se passou o fim do dia
-        if (currentMinutes >= dayEndMinute) {
-            currentMinutes = dayStartMinute; // volta ao início do dia
-            isNight = false;
+        // print sono a cada 5s
+        sleepPrintTimer += Time.deltaTime;
+        if (sleepPrintTimer >= sleepPrintInterval)
+        {
+            sleepPrintTimer = 0f;
+            Debug.Log($"=== SLEEP DEBUG ===");
+            Debug.Log($"Hora atual: {GetTimeDisplay()}");
+            Debug.Log($"accumulatedSleep: {accumulatedSleep:F2}h");
+            Debug.Log($"isNight: {isNight}");
+            Debug.Log($"SleepStage real: {GetSleepStage()}");
+            Debug.Log($"SleepStage efetivo: {GetEffectiveSleepStage()}");
+            Debug.Log($"Efeitos ativos: {activeEffects.Count}");
         }
-        O que isto faz é passar o relogio das 24 diretamente para as 8, mas como o jogador pode ficar acordado a noite não faz sentido estar isto assim
-        O que podemos fazer é se os currentMinutes forem = as 8 horas para ser demanha. Pois o jogador n deve de poder dormir no horario de trabalho 
-        apartir das 8h da manha ent começa supostamente o dia as 8h.
-        Ao tirar isto tive que arranjar um maneira do relogio estar sempre a contar e eu fiz o seguinte, se forem 24h passa a 0 outra vez(No inicio do udpate)
-         */
-
-        // quando o relogio esta nas 8h é de dia logo n pode dormir
-        if (currentMinutes >= dayStartMinute && currentMinutes < nightStartMinute && isNight) {
-            isNight = false;
-
-        }
-
-        switch (GetSleepStage()) {
-            case 0:
-                Debug.Log("Tou Fixe");
-                break;
-
-            case 1:
-                Debug.Log("Tou com sono");
-                break;
-
-            case 2:
-                Debug.Log("Tou cheio de sono");
-                break;
-
-            case 3:
-                Debug.Log("Vou caputar");
-                break;
-        }
-
-
 
         UpdateDisplay();
     }
+
 
     public float GetMaxSleepHours() {
         if (currentMinutes < dayStartMinute)
@@ -146,43 +117,163 @@ public class TimeManager : MonoBehaviour {
     public void TrySleep(float sleepHours = 0) {
         float time = currentMinutes;
         float wakeUp = dayStartMinute; // 8:00
+        if (isNight)
+        {
+            if (sleepHours == 0)
+            {
+                // calcular quantas horas dormiu
+                if (time < wakeUp)
+                    sleepHours = (wakeUp - time) / 60f;
+                else
+                    sleepHours = ((dayEndMinute - time) + wakeUp) / 60f;
+            }
 
-        // pronto uhm eu n entendi bem o que querias fazer aqui mas como o jogador é que decide quantas horas ele vai dormir eu passo por parâmetro o número q o jogador quer
-        // mas para não ignorar o teu código eu deixo o aqui à mesma e assim se n meteres um valor no parâmetro o teu código é usado
-        if (sleepHours == 0) {
+
+
+            float effectiveSleep = Mathf.Min(accumulatedSleep, 24f);
+
+            //se dormires mais que 7 horas as horas acumuladas voltam a 0 
+            if (sleepHours >= 7f)
+            {
+                accumulatedSleep = 0f;
+
+            }
+            else
+            {
+                accumulatedSleep = effectiveSleep - sleepHours;
+
+                if (accumulatedSleep < 0)
+                    accumulatedSleep = 0;
+            }
+
+
+
+            SetCurrentMinutes(wakeUp);
+
+            Debug.Log("Dormiu " + sleepHours + " horas");
+            Debug.Log("Sono acumulado: " + accumulatedSleep);
+        }
+        else
+        {
+            Debug.Log("Secalhar n posso dormir!");
+        }
+        
+    }
+
+    // a funcao cafe é uma funcao para conseguirmos fazer algum trabalho mesmo estando com sono. O objetivo da funao é durante 
+    //, inicialemnte 2 horas, ficar sem cansaso, porem n tira o cansanso so o camufla, quando essas horas passam o jogador volta
+    //ao estagio normal.
+    //Quero fazer isto gradualmente. Se ele tiver no estagio 1 de sono ele passa diretamente para o 0 e quando as horas acabarem
+    //passa denovo para o 1 porem se tiver no estagio 2 nos primeiros 30 min vai para o estagio 1, a hora depois vai para o 0 e
+    //os ultimos 30 min volta a tar para o estagio 1 terminando as 2 horas no estagio 2 denovo.
+
+    // No ultimo estagio n passamos para o estagio 2 vamos para o 1, mas demora mais tempo para chegar ao estagio 0. Ficas 1 hora no estagio
+    //1, meio no estagio 0, e o resto no estagio 2 ate acabar o efeito voltando ao 3.
+
+    //Vamos meter tbm um vicio, a cada 3 cafés bebidos avanca o seu estagio de vicio. Cada estagio tira 30 min de camuflagem.
+    public void Coffe()
+    {
+        int baseStage = GetSleepStage();
+        if (baseStage == 0) return;
+
+        coffeTaken++;
+
+        float coffeeStartMinute = currentMinutes; // minuto do jogo em que bebeu o café
+        float durationMinutes = 120f - GetCoffeStage() * 30f; // duração em minutos de jogo
+        if (durationMinutes < 10f) durationMinutes = 10f;
+
+        StatusEffect coffeeEffect = new StatusEffect(durationMinutes, (realStage, currentStage, timerMinutes) =>
+        {
+            // timerMinutes já é minutos de jogo — sem necessidade de calcular elapsed
+            if (realStage == 1) return 0;
+
+            if (realStage == 2)
+            {
+                if (timerMinutes < durationMinutes * 0.25f) return 1;
+                if (timerMinutes < durationMinutes * 0.75f) return 0;
+                return 1;
+            }
+
+            if (realStage == 3)
+            {
+                if (timerMinutes < durationMinutes * 0.5f) return 1;
+                if (timerMinutes < durationMinutes * 0.75f) return 0;
+                return 2;
+            }
+
+            return realStage;
+        });
+
+        activeEffects.Add(coffeeEffect);
+
+        Debug.Log($"Café bebido às {GetTimeDisplay()}. Duration: {durationMinutes}min. Vício Stage: {GetCoffeStage()}");
+    }
+
+
+
+    public void Sleep()
+    {
+        Debug.Log($"=== ANTES DE DORMIR ===");
+        Debug.Log($"accumulatedSleep: {accumulatedSleep:F2}h");
+        Debug.Log($"SleepStage: {GetSleepStage()}");
+        Debug.Log($"Hora: {GetTimeDisplay()}");
+        if (isNight)
+        {
+            float time = currentMinutes;
+            float wakeUp = dayStartMinute; // 8:00
+            float sleepHours;
+
             // calcular quantas horas dormiu
             if (time < wakeUp)
                 sleepHours = (wakeUp - time) / 60f;
             else
-                sleepHours = ((dayEndMinute - time) + wakeUp) / 60f;
+                sleepHours = ((1440f - time) + wakeUp) / 60f;
+
+
+            if (sleepHours >= 7f)
+            {
+                accumulatedSleep = 0f;
+            }
+            else
+            {
+                // Cada hora de sono "recupera" mais do que 1 hora de vigília
+                // Ex: 6h de sono limpa 6 * (accumulatedSleep / 7f) horas acumuladas
+                float recoveryRatio = sleepHours / 7f;
+                accumulatedSleep *= (1f - recoveryRatio);
+
+                if (accumulatedSleep < 0)
+                    accumulatedSleep = 0;
+            }
+
+            // totalMinutesAwake = 0f;
+
+            SetCurrentMinutes(wakeUp);
+            
+            Debug.Log("Dormiu " + sleepHours + " horas");
+            Debug.Log("Sono acumulado: " + accumulatedSleep);
+
+            Debug.Log($"=== DEPOIS DE DORMIR ===");
+            Debug.Log($"sleepHours dormidas: {sleepHours:F2}h");
+            Debug.Log($"accumulatedSleep: {accumulatedSleep:F2}h");
+            Debug.Log($"SleepStage: {GetSleepStage()}");
+
         }
+      
+        /* else
+         {
+             Debug.Log("Secalhar n posso dormir");
+         }*/
 
-
-        // eu fiz com que o sono acumulado n for maior que 24 horas pk se ficares acordado 48 horas e dormires tipo 6 horas
-        // o sono acumulado fica com 43 acomuladas e isso n era nem realista nem otimo para a gameplay. entao para ficar mais realista 
-        //fiz assim 
-        float effectiveSleep = Mathf.Min(accumulatedSleep, 24f);
-
-        //se dormires mais que 7 horas as horas acumuladas voltam a 0 
-        if (sleepHours >= 7f) {
-            accumulatedSleep = 0f;
-
-        } else {
-            accumulatedSleep = effectiveSleep - sleepHours;
-
-            if (accumulatedSleep < 0)
-                accumulatedSleep = 0;
-        }
-
-
-
-        SetCurrentMinutes(wakeUp);
-
-        Debug.Log("Dormiu " + sleepHours + " horas");
-        Debug.Log("Sono acumulado: " + accumulatedSleep);
     }
 
-
+    //efeito do vicio do cafe
+    public int GetCoffeStage()
+    {
+        if (coffeTaken <3) return 0;
+        if (coffeTaken >=3 && coffeTaken <6) return 1;
+        if (coffeTaken >=6 && coffeTaken<9) return 2;
+        return 3;
+    }
     // fazer as coisas da camara 
     public int GetSleepStage() {
         if (accumulatedSleep < 19) return 0;
@@ -191,6 +282,23 @@ public class TimeManager : MonoBehaviour {
 
         return 3;
     }
+    public int GetEffectiveSleepStage()
+    {
+        int baseStage = GetSleepStage();
+        int stage = baseStage;
+
+        foreach (var effect in activeEffects)
+        {
+            if (effect.timer < effect.duration)
+            {
+                stage = effect.modifySleepStage(baseStage, stage, effect.timer);
+            }
+        }
+
+        return Mathf.Clamp(stage, 0, 3);
+    }
+
+
 
 
 }
