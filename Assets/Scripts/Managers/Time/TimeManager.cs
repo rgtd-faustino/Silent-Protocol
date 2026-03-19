@@ -9,7 +9,7 @@ public class TimeManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [SerializeField] private float daySpeed = 1f; // minutos do jogo por segundo real (dia)
     [SerializeField] private float nightSpeed = 2f; // noite é 2x mais rápida
-    private float debugSpeedMultiplier = 1;
+    private float debugSpeedMultiplier = 100;
     [HideInInspector] public bool isNight = false;
 
     private float currentMinutes = 0f; // minutos do jogo
@@ -50,6 +50,11 @@ public class TimeManager : MonoBehaviour {
         if (currentMinutes >= dayEndMinute) {
             currentMinutes = 0f;
         }
+
+        if (currentMinutes >= nightStartMinute || currentMinutes < dayStartMinute)
+            isNight = true;
+        else
+            isNight = false;
 
 
         currentMinutes %= 1440f;
@@ -133,12 +138,6 @@ public class TimeManager : MonoBehaviour {
 
 
 
-
-
-
-
-
-
     // a funcao cafe é uma funcao para conseguirmos fazer algum trabalho mesmo estando com sono. O objetivo da funao é durante 
     //, inicialemnte 2 horas, ficar sem cansaso, porem n tira o cansanso so o camufla, quando essas horas passam o jogador volta
     //ao estagio normal.
@@ -192,6 +191,7 @@ public class TimeManager : MonoBehaviour {
         if (coffeTaken >= 6 && coffeTaken < 9) return 2;
         return 3;
     }
+
     // fazer as coisas da camara 
     public int GetSleepStage() {
         if (accumulatedSleep < 19) return 0;

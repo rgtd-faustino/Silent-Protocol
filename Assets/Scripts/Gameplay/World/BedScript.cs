@@ -19,13 +19,14 @@ public class BedScript : InteractableObject {
     }
 
     public override void Interact() {
-        ///if (TimeManager.Instance.isNight) {
+        if (TimeManager.Instance.isNight) {
             UIManager.Instance.OpenSleepView(this);
+            //TimeManager.Instance.Sleep();
 
-        //} else {
-        //    Debug.Log("Se calhar só posso dormir quando for de noite...");
-        //}
-        //TimeManager.Instance.Sleep();
+        } else {
+            Debug.Log("Se calhar só posso dormir quando for de noite...");
+        }
+        
 
     }
 }
