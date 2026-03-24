@@ -110,11 +110,11 @@ public class SuspicionManager : MonoBehaviour {
     }
 
 
-    public void ChangeSuspicionOnTaskComplete(float reductionAmount, bool doneCorrectly) {
+    public void ChangeSuspicionOnTaskComplete(float amount, bool doneCorrectly) {
         if(doneCorrectly)
-            suspicionSlider.value = Mathf.Max(0f, suspicionSlider.value - reductionAmount);
+            suspicionSlider.value = Mathf.Max(0f, suspicionSlider.value - amount);
         else
-            suspicionSlider.value = Mathf.Min(suspicionSlider.maxValue, suspicionSlider.value + reductionAmount);
+            suspicionSlider.value = Mathf.Min(suspicionSlider.maxValue, suspicionSlider.value + amount);
 
         // assim o suspicion level só desce de acordo com a conclusão da task, senão podia continuar a descer sem o jogador fazer nada então conta como se tivesse acabado de ser visto pelo NCP
         timeSinceLastIncrease = 0f;

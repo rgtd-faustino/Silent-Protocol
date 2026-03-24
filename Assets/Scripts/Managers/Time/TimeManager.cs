@@ -7,6 +7,7 @@ public class TimeManager : MonoBehaviour {
     public static TimeManager Instance;
 
     [SerializeField] private TextMeshProUGUI timeDisplay;
+    [SerializeField] private TextMeshProUGUI timeDisplayInComputer;
     [SerializeField] private float daySpeed = 1f; // minutos do jogo por segundo real (dia)
     [SerializeField] private float nightSpeed = 2f; // noite é 2x mais rápida
     private float debugSpeedMultiplier = 100;
@@ -14,8 +15,10 @@ public class TimeManager : MonoBehaviour {
 
     private float currentMinutes = 0f; // minutos do jogo
     private float dayStartMinute = 480f; // 8:00 (08:00 = 8*60)
+    private float workStartMinute = 560f; // 8:30
     private float nightStartMinute = 1320f; // 22:00
     private float dayEndMinute = 1440f; // 24:00 (fim do dia) , n sei se faz sentido
+    private bool tasksActivatedToday = false;
 
     private float accumulatedSleep; // variavel para ver o tempo que ele está acordado sem dormir
 
@@ -59,6 +62,11 @@ public class TimeManager : MonoBehaviour {
 
         currentMinutes %= 1440f;
 
+        if (tasksActivatedToday == false && currentMinutes >= workStartMinute) {
+            TaskManager.Instance.ActivateTasks();
+            tasksActivatedToday = true;
+        }
+
         // Atualiza efeitos
         for (int i = activeEffects.Count - 1; i >= 0; i--) {
             if (activeEffects[i].UpdateEffect(deltaMinutes))
@@ -69,13 +77,13 @@ public class TimeManager : MonoBehaviour {
         sleepPrintTimer += Time.deltaTime;
         if (sleepPrintTimer >= sleepPrintInterval) {
             sleepPrintTimer = 0f;
-            Debug.Log($"=== SLEEP DEBUG ===");
+            /*Debug.Log($"=== SLEEP DEBUG ===");
             Debug.Log($"Hora atual: {GetTimeDisplay()}");
             Debug.Log($"accumulatedSleep: {accumulatedSleep:F2}h");
             Debug.Log($"isNight: {isNight}");
             Debug.Log($"SleepStage real: {GetSleepStage()}");
             Debug.Log($"SleepStage efetivo: {GetEffectiveSleepStage()}");
-            Debug.Log($"Efeitos ativos: {activeEffects.Count}");
+            Debug.Log($"Efeitos ativos: {activeEffects.Count}");*/
         }
 
         UpdateDisplay();
@@ -91,6 +99,7 @@ public class TimeManager : MonoBehaviour {
 
     private void UpdateDisplay() {
         timeDisplay.text = GetTimeDisplay();
+        timeDisplayInComputer.text = GetTimeDisplay();
     }
 
 

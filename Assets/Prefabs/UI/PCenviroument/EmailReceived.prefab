@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1436504387290149163}
   - component: {fileID: 5975318272717946348}
   m_Layer: 6
-  m_Name: EmailReived
+  m_Name: EmailReceived
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
