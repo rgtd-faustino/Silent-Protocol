@@ -3,14 +3,16 @@ using UnityEngine;
 public class TaskManager : MonoBehaviour {
     public static TaskManager Instance;
 
-    [Header("Task UI Slots")]
+    [Header("UI das tasks")]
     [SerializeField] private TaskItemUI morningTaskUI;
     [SerializeField] private TaskItemUI afternoonTaskUI;
 
-    // Limites de tempo em minutos
-    private const float LunchStart = 720f;  // 12:00
-    private const float AfternoonStart = 780f;  // 13:00
-    private const float DinnerStart = 1140f; // 19:00
+    [Header("Impressoras disponíveis para a task de imprimir")]
+    public GameObject printerList;
+
+    private const float LunchStart = 720f;
+    private const float AfternoonStart = 780f;
+    private const float DinnerStart = 1140f;
 
     private readonly string[] morningOptions = { "Escrever documento", "Imprimir documento" };
     private readonly string[] afternoonOptions = { "Arquivar documento", "Entregar documento" };
@@ -28,46 +30,53 @@ public class TaskManager : MonoBehaviour {
 
     private TaskEntry morningTask;
     private TaskEntry afternoonTask;
-    private bool afternoonSpawned;
-
+    private bool afternoonSpawned = false;
 
     void Awake() {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject); return;
+        }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
+    void OnEnable() {
+        // subscrevemo nos aos eventos relevantes
+        GameEvent.OnWorkHoursStarted += ActivateTasks;
+        GameEvent.OnAfternoonStarted += SpawnAfternoonTask;
+    }
+
+    // para não haver fugas de memória ou problemas desse género
+    void OnDisable() {
+        GameEvent.OnWorkHoursStarted -= ActivateTasks;
+        GameEvent.OnAfternoonStarted -= SpawnAfternoonTask;
+    }
+
     void Update() {
         float now = TimeManager.Instance.GetCurrentTimeInHours() * 60f;
-
-        // Spawn da task da tarde quando o almoço acaba
-        if (!afternoonSpawned && now >= AfternoonStart) {
-            SpawnTask(afternoonOptions, AfternoonStart, DinnerStart, ref afternoonTask, afternoonTaskUI, TaskDifficulty.Medium);
-            afternoonSpawned = true;
-        }
-
         CheckDeadline(morningTask, now);
         CheckDeadline(afternoonTask, now);
     }
 
-    // Chamado pelo TimeManager quando começa o trabalho
-    public void ActivateTasks() {
+    private void ActivateTasks() {
         float now = TimeManager.Instance.GetCurrentTimeInHours() * 60f;
 
         morningTaskUI.gameObject.SetActive(false);
         afternoonTaskUI.gameObject.SetActive(false);
 
         SpawnTask(morningOptions, now, LunchStart, ref morningTask, morningTaskUI, TaskDifficulty.Medium);
-
         afternoonSpawned = false;
     }
 
+    private void SpawnAfternoonTask() {
+        if (afternoonSpawned) return;
+        SpawnTask(afternoonOptions, AfternoonStart, DinnerStart, ref afternoonTask, afternoonTaskUI, TaskDifficulty.Medium);
+        afternoonSpawned = true;
+    }
 
-    private void SpawnTask(string[] options, float periodStart, float periodEnd,
-                           ref TaskEntry entry, TaskItemUI ui, TaskDifficulty difficulty) {
+    private void SpawnTask(string[] options, float periodStart, float periodEnd, ref TaskEntry entry, TaskItemUI ui, TaskDifficulty difficulty) {
         string name = options[Random.Range(0, options.Length)];
 
-        // Deadline nos últimos 30 % do período, com 15 min de folga no fim
         float window = periodEnd - periodStart;
         float deadlineMin = periodStart + window * 0.70f;
         float deadlineMax = periodEnd - 15f;
@@ -93,17 +102,15 @@ public class TaskManager : MonoBehaviour {
 
         task.failed = true;
         task.ui.SetFailed();
-        OnTaskComplete(task.difficulty, false);
-        Debug.Log($"[TaskManager] Task '{task.name}' falhada (passou o deadline).");
+        HandleTaskComplete(task.difficulty, false);
+        Debug.Log($"[TaskManager] Task '{task.name}' falhada.");
     }
 
-    // Chama isto quando o jogador completar uma task (ex: no script de interação)
     public void CompleteTask(string taskName, bool doneCorrectly) {
         TaskEntry task = null;
 
         if (morningTask != null && morningTask.name == taskName && !morningTask.completed && !morningTask.failed)
             task = morningTask;
-
         else if (afternoonTask != null && afternoonTask.name == taskName && !afternoonTask.completed && !afternoonTask.failed)
             task = afternoonTask;
 
@@ -111,28 +118,25 @@ public class TaskManager : MonoBehaviour {
 
         task.completed = true;
         task.ui.SetCompleted();
-        OnTaskComplete(task.difficulty, doneCorrectly);
+        HandleTaskComplete(task.difficulty, doneCorrectly);
         Debug.Log($"[TaskManager] Task '{taskName}' completada. Correto: {doneCorrectly}");
     }
 
-    public void OnTaskComplete(TaskDifficulty difficulty, bool doneCorrectly) {
-        float multiplier = 0;
-        switch (difficulty) {
-            case TaskDifficulty.Small:
-                multiplier = 0.1f;
-                break;
-            case TaskDifficulty.Medium:
-                multiplier = 0.25f;
-                break;
-            case TaskDifficulty.Major:
-                multiplier = 0.5f;
-                break;
-
-        }
+    private void HandleTaskComplete(TaskDifficulty difficulty, bool doneCorrectly) {
+        float multiplier = difficulty switch {
+            TaskDifficulty.Small => 0.1f,
+            TaskDifficulty.Medium => 0.25f,
+            TaskDifficulty.Major => 0.5f,
+            _ => 0f
+        };
         SuspicionManager.Instance.ChangeSuspicionOnTaskComplete(multiplier, doneCorrectly);
     }
 
-    // Getters úteis para scripts de interação
+    public void ActivatePrinterTask() {
+        int index = Random.Range(0, printerList.transform.childCount);
+        printerList.transform.GetChild(index).gameObject.GetComponent<ImpressoraScript>().ActivatePrinterTask();
+    }
+
     public bool HasActiveMorningTask(string name) =>
         morningTask != null && morningTask.name == name && !morningTask.completed && !morningTask.failed;
 

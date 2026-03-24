@@ -1,11 +1,10 @@
 ﻿using System.Collections;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class UIManager : MonoBehaviour {
+
     [Header("Tooltip")]
     public GameObject tooltipObject;
 
@@ -19,63 +18,53 @@ public class UIManager : MonoBehaviour {
 
     [Header("Sleep")]
     public GameObject sleepUI;
-    public GameObject sleepInputPanel; // painel com o input field e botões confirmar/cancelar
-    public GameObject sleepAnimPanel; // painel com o relógio radial (aparece só na animação)
+    public GameObject sleepInputPanel;       // painel com input field e botões confirmar/cancelar
+    public GameObject sleepAnimPanel;        // painel do relógio radial — só aparece na animação
     public TMP_InputField sleepHoursInput;
     public TextMeshProUGUI sleepHoursTextError;
-    public Image sleepRadialClock; // Image com Fill Type=Filled, Radial 360, anti-clockwise
-    public TextMeshProUGUI sleepCountdownText; // opcional: mostra "7h 30m" a diminuir
+    public Image sleepRadialClock;           // Image com Fill Type=Filled, Radial 360, anti-clockwise
+    public TextMeshProUGUI sleepCountdownText;
     private BedScript currentBed;
+
+    [Header("PC")]
+    // botão de imprimir no ecrã do computador — só deve estar ativo quando a task de impressão existir
+    [SerializeField] private Button printButton;
 
     private int[] currentCodeTry = new int[5];
     private int currentIndexDigit = 0;
 
-
     public static UIManager Instance;
 
-
     void Awake() {
-        if (Instance != null && Instance != this) {
-            Destroy(gameObject);
-            return;
-        }
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
-        Cursor.lockState = CursorLockMode.Locked; // esconde o cursor no início
+        Cursor.lockState = CursorLockMode.Locked;
     }
-
-
 
     public void ChangeCursorState(CursorLockMode mode) {
         Cursor.lockState = mode;
-        Input.ResetInputAxes(); // às vezes temos um spike de rato no frame da transição isto arranja
+        Input.ResetInputAxes(); // previne spike de rato no frame da transição
     }
 
-
-
-    // Update is called once per frame
-    void Update() {
-
+    // atualiza os controlos do PC para refletir o estado atual do jogo
+    // chamado pelo PCInteractable quando o PC é aberto
+    public void RefreshPCInterface() {
+        if (printButton != null)
+            printButton.interactable = TaskManager.Instance.HasActiveMorningTask("Imprimir documento");
     }
 
-    public void ShowSleepUI() {
-        sleepUI.SetActive(true);
-    }
+    // ---- Sleep ----
 
-    public void HideSleepUI() {
-        sleepUI.SetActive(false);
-    }
-
+    public void ShowSleepUI() => sleepUI.SetActive(true);
+    public void HideSleepUI() => sleepUI.SetActive(false);
 
     public void OpenSleepView(BedScript bed) {
         currentBed = bed;
 
-        // dar reset a tudo e só depois mostramos as coisas
         sleepHoursTextError.gameObject.SetActive(false);
         sleepHoursTextError.text = "";
         sleepHoursInput.text = "";
@@ -85,13 +74,13 @@ public class UIManager : MonoBehaviour {
         sleepAnimPanel.SetActive(false);
         sleepUI.SetActive(true);
 
-        ChangeCursorState(CursorLockMode.None); // deixar o jogador mexer o quadro para poder escrever no campo de input
+        ChangeCursorState(CursorLockMode.None);
         PlayerController.Instance.canMoveRotate = false;
     }
 
     public void ConfirmSleep() {
         string raw = sleepHoursInput.text.Trim();
-        string[] parts = raw.Split(':'); // o jogador mete sempre em formato HH:MM então dividimos aí
+        string[] parts = raw.Split(':'); // o jogador introduz sempre no formato HH:MM
 
         if (parts.Length != 2 || !int.TryParse(parts[0], out int h) || !int.TryParse(parts[1], out int m)) {
             ShowSleepError("Formato inválido. Usa HH:MM (ex: 07:30)");
@@ -106,7 +95,7 @@ public class UIManager : MonoBehaviour {
         float currentTimeInHours = TimeManager.Instance.GetCurrentTimeInHours();
         float wakeUpTimeInHours = h + m / 60f;
 
-        // se a hora de acordar já passou hoje, assume que é amanhã
+        // se a hora de acordar já passou hoje, assume-se que é amanhã
         if (wakeUpTimeInHours <= currentTimeInHours)
             wakeUpTimeInHours += 24f;
 
@@ -122,7 +111,7 @@ public class UIManager : MonoBehaviour {
 
         sleepHoursTextError.gameObject.SetActive(false);
         sleepHoursTextError.text = "";
-        StartCoroutine(SleepSequence(hours));
+        StartCoroutine(SleepSequence(hours, wakeUpTimeInHours));
     }
 
     private void ShowSleepError(string message) {
@@ -138,83 +127,107 @@ public class UIManager : MonoBehaviour {
         PlayerController.Instance.canMoveRotate = true;
     }
 
-    private IEnumerator SleepSequence(float hours) {
-        float wakeUpTimeInHours = TimeManager.Instance.GetCurrentTimeInHours() + hours; // guarda antes da animação
-
-        // troca para o painel da animação
+    private IEnumerator SleepSequence(float hours, float wakeUpTimeInHours) {
         sleepInputPanel.SetActive(false);
         sleepAnimPanel.SetActive(true);
 
-        float duration = 3f;   // duração real da animação em segundos (ajustável)
+        float duration = 3f; // duração real da animação em segundos
         float elapsed = 0f;
 
         while (elapsed < duration) {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
-            // relógio esvazia no sentido anti-horário: fillAmount de 1 → 0
+            // relógio esvazia anti-horário: fillAmount de 1 → 0
             sleepRadialClock.fillAmount = 1f - t;
 
-            // texto opcional com as horas restantes
             if (sleepCountdownText != null) {
                 float hoursLeft = hours * (1f - t);
-                int h = Mathf.FloorToInt(hoursLeft);
-                int m = Mathf.FloorToInt((hoursLeft - h) * 60f);
-                sleepCountdownText.text = $"{h}h {m:00}m";
+                int hLeft = Mathf.FloorToInt(hoursLeft);
+                int mLeft = Mathf.FloorToInt((hoursLeft - hLeft) * 60f);
+                sleepCountdownText.text = $"{hLeft}h {mLeft:00}m";
             }
 
             yield return null;
         }
 
         sleepRadialClock.fillAmount = 0f;
-
         if (sleepCountdownText != null)
             sleepCountdownText.text = "0h 00m";
 
         yield return new WaitForSeconds(0.5f);
 
-        // aplica o sono
-        if (currentBed != null)
-            currentBed.OnSleepConfirmed(hours);
-
+        // notifica a cama (hook para sons/animações futuras) e aplica o sono no TimeManager
+        currentBed?.OnSleepConfirmed(hours);
         TimeManager.Instance.Sleep(wakeUpTimeInHours);
 
-        // fecha tudo
         sleepUI.SetActive(false);
         ChangeCursorState(CursorLockMode.Locked);
         PlayerController.Instance.canMoveRotate = true;
         currentBed = null;
     }
 
-    public void ShowTooltip() {
-        tooltipObject.SetActive(true);
-    }
+    // ---- Tooltip ----
 
-    public void HideTooltip() {
-        tooltipObject.SetActive(false);
-    }
+    public void ShowTooltip() => tooltipObject.SetActive(true);
+    public void HideTooltip() => tooltipObject.SetActive(false);
+
+    // ---- Lock ----
 
     public void OpenLockView(LockScript lockScript) {
         currentLock = lockScript;
-        currentIndexDigit = 0; // reset da tentativa anterior
+        currentIndexDigit = 0;
         currentCodeTry = new int[5];
         openLockView.SetActive(true);
         UpdateLockDisplay();
     }
 
-    private void UpdateLockDisplay() {
-        string display = "";
-
-        for (int i = 0; i < 5; i++)
-            display += i < currentIndexDigit ? currentCodeTry[i].ToString() : "*";
-
-        lockDisplayText.text = display;
-    }
-
-
     public void CloseLockView() {
         currentLock = null;
         openLockView.SetActive(false);
+    }
+
+    public bool IsLockViewOpen() => openLockView.activeSelf;
+
+    public void OnDigitPressed(int digit) {
+        if (currentLock == null) return;
+
+        if (digit == -1) {
+            // botão de sair — fecha a view sem tentar o código
+            currentLock.SyncViewClosed();
+            CloseLockView();
+            ChangeCursorState(CursorLockMode.Locked);
+            PlayerController.Instance.canMoveRotate = true;
+            return;
+        }
+
+        if (digit == -2) {
+            // botão de apagar — remove o último dígito introduzido
+            if (currentIndexDigit > 0) {
+                currentIndexDigit--;
+                UpdateLockDisplay();
+            }
+            return;
+        }
+
+        if (currentIndexDigit >= 5) return;
+
+        currentCodeTry[currentIndexDigit++] = digit;
+        UpdateLockDisplay();
+
+        if (currentIndexDigit == 5) {
+            bool correct = currentLock.TryCode(currentCodeTry);
+            SetLed(correct ? greenLed : redLed, 1f);
+            SetButtonsInteractable(false);
+            StartCoroutine(correct ? CorrectCodeDelay() : WrongCodeDelay());
+        }
+    }
+
+    private void UpdateLockDisplay() {
+        string display = "";
+        for (int i = 0; i < 5; i++)
+            display += i < currentIndexDigit ? currentCodeTry[i].ToString() : "*";
+        lockDisplayText.text = display;
     }
 
     private void SetLed(Image led, float alpha) {
@@ -228,56 +241,14 @@ public class UIManager : MonoBehaviour {
             b.interactable = interactable;
     }
 
-    public bool IsLockViewOpen() {
-        return openLockView.activeSelf;
-    }
-
-    public void OnDigitPressed(int digit) {
-        if (currentLock == null)
-            return;
-
-        // se clicou no botão de sair fecha a view e volta a jogar
-        if (digit == -1) {
-            currentLock.SyncViewClosed();
-            CloseLockView();
-            ChangeCursorState(CursorLockMode.Locked);
-            PlayerController.Instance.canMoveRotate = true;
-            return;
-        }
-
-        // se clicou no botão de apagar remove o último dígito introduzido
-        if (digit == -2) {
-            if (currentIndexDigit > 0) {
-                currentIndexDigit--;
-                UpdateLockDisplay();
-            }
-            return;
-        }
-
-        // se já tem 5 dígitos introduzidos
-        if (currentIndexDigit >= 5)
-            return;
-
-        currentCodeTry[currentIndexDigit++] = digit;
-        UpdateLockDisplay();
-
-        if (currentIndexDigit == 5) {
-            bool correct = currentLock.TryCode(currentCodeTry);
-            SetLed(correct ? greenLed : redLed, 1f);
-            SetButtonsInteractable(false); // desativa botões durante o delay
-            StartCoroutine(correct ? CorrectCodeDelay() : WrongCodeDelay());
-        }
-    }
-
     private IEnumerator CorrectCodeDelay() {
         yield return new WaitForSeconds(1f);
 
-        currentLock.DropLock(); // cai após o delay
+        currentLock.DropLock();
         CloseLockView();
         ChangeCursorState(CursorLockMode.Locked);
         PlayerController.Instance.canMoveRotate = true;
 
-        // reset leds e display para quando a view abrir noutra porta
         SetLed(redLed, 0.5f);
         SetLed(greenLed, 0.5f);
         ResetInput();
@@ -289,17 +260,20 @@ public class UIManager : MonoBehaviour {
         SetLed(redLed, 0.5f);
         SetLed(greenLed, 0.5f);
         ResetInput();
-        UpdateLockDisplay(); // reset do texto após o delay
-        SetButtonsInteractable(true); // volta a ativar os botões
+        UpdateLockDisplay();
+        SetButtonsInteractable(true);
     }
-
 
     private void ResetInput() {
         currentIndexDigit = 0;
         currentCodeTry = new int[5];
     }
 
+    // ---- PC ----
 
-
-
+    // o botão de imprimir no computador só deve funcionar quando a task está ativa
+    public void OnPrinterPrintButton() {
+        if (!TaskManager.Instance.HasActiveMorningTask("Imprimir documento")) return;
+        TaskManager.Instance.ActivatePrinterTask();
+    }
 }

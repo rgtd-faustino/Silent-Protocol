@@ -1,32 +1,19 @@
 using UnityEngine;
-using UnityEngine.ProBuilder.Shapes;
 
 public class BedScript : InteractableObject {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    public void OnSleepConfirmed(float hours) {
-        TimeManager.Instance.Sleep(hours);
-    }
-
+    // Ao interagir, a cama verifica se é noite, só faz sentido dormir durante a noite. Se for de dia, o jogador recebe feedback
     public override void Interact() {
         if (TimeManager.Instance.isNight) {
+            // passa-se a si própria para que o UIManager possa chamar OnSleepConfirmed() quando o sono for confirmado
+            // (necessário para futuros efeitos visuais/sonoros específicos da cama)
             UIManager.Instance.OpenSleepView(this);
-            //TimeManager.Instance.Sleep();
-
         } else {
             Debug.Log("Se calhar só posso dormir quando for de noite...");
         }
-        
+    }
 
+    public void OnSleepConfirmed(float hours) {
+        // reservado para efeitos visuais/sonoros quando existirem
     }
 }

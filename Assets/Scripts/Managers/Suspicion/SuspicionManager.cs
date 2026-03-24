@@ -1,21 +1,36 @@
 using UnityEngine;
 using UnityEngine.UI;
-using static NPCScript;
-public class SuspicionManager : MonoBehaviour {
-    public static SuspicionManager Instance;
-    [SerializeField] private Slider suspicionSlider;
-    [SerializeField] private float baseIncreaseSpeed = 0.1f; // velocidade base por segundo
-    [SerializeField] private float decayDelay = 10f; // tempo em segundos antes de começar decay
-    [SerializeField] private float decaySpeed = 0.03f; // velocidade de redução (mais lenta que nível 1 (0.1))
 
+public class SuspicionManager : MonoBehaviour {
+
+    public static SuspicionManager Instance;
+
+    [SerializeField] private Slider suspicionSlider;
+
+    // baseIncreaseSpeed: velocidade base a que a suspeita sobe por segundo quando há uma fonte ativa (ex: NPC a ver o jogador).
+    // multiplicada pelo "level" da fonte (1, 1.5 ou 2) para fontes mais graves
+    // decayDelay: segundos sem descer mais depois da fonte parar antes da suspeita começar a baixar
+    // decaySpeed: velocidade a que a suspeita baixa por segundo durante o decay
+    [SerializeField] private float baseIncreaseSpeed = 0.1f;
+    [SerializeField] private float decayDelay = 10f;
+    [SerializeField] private float decaySpeed = 0.03f;
+
+    // currentIncreaseRate: taxa de subida atual (0 se não há fonte ativa)
+    // timeSinceLastIncrease: contador para o decayDelay
+    // isDecaying: flag que ativa o decay após o delay expirar
     private float currentIncreaseRate = 0f;
-    private float timeSinceLastIncrease = 0f; // timer desde última detecção
+    private float timeSinceLastIncrease = 0f;
     private bool isDecaying = false;
 
-    // estes eventos funcionam como listas de funções e quando são chamados todas as funções são chamadas
-    public static event System.Action<SuspicionState> OnStateChanged; // so aceita funções que tenham (SuspicionState state) como parâmetro
+    // estado atual (None/Attention/Investigation/Expulsion)
+    // guardado para detetar mudanças e disparar o evento apenas quando muda
     private SuspicionState currentState = SuspicionState.None;
 
+
+    // None        — comportamento normal
+    // Attention   — NPCs observam mais (>33% da barra)
+    // Investigation — guardas aumentam patrulhas (>66%)
+    // Expulsion   — Game Over (100%)
     public enum SuspicionState {
         None,
         Attention,
@@ -23,102 +38,112 @@ public class SuspicionManager : MonoBehaviour {
         Expulsion
     }
 
+    public enum SuspicionSource {
+        NPCSight,       // NPC vê o jogador numa zona suspeita
+        RestrictedArea, // jogador está numa zona restrita
+        Camera,         // acesso excessivo a câmaras
+        Noise,          // barulho à noite
+        TerminalAccess  // acesso a terminais fora do posto de trabalho
+    }
+
+
     void Awake() {
         if (Instance != null && Instance != this) {
-            Destroy(gameObject);
-            return;
+            Destroy(gameObject); return;
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start() {
-
-    }
 
     void Update() {
-        // se o jogador estiver a ficar suspeito aumentamos de acordo com o rate atual (mudado de acordo com a distancia ao NPC por enquanto
         if (currentIncreaseRate > 0) {
-            suspicionSlider.value += currentIncreaseRate * Time.deltaTime;
+            // há uma fonte ativa -> a suspeita sobe.
+            suspicionSlider.value = Mathf.Min(suspicionSlider.maxValue, suspicionSlider.value + currentIncreaseRate * Time.deltaTime);
 
-            // se ja chegou ao limite máximo então o rate fica a 0
-            if (suspicionSlider.value >= suspicionSlider.maxValue) {
-                suspicionSlider.value = suspicionSlider.maxValue;
-                currentIncreaseRate = 0f;
-            }
-
-            // damos reset à ultima vez desde q o player n aumentava o nivel de suspeito
+            // reset do contador de decay -> enquanto há fonte ativa o timer não avança
             timeSinceLastIncrease = 0f;
             isDecaying = false;
 
-            // se o jogador não estiver a ficar suspeito então vemos de podemos diminuir
         } else {
-            timeSinceLastIncrease += Time.deltaTime; // aumentamos a duração de tempo desde que a ultima vez que ficou mais sus
+            // sem fonte ativa —> conta o tempo antes do decay
+            timeSinceLastIncrease += Time.deltaTime;
 
-            if (timeSinceLastIncrease >= decayDelay && !isDecaying) {
-                isDecaying = true; // se já passou mais do que o tempo necessário então começamos a baixar lhe o nível de suspeita
-            }
+            if (timeSinceLastIncrease >= decayDelay)
+                isDecaying = true;
 
-            // se já tiver a 0 não fazemos nada
+            // baixa a suspeita gradualmente após o delay
             if (isDecaying && suspicionSlider.value > 0) {
-                suspicionSlider.value -= decaySpeed * Time.deltaTime;
+                suspicionSlider.value = Mathf.Max(0f,
+                    suspicionSlider.value - decaySpeed * Time.deltaTime);
 
-                // não deixamos ir para baixo de 0 (damos reset para 0)
-                if (suspicionSlider.value <= 0) {
-                    suspicionSlider.value = 0;
+                if (suspicionSlider.value <= 0)
                     isDecaying = false;
-                }
             }
         }
 
         CheckStateChange();
     }
 
-    private void CheckStateChange() {
-        float ratio = suspicionSlider.value / suspicionSlider.maxValue;
 
-        SuspicionState newState;
-
-        if (ratio >= 1f)
-            newState = SuspicionState.Expulsion;
-        else if (ratio >= 0.66f)
-            newState = SuspicionState.Investigation;
-        else if (ratio >= 0.33f)
-            newState = SuspicionState.Attention;
-        else newState = SuspicionState.None;
-
-        if (newState != currentState) {
-            currentState = newState;
-            OnStateChanged.Invoke(currentState); // invoke é o que chama o evento
-        }
-    }
-
-
-    public void IncreaseSuspicion(float level) {
-        if (level < 1 || level > 3) 
-            return; // niveis de velocidade de ganhar suspeita
+    // chamado pelo NPCScript (e futuramente por câmaras, áreas restritas, etc.)
+    // level vai de 1 a 3 — representa a gravidade da situação
+    public void IncreaseSuspicion(float level, SuspicionSource source = SuspicionSource.NPCSight) {
+        if (level < 1 || level > 3) return; // valores fora do intervalo são ignorados
 
         currentIncreaseRate = baseIncreaseSpeed * level;
-
-        // da reset ao decay quando deteta novamente
         timeSinceLastIncrease = 0f;
         isDecaying = false;
     }
 
+    // chamado pelo NPCScript quando o jogador sai do FOV ou da zona suspeita
+    // pára a subida mas não dá reset o valor porque o decay trata disso com o delay
     public void StopIncreasingSuspicion() {
         currentIncreaseRate = 0f;
     }
 
 
+    // completar tarefas de trabalho baixa a suspeita (o jogador parece um funcionário normal), mas falhar ou completar incorretamente sobe
+    // amount é um multiplicador baseado na dificuldade da task (definido no TaskManager: Small=0.1, Medium=0.25, Major=0.5).
     public void ChangeSuspicionOnTaskComplete(float amount, bool doneCorrectly) {
-        if(doneCorrectly)
+        if (doneCorrectly)
             suspicionSlider.value = Mathf.Max(0f, suspicionSlider.value - amount);
         else
             suspicionSlider.value = Mathf.Min(suspicionSlider.maxValue, suspicionSlider.value + amount);
 
-        // assim o suspicion level só desce de acordo com a conclusão da task, senão podia continuar a descer sem o jogador fazer nada então conta como se tivesse acabado de ser visto pelo NCP
+        // reset do decay para que a mudança seja processada imediatamente em vez de esperar pelo próximo ciclo de Update.
         timeSinceLastIncrease = 0f;
         isDecaying = false;
         CheckStateChange();
+    }
+
+
+    // verifica se o ratio atual da barra cruzou algum threshold e, se o estado mudou, dispara o evento global
+    // chamado no Update e sempre que o valor muda fora do Update (ex: ao completar uma task).
+    private void CheckStateChange() {
+        float ratio = suspicionSlider.value / suspicionSlider.maxValue;
+
+        SuspicionState newState;
+        if (ratio >= 1f) newState = SuspicionState.Expulsion;
+        else if (ratio >= 0.66f) newState = SuspicionState.Investigation;
+        else if (ratio >= 0.33f) newState = SuspicionState.Attention;
+        else newState = SuspicionState.None;
+
+        // só dispara se o estado realmente mudou
+        if (newState != currentState) {
+            currentState = newState;
+
+            // GameEvent.SuspicionStateChanged notifica o NPCManager, que por sua vez notifica todos os NPCs
+            GameEvent.SuspicionStateChanged(newState);
+
+            // expulsion é Game Over —> dispara evento separado para que o GameManager possa reagir.
+            if (newState == SuspicionState.Expulsion)
+                GameEvent.GameOver();
+        }
+    }
+
+    // permite que outros scripts leiam o estado atual sem aceder diretamente ao slider
+    public SuspicionState GetCurrentState() {
+        return currentState;
     }
 }

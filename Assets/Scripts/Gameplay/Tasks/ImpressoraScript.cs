@@ -1,32 +1,27 @@
-using UnityEditor;
 using UnityEngine;
 
-public class ImpressoraScript : InteractableObject
-{
+public class ImpressoraScript : InteractableObject {
 
-
-
-
-
+    // controla se esta impressora específica pode ser usada agora
+    // começa a false e só muda quando o TaskManager chamar ActivatePrinterTask() senão qualquer impressora completaria a task a qualquer momento
+    private bool canInteract = false;
 
     private void Awake() {
-        objectName = "Porta";
+        objectName = "Impressora";
     }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start() {
-
-    }
-
-    // Update is called once per frame
-    void Update() {
-
-    }
-
-
-
 
     public override void Interact() {
-        TaskManager.Instance.CompleteTask("Imprimir documento", true);
+        if (canInteract) {
+            TaskManager.Instance.CompleteTask("Imprimir documento", true);
+            canInteract = false;
+
+        } else {
+            Debug.Log("Ainda não consigo interagir com isto.");
+        }
+    }
+
+    // chamado pelo TaskManager quando esta impressora é a selecionada para a task
+    public void ActivatePrinterTask() {
+        canInteract = true;
     }
 }
