@@ -5,6 +5,9 @@ public class ImpressoraScript : InteractableObject {
     // controla se esta impressora específica pode ser usada agora
     // começa a false e só muda quando o TaskManager chamar ActivatePrinterTask() senão qualquer impressora completaria a task a qualquer momento
     private bool canInteract = false;
+    public GameObject document;
+    
+
 
     private void Awake() {
         objectName = "Impressora";
@@ -13,6 +16,7 @@ public class ImpressoraScript : InteractableObject {
     public override void Interact() {
         if (canInteract) {
             TaskManager.Instance.CompleteTask("Imprimir documento", true);
+            Instantiate(document, transform.position + Vector3.up, Quaternion.identity, transform);
             canInteract = false;
 
         } else {

@@ -27,7 +27,7 @@ public class PCInteractable : InteractableObject {
 
     private void Update() {
         // só tenta apanahr o Escape se o PC estiver aberto
-        if (isOpen && Input.GetKeyDown(KeyCode.Escape))
+        if (isOpen && Input.GetKeyDown(KeyCode.P))
             ClosePC();
     }
 

@@ -5,7 +5,8 @@ public class SuspicionManager : MonoBehaviour {
 
     public static SuspicionManager Instance;
 
-    [SerializeField] private Slider suspicionSlider;
+    [SerializeField] private float maxSuspicion = 1f;
+    private float currentSuspicion = 0f;
 
     // baseIncreaseSpeed: velocidade base a que a suspeita sobe por segundo quando há uma fonte ativa (ex: NPC a ver o jogador).
     // multiplicada pelo "level" da fonte (1, 1.5 ou 2) para fontes mais graves
@@ -59,7 +60,7 @@ public class SuspicionManager : MonoBehaviour {
     void Update() {
         if (currentIncreaseRate > 0) {
             // há uma fonte ativa -> a suspeita sobe.
-            suspicionSlider.value = Mathf.Min(suspicionSlider.maxValue, suspicionSlider.value + currentIncreaseRate * Time.deltaTime);
+            currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + currentIncreaseRate * Time.deltaTime);
 
             // reset do contador de decay -> enquanto há fonte ativa o timer não avança
             timeSinceLastIncrease = 0f;
@@ -73,11 +74,11 @@ public class SuspicionManager : MonoBehaviour {
                 isDecaying = true;
 
             // baixa a suspeita gradualmente após o delay
-            if (isDecaying && suspicionSlider.value > 0) {
-                suspicionSlider.value = Mathf.Max(0f,
-                    suspicionSlider.value - decaySpeed * Time.deltaTime);
+            if (isDecaying && currentSuspicion > 0) {
+                currentSuspicion = Mathf.Max(0f,
+                    currentSuspicion - decaySpeed * Time.deltaTime);
 
-                if (suspicionSlider.value <= 0)
+                if (currentSuspicion <= 0)
                     isDecaying = false;
             }
         }
@@ -107,9 +108,9 @@ public class SuspicionManager : MonoBehaviour {
     // amount é um multiplicador baseado na dificuldade da task (definido no TaskManager: Small=0.1, Medium=0.25, Major=0.5).
     public void ChangeSuspicionOnTaskComplete(float amount, bool doneCorrectly) {
         if (doneCorrectly)
-            suspicionSlider.value = Mathf.Max(0f, suspicionSlider.value - amount);
+            currentSuspicion = Mathf.Max(0f, currentSuspicion - amount);
         else
-            suspicionSlider.value = Mathf.Min(suspicionSlider.maxValue, suspicionSlider.value + amount);
+            currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + amount);
 
         // reset do decay para que a mudança seja processada imediatamente em vez de esperar pelo próximo ciclo de Update.
         timeSinceLastIncrease = 0f;
@@ -121,7 +122,7 @@ public class SuspicionManager : MonoBehaviour {
     // verifica se o ratio atual da barra cruzou algum threshold e, se o estado mudou, dispara o evento global
     // chamado no Update e sempre que o valor muda fora do Update (ex: ao completar uma task).
     private void CheckStateChange() {
-        float ratio = suspicionSlider.value / suspicionSlider.maxValue;
+        float ratio = currentSuspicion / maxSuspicion;
 
         SuspicionState newState;
         if (ratio >= 1f) newState = SuspicionState.Expulsion;
@@ -145,5 +146,9 @@ public class SuspicionManager : MonoBehaviour {
     // permite que outros scripts leiam o estado atual sem aceder diretamente ao slider
     public SuspicionState GetCurrentState() {
         return currentState;
+    }
+    public float GetSuspicionRatio()
+    {
+        return currentSuspicion / maxSuspicion;
     }
 }
