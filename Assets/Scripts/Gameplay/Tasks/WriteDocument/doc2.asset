@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
+  m_Name: doc2
+  m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
+  documentTitle: "Ata de Reuni\xE3o \u2014 Comit\xE9 Executivo"
+  bodyText: "Reuni\xE3o do Comit\xE9 Executivo realizada a {0}, sem ordem de trabalhos
+    distribu\xEDda \npreviamente. Presidiu o {1}. Por unanimidade, deliberou-se {2}
+    todos os registos \nde comunica\xE7\xE3o relativos ao projeto VS-09, com efeitos
+    retroativos a janeiro."
+  blanks:
+  - slotID: doc2_date
+    correctAnswer: 14 de fevereiro
+    wrongOptions:
+    - data a confirmar
+    - "5 de mar\xE7o"
+    - sem registo
+    weightDenuncia: 0
+    weightExtorsao: 0
+    weightLealdade: 0.1
+  - slotID: doc2_chair
+    correctAnswer: "Diretor de Opera\xE7\xF5es"
+    wrongOptions:
+    - CEO
+    - Diretor Financeiro
+    - representante externo
+    weightDenuncia: 0.1
+    weightExtorsao: 0.2
+    weightLealdade: 0.1
+  - slotID: doc2_decision
+    correctAnswer: arquivar
+    wrongOptions:
+    - eliminar
+    - auditar
+    - "tornar p\xFAblicos"
+    weightDenuncia: 0.2
+    weightExtorsao: 0.1
+    weightLealdade: 0.3

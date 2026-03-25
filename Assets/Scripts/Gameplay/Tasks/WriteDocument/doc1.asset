@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
+  m_Name: doc1
+  m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
+  documentTitle: "Proposta de Servi\xE7os \u2014 Vantage Solutions"
+  bodyText: "A Nexum Corp celebra acordo de presta\xE7\xE3o de servi\xE7os com a
+    Vantage Solutions, S.A., \ncom in\xEDcio a {0}. O \xE2mbito do acordo inclui
+    o {1} de infraestrutura de dados e suporte \nt\xE9cnico especializado. O valor
+    contratual fixado \xE9 de {2} euros anuais, \nsujeito a revis\xE3o semestral."
+  blanks:
+  - slotID: doc1_date
+    correctAnswer: "1 de mar\xE7o"
+    wrongOptions:
+    - data a definir
+    - com efeito imediato
+    - 15 de janeiro
+    weightDenuncia: 0
+    weightExtorsao: 0
+    weightLealdade: 0.1
+  - slotID: doc1_scope
+    correctAnswer: desenvolvimento
+    wrongOptions:
+    - "monitoriza\xE7\xE3o"
+    - venda
+    - auditoria
+    weightDenuncia: 0
+    weightExtorsao: 0
+    weightLealdade: 0.1
+  - slotID: doc1_value
+    correctAnswer: 2.400.000
+    wrongOptions:
+    - 240.000
+    - 24.000.000
+    - confidencial
+    weightDenuncia: 0
+    weightExtorsao: 0.1
+    weightLealdade: 0.1
