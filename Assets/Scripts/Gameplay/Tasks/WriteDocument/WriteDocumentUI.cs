@@ -2,29 +2,38 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using static DocumentTaskData;
 
 public class WriteDocumentUI : MonoBehaviour {
 
     [Header("Painéis")]
+    // documentPanel é o estado normal —> mostra o documento a preencher
+    // emptyStatePanel é para quando o jogador abre o computador mas não tem esta task ativa
     [SerializeField] private GameObject documentPanel;
     [SerializeField] private GameObject emptyStatePanel;
 
     [Header("UI do documento")]
     [SerializeField] private TextMeshProUGUI documentTitleText;
-    [SerializeField] private Transform documentBodyParent;
-    [SerializeField] private Transform wordChoicesParent;
+    [SerializeField] private TextMeshProUGUI documentBodyText;
+    // submitButton está sempre ativo —> se o jogador submeter com lacunas por preencher, a task conta como mal feita e a suspeita sobe
     [SerializeField] private Button submitButton;
 
-    [Header("Prefabs")]
-    [SerializeField] private GameObject textSegmentPrefab;
-    [SerializeField] private GameObject blankSlotPrefab;
-    [SerializeField] private GameObject wordChoicePrefab;
+    [Header("Botões de escolha (4 botões fixos)")]
+    [SerializeField] private Button[] choiceButtons;
 
+    // referência ao ScriptableObject do documento ativo
     private DocumentTaskData currentData;
-    private BlankSlotUI[] blankSlots;
-    private int filledCount = 0;
+
+    private string[] chosenWords; // chosenWords guarda a palavra que o jogador escolheu para cada lacuna, indexado por posição no array blanks
+    private bool[] filledSlots; // filledSlots marca quais lacunas já foram respondidas
+
+    // qual a lacuna que está ativa no momento —> determina qual conjunto de opções mostrar e qual placeholder fica destacado a amarelo
+    private int currentBlankIndex;
 
 
+    // OnEnable em vez de Start porque este GameObject é ativado/desativado pelo PCInteractable cada vez que o PC é aberto ou seja
+    // o OnEnable corre de novo sempre que o painel fica visível, assim o estado das tasks é sempre verificado
+    // no momento certo e não com dados desatualizados de quando o objeto foi criado pela primeira vez
     void OnEnable() {
         bool hasMorning = TaskManager.Instance.HasActiveMorningTask("Escrever documento");
         bool hasAfternoon = TaskManager.Instance.HasActiveAfternoonTask("Escrever documento");
@@ -32,7 +41,8 @@ public class WriteDocumentUI : MonoBehaviour {
         if (hasMorning || hasAfternoon) {
             emptyStatePanel.SetActive(false);
             documentPanel.SetActive(true);
-            OpenDocument(DocumentManager.Instance.GetDocumentForToday()); // pede ao manager
+            OpenDocument(DocumentManager.Instance.GetDocumentForToday());
+
         } else {
             documentPanel.SetActive(false);
             emptyStatePanel.SetActive(true);
@@ -40,96 +50,123 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
 
+    // inicializa todos os arrays e estado local com base no documento recebido
     private void OpenDocument(DocumentTaskData data) {
         currentData = data;
-        filledCount = 0;
-        submitButton.interactable = false;
+        chosenWords = new string[data.blanks.Length];
+        filledSlots = new bool[data.blanks.Length];
+        currentBlankIndex = 0;
+
         documentTitleText.text = data.documentTitle;
-        BuildBody(data);
-        BuildChoices(data);
-        // sem SetActive aqui — já foi feito no OnEnable
+
+        RefreshBodyText();
+        ShowOptionsForCurrentBlank();
     }
 
 
-    private void BuildBody(DocumentTaskData data) {
-        foreach (Transform child in documentBodyParent)
-            Destroy(child.gameObject);
+    // reconstrói o texto completo do documento de raiz a cada escolha
+    // a cor amarela na lacuna ativa serve para o jogador saber sempre onde está a escolher
+    // a cor branca nas lacunas já preenchidas (e o sublinhado) distingue-as das lacunas por preencher (traço simples sem cor)
+    private void RefreshBodyText() {
+        string body = currentData.bodyText;
 
-        string[] parts = System.Text.RegularExpressions.Regex
-            .Split(data.bodyText, @"(\{\d+\})");
+        for (int i = 0; i < currentData.blanks.Length; i++) {
+            string placeholder = "{" + i + "}";
 
-        blankSlots = new BlankSlotUI[data.blanks.Length];
+            if (filledSlots[i])
+                body = body.Replace(placeholder, $"<color=#ffffff><u>{chosenWords[i]}</u></color>");
+            else if (i == currentBlankIndex)
+                body = body.Replace(placeholder, "<color=#FFD700><u>______</u></color>");
+            else
+                body = body.Replace(placeholder, "______");
+        }
 
-        foreach (string part in parts) {
-            var match = System.Text.RegularExpressions.Regex
-                .Match(part, @"\{(\d+)\}");
+        documentBodyText.text = body;
+    }
 
-            if (match.Success) {
-                int index = int.Parse(match.Groups[1].Value);
-                GameObject go = Instantiate(blankSlotPrefab, documentBodyParent);
-                BlankSlotUI slot = go.GetComponent<BlankSlotUI>();
-                slot.Init(index, this);
-                blankSlots[index] = slot;
-            } else if (!string.IsNullOrEmpty(part)) {
-                GameObject go = Instantiate(textSegmentPrefab, documentBodyParent);
-                go.GetComponent<TextMeshProUGUI>().text = part;
-            }
+
+    // esconde todos os botões antes de mostrar os da lacuna atual
+    // as opções são baralhadas para que a resposta correta não esteja sempre na mesma posição
+    // RemoveAllListeners antes de AddListener porque o mesmo botão é reutilizado entre lacunas
+    private void ShowOptionsForCurrentBlank() {
+        foreach (var btn in choiceButtons)
+            btn.gameObject.SetActive(false);
+
+        if (currentBlankIndex >= currentData.blanks.Length) return;
+
+        BlankSlot blank = currentData.blanks[currentBlankIndex];
+
+        List<string> options = new List<string>();
+        options.Add(blank.correctAnswer);
+        options.AddRange(blank.wrongOptions);
+        Shuffle(options);
+
+        for (int i = 0; i < options.Count && i < choiceButtons.Length; i++) {
+            string word = options[i];
+            bool isCorrect = (word == blank.correctAnswer);
+
+            choiceButtons[i].gameObject.SetActive(true);
+            choiceButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = word;
+
+            choiceButtons[i].onClick.RemoveAllListeners();
+            choiceButtons[i].onClick.AddListener(() => OnWordChosen(word, isCorrect));
         }
     }
 
 
-    private void BuildChoices(DocumentTaskData data) {
-        foreach (Transform child in wordChoicesParent)
-            Destroy(child.gameObject);
+    // chamado quando o jogador clica numa opção, avança o estado interno para a próxima lacuna por preencher
+    // quando todas as lacunas estão preenchidas, os botões desaparecem
+    private void OnWordChosen(string word, bool isCorrect) {
+        chosenWords[currentBlankIndex] = word;
+        filledSlots[currentBlankIndex] = true;
 
-        var allOptions = new List<(string word, int blankIndex, bool isCorrect)>();
+        currentBlankIndex++;
+        while (currentBlankIndex < filledSlots.Length && filledSlots[currentBlankIndex])
+            currentBlankIndex++;
 
-        for (int i = 0; i < data.blanks.Length; i++) {
-            allOptions.Add((data.blanks[i].correctAnswer, i, true));
-            foreach (string wrong in data.blanks[i].wrongOptions)
-                allOptions.Add((wrong, i, false));
-        }
+        RefreshBodyText();
 
-        for (int i = allOptions.Count - 1; i > 0; i--) {
-            int j = Random.Range(0, i + 1);
-            (allOptions[i], allOptions[j]) = (allOptions[j], allOptions[i]);
-        }
+        bool allFilled = currentBlankIndex >= currentData.blanks.Length;
 
-        foreach (var option in allOptions) {
-            GameObject go = Instantiate(wordChoicePrefab, wordChoicesParent);
-            go.GetComponentInChildren<TextMeshProUGUI>().text = option.word;
-
-            string w = option.word;
-            int idx = option.blankIndex;
-            bool correct = option.isCorrect;
-
-            go.GetComponent<Button>().onClick.AddListener(() =>
-                OnWordChosen(w, idx, correct));
+        if (allFilled) {
+            foreach (Button btn in choiceButtons)
+                btn.gameObject.SetActive(false);
+        } else {
+            ShowOptionsForCurrentBlank();
         }
     }
 
 
-    public void OnWordChosen(string word, int blankIndex, bool isCorrect) {
-        if (blankSlots[blankIndex].IsFilled()) return;
-        blankSlots[blankIndex].Fill(word, isCorrect);
-        filledCount++;
-        if (filledCount >= currentData.blanks.Length)
-            submitButton.interactable = true;
-    }
-
-
+    // ao submeter, percorre todas as lacunas para determinar se o documento foi preenchido corretamente
+    // lacunas por preencher (chosenWords[i] == null) contam automaticamente como erradas
+    // as escolhas individuais são também guardadas no DocumentManager independentemente de estarem certas ou erradas —>
+    // os pesos narrativos (weightDenuncia, etc.) precisam de todas as respostas, não só das corretas, para calcular para que final o jogador está a caminhar
     public void OnSubmit() {
         bool allCorrect = true;
 
-        for (int i = 0; i < blankSlots.Length; i++) {
-            if (!blankSlots[i].IsCorrect()) allCorrect = false;
+        for (int i = 0; i < currentData.blanks.Length; i++) {
+            bool correct = chosenWords[i] == currentData.blanks[i].correctAnswer;
+            if (!correct) allCorrect = false;
+
             DocumentManager.Instance.SaveChoice(
                 currentData.blanks[i].slotID,
-                blankSlots[i].GetChosenWord()
+                chosenWords[i] ?? ""
             );
         }
 
         TaskManager.Instance.CompleteTask("Escrever documento", allCorrect);
         gameObject.SetActive(false);
+    }
+
+
+    // algoritmo simples para baralhar as opções para que a resposta correta não esteja sempre na mesma posição
+    private void Shuffle<String>(List<String> list) {
+        for (int i = 0; i < list.Count * 2; i++) {
+            int a = Random.Range(0, list.Count);
+            int b = Random.Range(0, list.Count);
+            String temp = list[a];
+            list[a] = list[b];
+            list[b] = temp;
+        }
     }
 }

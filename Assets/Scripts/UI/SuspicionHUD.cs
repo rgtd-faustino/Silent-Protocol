@@ -45,6 +45,9 @@ public class SuspicionHUD : MonoBehaviour
         // guardar o tamanho original para depois escalar a partir daqui
         baseEyeScale = eyeWhiteRect.localScale;
         baseIrisScale = irisRect.localScale;
+        canvasGroup.alpha = 0.25f;
+
+        HandleStateChanged(SuspicionManager.Instance.GetCurrentState());
     }
 
     void OnEnable()
@@ -120,7 +123,7 @@ public class SuspicionHUD : MonoBehaviour
         {
             case SuspicionManager.SuspicionState.None:
                 ApplyVisuals(colorNone, "NONE", "Comportamento normal", false);
-                SetFade(0f, 0.8f); // desaparece
+                SetFade(0.25f, 0.8f); // desaparece
                 break;
 
             case SuspicionManager.SuspicionState.Attention:
