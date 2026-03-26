@@ -14,8 +14,12 @@ public class TaskItemUI : MonoBehaviour {
         gameObject.SetActive(true);
     }
 
-    public void SetCompleted() => Render(true, false);
-    public void SetFailed() => Render(false, true);
+    public void SetCompleted() {
+        Render(true, false);
+    }
+    public void SetFailed() {
+        Render(false, true);
+    }
 
     private void Render(bool completed, bool failed) {
         string text = $"{taskName}  <size=75%><color=#AAAAAA>{deadline}</color></size>";

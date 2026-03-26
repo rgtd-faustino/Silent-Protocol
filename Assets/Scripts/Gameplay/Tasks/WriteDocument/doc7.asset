@@ -12,6 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
   m_Name: doc7
   m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
-  documentTitle: 
-  bodyText: 
-  blanks: []
+  documentTitle: "Relat\xF3rio de Auditoria \u2014 Servidor VS-09"
+  bodyText: "A auditoria ao servidor VS-09 n\xE3o identificou {0} nos acessos registados
+    \nentre mar\xE7o e setembro. Os volumes de dados transferidos encontram-se {1}
+    \nface aos limites contratuais estabelecidos. \nRecomenda-se {2} do presente
+    relat\xF3rio ap\xF3s valida\xE7\xE3o da chefia direta."
+  blanks:
+  - slotID: doc7_finding
+    correctAnswer: irregularidades relevantes
+    wrongOptions:
+    - "os acessos n\xE3o autorizados"
+    - "evid\xEAncias de transfer\xEAncias ilegais"
+    - "qualquer atividade an\xF3mala"
+    weightDenuncia: 0.5
+    weightExtorsao: 0.4
+    weightLealdade: 0.7
+    awarenessWeight: 0.237
+  - slotID: doc7_volume
+    correctAnswer: "dentro dos par\xE2metros acordados"
+    wrongOptions:
+    - 375% acima do contratualizado
+    - "imposs\xEDveis de verificar externamente"
+    - abaixo do esperado
+    weightDenuncia: 0.5
+    weightExtorsao: 0.3
+    weightLealdade: 0.6
+    awarenessWeight: 0.519
+  - slotID: doc7_action
+    correctAnswer: o arquivo
+    wrongOptions:
+    - "a notifica\xE7\xE3o \xE0s autoridades regulat\xF3rias"
+    - "a divulga\xE7\xE3o imediata"
+    - "a destrui\xE7\xE3o"
+    weightDenuncia: 0.5
+    weightExtorsao: 0.3
+    weightLealdade: 0.6
+    awarenessWeight: 1
+  correctDepartment: 1

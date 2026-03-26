@@ -12,6 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
   m_Name: doc6
   m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
-  documentTitle: 
-  bodyText: 
-  blanks: []
+  documentTitle: "Avalia\xE7\xE3o de Desempenho \u2014 Per\xEDodo Q1"
+  bodyText: "O colaborador {0} apresentou durante o per\xEDodo em avalia\xE7\xE3o
+    um desempenho {1}. \nFace ao exposto, recomenda-se {2} com efeitos imediatos,
+    \ntendo em considera\xE7\xE3o os interesses da organiza\xE7\xE3o."
+  blanks:
+  - slotID: doc6_name
+    correctAnswer: referenciado no processo interno
+    wrongOptions:
+    - Miguel Santos, Dep. Tecnologia
+    - a colaboradora em causa
+    - o elemento identificado
+    weightDenuncia: 0.3
+    weightExtorsao: 0.4
+    weightLealdade: 0.3
+    awarenessWeight: 0.256
+  - slotID: doc6_performance
+    correctAnswer: abaixo das expectativas funcionais
+    wrongOptions:
+    - "tecnicamente s\xF3lido mas inadequado ao contexto"
+    - "exemplar nos resultados, problem\xE1tico na conduta"
+    - "irrelevante para esta avalia\xE7\xE3o"
+    weightDenuncia: 0.4
+    weightExtorsao: 0.3
+    weightLealdade: 0.3
+    awarenessWeight: 0.556
+  - slotID: doc6_recommendation
+    correctAnswer: "a reclassifica\xE7\xE3o funcional"
+    wrongOptions:
+    - "a suspens\xE3o preventiva"
+    - "a prote\xE7\xE3o formal no \xE2mbito laboral"
+    - "a transfer\xEAncia urgente para outro departamento"
+    weightDenuncia: 0.3
+    weightExtorsao: 0.4
+    weightLealdade: 0.4
+    awarenessWeight: 1
+  correctDepartment: 2

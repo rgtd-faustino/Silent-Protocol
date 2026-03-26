@@ -269,11 +269,13 @@ public class UIManager : MonoBehaviour {
         currentCodeTry = new int[5];
     }
 
-    // ---- PC ----
 
     // o botão de imprimir no computador só deve funcionar quando a task está ativa
     public void OnPrinterPrintButton() {
-        if (!TaskManager.Instance.HasActiveMorningTask("Imprimir documento")) return;
+        if (!TaskManager.Instance.HasActiveMorningTask("Imprimir documento")) 
+            return;
+
         TaskManager.Instance.ActivatePrinterTask();
+        printButton.interactable = false;
     }
 }

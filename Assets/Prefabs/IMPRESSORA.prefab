@@ -125,4 +125,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ImpressoraScript
   objectName: Impressora
-  document: {fileID: 5360611658850818637, guid: c71be411f2d346846b7450ff3b184bff, type: 3}
+  documentPickupPrefab: {fileID: 5360611658850818637, guid: c71be411f2d346846b7450ff3b184bff, type: 3}

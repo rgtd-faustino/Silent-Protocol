@@ -12,6 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
   m_Name: doc4
   m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
-  documentTitle: 
-  bodyText: 
-  blanks: []
+  documentTitle: "Acordo de Confidencialidade \u2014 Vig\xEAncia Retroativa"
+  bodyText: "O presente acordo vincula {0} a n\xE3o divulgar qualquer informa\xE7\xE3o
+    relacionada \ncom o projeto VS-09, incluindo eventos ocorridos entre {1} e a
+    data de assinatura. \nO incumprimento implica {2} e a\xE7\xE3o judicial imediata,
+    sem direito a contesta\xE7\xE3o."
+  blanks:
+  - slotID: doc4_target
+    correctAnswer: o colaborador abaixo identificado
+    wrongOptions:
+    - "Ana Ferreira, n.\xBA func. 2847"
+    - qualquer testemunha dos factos
+    - o elemento perturbador
+    weightDenuncia: 0.4
+    weightExtorsao: 0.5
+    weightLealdade: 0.4
+    awarenessWeight: 0.237
+  - slotID: doc4_period
+    correctAnswer: 1 de janeiro do corrente ano
+    wrongOptions:
+    - sempre
+    - a data do primeiro contacto com VS-09
+    - "o in\xEDcio do seu contrato"
+    weightDenuncia: 0.3
+    weightExtorsao: 0.4
+    weightLealdade: 0.4
+    awarenessWeight: 0.525
+  - slotID: doc4_consequence
+    correctAnswer: "rescis\xE3o imediata do contrato"
+    wrongOptions:
+    - "compensa\xE7\xE3o financeira"
+    - "prote\xE7\xE3o legal garantida"
+    - "suspens\xE3o preventiva"
+    weightDenuncia: 0.3
+    weightExtorsao: 0.6
+    weightLealdade: 0.3
+    awarenessWeight: 1
+  correctDepartment: 0

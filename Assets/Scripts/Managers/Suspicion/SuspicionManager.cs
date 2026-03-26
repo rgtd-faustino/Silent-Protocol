@@ -44,7 +44,8 @@ public class SuspicionManager : MonoBehaviour {
         RestrictedArea, // jogador está numa zona restrita
         Camera,         // acesso excessivo a câmaras
         Noise,          // barulho à noite
-        TerminalAccess  // acesso a terminais fora do posto de trabalho
+        TerminalAccess,  // acesso a terminais fora do posto de trabalho
+        DocumentMisfiled   // documento arquivado no departamento errado
     }
 
 
@@ -125,10 +126,14 @@ public class SuspicionManager : MonoBehaviour {
         float ratio = currentSuspicion / maxSuspicion;
 
         SuspicionState newState;
-        if (ratio >= 1f) newState = SuspicionState.Expulsion;
-        else if (ratio >= 0.66f) newState = SuspicionState.Investigation;
-        else if (ratio >= 0.33f) newState = SuspicionState.Attention;
-        else newState = SuspicionState.None;
+        if (ratio >= 1f)
+            newState = SuspicionState.Expulsion;
+        else if (ratio >= 0.66f)
+            newState = SuspicionState.Investigation;
+        else if (ratio >= 0.33f)
+            newState = SuspicionState.Attention;
+        else
+            newState = SuspicionState.None;
 
         // só dispara se o estado realmente mudou
         if (newState != currentState) {
@@ -147,8 +152,7 @@ public class SuspicionManager : MonoBehaviour {
     public SuspicionState GetCurrentState() {
         return currentState;
     }
-    public float GetSuspicionRatio()
-    {
+    public float GetSuspicionRatio() {
         return currentSuspicion / maxSuspicion;
     }
 }

@@ -1,4 +1,3 @@
-// DocumentTaskData.cs
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Tasks/Document Task")]
@@ -13,15 +12,23 @@ public class DocumentTaskData : ScriptableObject {
 
     public BlankSlot[] blanks;
 
+    // departamento correto para este documento —> o jogador tem de deduzir com base no conteúdo
+    // não é mostrado diretamente na UI para manter a tensão de "será que estou a arquivar no sítio certo?"
+    public ArchiveScript.DepartmentType correctDepartment;
+
     [System.Serializable]
     public class BlankSlot {
-        public string slotID;        // "slot_dia3_transfer" — para guardar narrativa depois
+        public string slotID;
         public string correctAnswer;
         public string[] wrongOptions;
 
-        [Header("Peso narrativo (para mais tarde)")]
+        [Header("Peso narrativo")]
         public float weightDenuncia;
         public float weightExtorsao;
         public float weightLealdade;
+
+        // peso que vai para o Company Awareness ao ser arquivado
+        [Header("Impacto no Company Awareness")]
+        [Range(0f, 1f)] public float awarenessWeight;
     }
 }

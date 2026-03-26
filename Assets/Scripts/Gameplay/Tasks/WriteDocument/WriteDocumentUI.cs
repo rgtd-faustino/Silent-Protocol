@@ -89,10 +89,11 @@ public class WriteDocumentUI : MonoBehaviour {
     // as opções são baralhadas para que a resposta correta não esteja sempre na mesma posição
     // RemoveAllListeners antes de AddListener porque o mesmo botão é reutilizado entre lacunas
     private void ShowOptionsForCurrentBlank() {
-        foreach (var btn in choiceButtons)
+        foreach (Button btn in choiceButtons)
             btn.gameObject.SetActive(false);
 
-        if (currentBlankIndex >= currentData.blanks.Length) return;
+        if (currentBlankIndex >= currentData.blanks.Length) 
+            return;
 
         BlankSlot blank = currentData.blanks[currentBlankIndex];
 
@@ -116,11 +117,14 @@ public class WriteDocumentUI : MonoBehaviour {
 
     // chamado quando o jogador clica numa opção, avança o estado interno para a próxima lacuna por preencher
     // quando todas as lacunas estão preenchidas, os botões desaparecem
+    // COMO NÃO HÁ RESPOSTAS ERRADAS PODEMOS FAZER QUE SE UM CHEFE CALHAR A VER UM DOCUMENTO COM RESPOSTAS "erradas" ENTÃO O NIVEL DE SUSPEITA/company awareness AUMENTA
+    // ASSIM O JOGADOR É CASTIGADO POR METER RESPOSTAS QUE NAO SEJAM CORRETAS
     private void OnWordChosen(string word, bool isCorrect) {
         chosenWords[currentBlankIndex] = word;
         filledSlots[currentBlankIndex] = true;
 
         currentBlankIndex++;
+
         while (currentBlankIndex < filledSlots.Length && filledSlots[currentBlankIndex])
             currentBlankIndex++;
 
@@ -137,34 +141,33 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
 
-    // ao submeter, percorre todas as lacunas para determinar se o documento foi preenchido corretamente
-    // lacunas por preencher (chosenWords[i] == null) contam automaticamente como erradas
-    // as escolhas individuais são também guardadas no DocumentManager independentemente de estarem certas ou erradas —>
-    // os pesos narrativos (weightDenuncia, etc.) precisam de todas as respostas, não só das corretas, para calcular para que final o jogador está a caminhar
+    // ao submeter, percorre todas as lacunas para determinar se a tarefa foi bem feita
+    // todas as lacunas preenchidas = tarefa correta, lacunas por preencher = tarefa mal feita, suspeita sobe
+    // as escolhas são guardadas no DocumentManager para os pesos narrativos (weightDenuncia, etc.) que calculam para que final o jogador está a caminhar
     public void OnSubmit() {
-        bool allCorrect = true;
+        // correto = todas as lacunas preenchidas (o jogador fez o trabalho)
+        // as escolhas afetam pesos narrativos, não a avaliação da task
+        bool allFilled = true;
 
         for (int i = 0; i < currentData.blanks.Length; i++) {
-            bool correct = chosenWords[i] == currentData.blanks[i].correctAnswer;
-            if (!correct) allCorrect = false;
+            if (string.IsNullOrEmpty(chosenWords[i])) {
+                allFilled = false;
+            }
 
-            DocumentManager.Instance.SaveChoice(
-                currentData.blanks[i].slotID,
-                chosenWords[i] ?? ""
-            );
+            DocumentManager.Instance.SaveChoice(currentData.blanks[i].slotID, chosenWords[i] ?? "");
         }
 
-        TaskManager.Instance.CompleteTask("Escrever documento", allCorrect);
+        TaskManager.Instance.CompleteTask("Escrever documento", allFilled);
         gameObject.SetActive(false);
     }
 
 
     // algoritmo simples para baralhar as opções para que a resposta correta não esteja sempre na mesma posição
-    private void Shuffle<String>(List<String> list) {
+    private void Shuffle(List<string> list) {
         for (int i = 0; i < list.Count * 2; i++) {
             int a = Random.Range(0, list.Count);
             int b = Random.Range(0, list.Count);
-            String temp = list[a];
+            string temp = list[a];
             list[a] = list[b];
             list[b] = temp;
         }

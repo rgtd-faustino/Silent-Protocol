@@ -27,6 +27,7 @@ MonoBehaviour:
     weightDenuncia: 0
     weightExtorsao: 0
     weightLealdade: 0.1
+    awarenessWeight: 0.225
   - slotID: doc1_scope
     correctAnswer: desenvolvimento
     wrongOptions:
@@ -36,6 +37,7 @@ MonoBehaviour:
     weightDenuncia: 0
     weightExtorsao: 0
     weightLealdade: 0.1
+    awarenessWeight: 0.5
   - slotID: doc1_value
     correctAnswer: 2.400.000
     wrongOptions:
@@ -45,3 +47,5 @@ MonoBehaviour:
     weightDenuncia: 0
     weightExtorsao: 0.1
     weightLealdade: 0.1
+    awarenessWeight: 1
+  correctDepartment: 0

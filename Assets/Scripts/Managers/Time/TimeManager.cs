@@ -16,7 +16,7 @@ public class TimeManager : MonoBehaviour {
     [Header("Velocidade do tempo")]
     [SerializeField] private float daySpeed = 1f;
     [SerializeField] private float nightSpeed = 2f;
-    [SerializeField] private float debugSpeedMultiplier = 100f;
+    [SerializeField] private float debugSpeedMultiplier = 50f;
 
     // outros scripts (ex: PlayerController para a lanterna, BedScript para só deixar dormir à noite) consultam esta variável
     [HideInInspector] public bool isNight = false;

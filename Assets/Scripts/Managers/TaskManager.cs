@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class TaskManager : MonoBehaviour {
     public static TaskManager Instance;
@@ -7,15 +7,15 @@ public class TaskManager : MonoBehaviour {
     [SerializeField] private TaskItemUI morningTaskUI;
     [SerializeField] private TaskItemUI afternoonTaskUI;
 
-    [Header("Impressoras disponíveis para a task de imprimir")]
+    [Header("Impressoras disponÃ­veis para a task de imprimir")]
     public GameObject printerList;
 
     private const float LunchStart = 720f;
     private const float AfternoonStart = 780f;
     private const float DinnerStart = 1140f;
 
-    private readonly string[] morningOptions = { "Escrever documento", "Imprimir documento" };
-    private readonly string[] afternoonOptions = { "Arquivar documento", "Entregar documento" };
+    private string[] morningOptions = { "Escrever documento", "Imprimir documento" };
+    //private string[] afternoonOptions = { "Arquivar documento", "Entregar documento" };
 
     public enum TaskDifficulty { Small, Medium, Major }
 
@@ -46,7 +46,7 @@ public class TaskManager : MonoBehaviour {
         GameEvent.OnAfternoonStarted += SpawnAfternoonTask;
     }
 
-    // para não haver fugas de memória ou problemas desse género
+    // para nÃ£o haver fugas de memÃ³ria ou problemas desse gÃ©nero
     void OnDisable() {
         GameEvent.OnWorkHoursStarted -= ActivateTasks;
         GameEvent.OnAfternoonStarted -= SpawnAfternoonTask;
@@ -69,8 +69,29 @@ public class TaskManager : MonoBehaviour {
     }
 
     private void SpawnAfternoonTask() {
-        if (afternoonSpawned) return;
-        SpawnTask(afternoonOptions, AfternoonStart, DinnerStart, ref afternoonTask, afternoonTaskUI, TaskDifficulty.Medium);
+        if (afternoonSpawned) 
+            return;
+
+        // a task da tarde depende diretamente da manhÃ£:
+        // Escrever -> Entregar
+        // Imprimir -> Arquivar
+        string afternoonName;
+        switch (morningTask.name) {
+            case "Escrever documento":
+                afternoonName = "Entregar documento";
+                break;
+
+            case "Imprimir documento":
+                afternoonName = "Arquivar documento";
+                break;
+
+            default:
+                afternoonName = "NÃ£o vai acontecer";
+                break;
+        }
+
+
+        SpawnTask(new[] { afternoonName }, AfternoonStart, DinnerStart, ref afternoonTask, afternoonTaskUI, TaskDifficulty.Medium);
         afternoonSpawned = true;
     }
 
@@ -114,7 +135,8 @@ public class TaskManager : MonoBehaviour {
         else if (afternoonTask != null && afternoonTask.name == taskName && !afternoonTask.completed && !afternoonTask.failed)
             task = afternoonTask;
 
-        if (task == null) return;
+        if (task == null)
+            return;
 
         task.completed = true;
         task.ui.SetCompleted();
@@ -123,12 +145,26 @@ public class TaskManager : MonoBehaviour {
     }
 
     private void HandleTaskComplete(TaskDifficulty difficulty, bool doneCorrectly) {
-        float multiplier = difficulty switch {
-            TaskDifficulty.Small => 0.1f,
-            TaskDifficulty.Medium => 0.25f,
-            TaskDifficulty.Major => 0.5f,
-            _ => 0f
-        };
+        float multiplier;
+
+        switch (difficulty) {
+            case TaskDifficulty.Small:
+                multiplier = 0.1f;
+                break;
+
+            case TaskDifficulty.Medium:
+                multiplier = 0.25f;
+                break;
+
+            case TaskDifficulty.Major:
+                multiplier = 0.5f;
+                break;
+
+            default:
+                multiplier = 0f;
+                break;
+        }
+
         SuspicionManager.Instance.ChangeSuspicionOnTaskComplete(multiplier, doneCorrectly);
     }
 
@@ -137,9 +173,35 @@ public class TaskManager : MonoBehaviour {
         printerList.transform.GetChild(index).gameObject.GetComponent<ImpressoraScript>().ActivatePrinterTask();
     }
 
-    public bool HasActiveMorningTask(string name) =>
-        morningTask != null && morningTask.name == name && !morningTask.completed && !morningTask.failed;
+    public bool HasActiveMorningTask(string name) {
+        if (morningTask == null) 
+            return false;
 
-    public bool HasActiveAfternoonTask(string name) =>
-        afternoonTask != null && afternoonTask.name == name && !afternoonTask.completed && !afternoonTask.failed;
+        if (morningTask.name != name) 
+            return false;
+
+        if (morningTask.completed) 
+            return false;
+
+        if (morningTask.failed) 
+            return false;
+
+        return true;
+    }
+
+    public bool HasActiveAfternoonTask(string name) {
+        if (afternoonTask == null) 
+            return false;
+
+        if (afternoonTask.name != name) 
+            return false;
+
+        if (afternoonTask.completed) 
+            return false;
+
+        if (afternoonTask.failed) 
+            return false;
+
+        return true;
+    }
 }

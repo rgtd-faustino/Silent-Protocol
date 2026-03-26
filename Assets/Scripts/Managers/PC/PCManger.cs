@@ -6,6 +6,5 @@ public class PCManager : MonoBehaviour
     {
         window.SetActive(true);
         window.transform.SetAsLastSibling(); // traz para frente
-        Debug.Log("Clicas-te");
     }
 }

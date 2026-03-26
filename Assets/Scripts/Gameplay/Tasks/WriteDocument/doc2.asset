@@ -27,6 +27,7 @@ MonoBehaviour:
     weightDenuncia: 0
     weightExtorsao: 0
     weightLealdade: 0.1
+    awarenessWeight: 0.281
   - slotID: doc2_chair
     correctAnswer: "Diretor de Opera\xE7\xF5es"
     wrongOptions:
@@ -36,6 +37,7 @@ MonoBehaviour:
     weightDenuncia: 0.1
     weightExtorsao: 0.2
     weightLealdade: 0.1
+    awarenessWeight: 0.581
   - slotID: doc2_decision
     correctAnswer: arquivar
     wrongOptions:
@@ -45,3 +47,5 @@ MonoBehaviour:
     weightDenuncia: 0.2
     weightExtorsao: 0.1
     weightLealdade: 0.3
+    awarenessWeight: 1
+  correctDepartment: 1

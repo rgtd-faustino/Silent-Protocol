@@ -61,42 +61,26 @@ public class SuspicionHUD : MonoBehaviour
         GameEvent.OnSuspicionStateChanged -= HandleStateChanged;
     }
 
-    void Update()
-    {
-        // vai buscar o valor da suspeita (0 a 1)
+    void Update() {
         float targetRatio = SuspicionManager.Instance.GetSuspicionRatio();
-
-        // suaviza o valor para não ser brusco
         currentRatio = Mathf.SmoothDamp(currentRatio, targetRatio, ref velocity, 0.2f);
 
-        // atualiza o anel radial
         ringImage.fillAmount = currentRatio;
 
-        // -------------------------
-        // ESCALA DO OLHO (suave e gradual)
-        // -------------------------
-
-        // curva para ficar mais natural
         float eased = Mathf.SmoothStep(0f, 1f, currentRatio);
         eased = Mathf.Pow(eased, 1.3f);
 
-        // olho cresce mais
         float eyeScaleFactor = Mathf.Lerp(1f, 2.2f, eased);
-
-        // íris cresce menos (fica mais realista)
         float irisScaleFactor = Mathf.Lerp(1f, 1.5f, eased);
 
-        // aplica escala
         eyeWhiteRect.localScale = baseEyeScale * eyeScaleFactor;
         irisRect.localScale = baseIrisScale * irisScaleFactor;
 
-        // -------------------------
-        // "respiração" quando suspeita está alta
-        // -------------------------
+        // alpha do HUD acompanha o ratio mesmo no estado None
+        // mínimo 0.25, máximo 1.0 — o jogador vê sempre algo a mexer
+        canvasGroup.alpha = Mathf.Max(canvasGroup.alpha, Mathf.Lerp(0.25f, 1f, currentRatio));
 
-        if (currentRatio > 0.6f)
-        {
-            // faz um pequeno movimento tipo pulsar
+        if (currentRatio > 0.6f) {
             float breathe = Mathf.Sin(Time.time * 2f) * 0.03f;
             eyeWhiteRect.localScale += Vector3.one * breathe;
         }
@@ -123,7 +107,7 @@ public class SuspicionHUD : MonoBehaviour
         {
             case SuspicionManager.SuspicionState.None:
                 ApplyVisuals(colorNone, "NONE", "Comportamento normal", false);
-                SetFade(0.25f, 0.8f); // desaparece
+                SetFade(0.25f, 0.8f);
                 break;
 
             case SuspicionManager.SuspicionState.Attention:

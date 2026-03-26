@@ -5,8 +5,8 @@ public class ImpressoraScript : InteractableObject {
     // controla se esta impressora específica pode ser usada agora
     // começa a false e só muda quando o TaskManager chamar ActivatePrinterTask() senão qualquer impressora completaria a task a qualquer momento
     private bool canInteract = false;
-    public GameObject document;
-    
+    public GameObject documentPickupPrefab;
+
 
 
     private void Awake() {
@@ -16,11 +16,15 @@ public class ImpressoraScript : InteractableObject {
     public override void Interact() {
         if (canInteract) {
             TaskManager.Instance.CompleteTask("Imprimir documento", true);
-            Instantiate(document, transform.position + Vector3.up, Quaternion.identity, transform);
+
+            // instancia o documento físico em cima da impressora
+            // e inicia-o com os dados do documento do dia para que o ArchiveScript saiba para onde deve ir
+            DocumentPickup pickup = Instantiate(documentPickupPrefab, transform.position + Vector3.up * 0.1f, Quaternion.identity, transform).GetComponent<DocumentPickup>();
+            pickup.Initialize(DocumentManager.Instance.GetDocumentForToday());
             canInteract = false;
 
         } else {
-            Debug.Log("Ainda não consigo interagir com isto.");
+            Debug.Log("[ImpressoraScript] Ainda não consigo interagir com isto.");
         }
     }
 

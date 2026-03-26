@@ -12,6 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
   m_Name: doc3
   m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
-  documentTitle: 
-  bodyText: 
-  blanks: []
+  documentTitle: "Memorando Interno \u2014 Transfer\xEAncia de Base de Dados"
+  bodyText: "Por instru\xE7\xE3o da {0}, procede-se \xE0 transfer\xEAncia de {1}
+    registos de clientes \npara o servidor externo VS-09, operado pela Vantage Solutions.
+    \nA transfer\xEAncia \xE9 classificada como {2} e n\xE3o constar\xE1 nos relat\xF3rios
+    \nde atividade do trimestre."
+  blanks:
+  - slotID: doc3_authority
+    correctAnswer: "Dire\xE7\xE3o Geral"
+    wrongOptions:
+    - "Autoridade de Prote\xE7\xE3o de Dados"
+    - "Comiss\xE3o de \xC9tica"
+    - "decis\xE3o coletiva"
+    weightDenuncia: 0.3
+    weightExtorsao: 0.2
+    weightLealdade: 0.5
+    awarenessWeight: 0.25
+  - slotID: doc3_records
+    correctAnswer: 847.000
+    wrongOptions:
+    - 84.700
+    - "n\xFAmero a determinar"
+    - volume standard
+    weightDenuncia: 0.5
+    weightExtorsao: 0.4
+    weightLealdade: 0.3
+    awarenessWeight: 0.5
+  - slotID: doc3_classification
+    correctAnswer: "opera\xE7\xE3o interna"
+    wrongOptions:
+    - "transfer\xEAncia n\xE3o autorizada"
+    - "protocolo de emerg\xEAncia"
+    - "confidencial \u2014 n\xEDvel 3"
+    weightDenuncia: 0.3
+    weightExtorsao: 0.3
+    weightLealdade: 0.6
+    awarenessWeight: 1
+  correctDepartment: 2

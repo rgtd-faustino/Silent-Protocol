@@ -12,6 +12,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd33f7cd4622bc47a2214783133e3ae, type: 3}
   m_Name: doc5
   m_EditorClassIdentifier: Assembly-CSharp::DocumentTaskData
-  documentTitle: 
-  bodyText: 
-  blanks: []
+  documentTitle: "Comunicado de Crise \u2014 Uso Exclusivo Interno"
+  bodyText: "Em resposta \xE0s recentes {0} sobre a gest\xE3o de dados da Nexum Corp,
+    a empresa \nreafirma o cumprimento de todos os normativos legais aplic\xE1veis.
+    \nOs acontecimentos em causa resultaram de {1} e n\xE3o refletem a pol\xEDtica
+    \nou os valores da organiza\xE7\xE3o. A Nexum Corp {2} cooperar com todas as
+    \nentidades competentes."
+  blanks:
+  - slotID: doc5_trigger
+    correctAnswer: "alega\xE7\xF5es medi\xE1ticas"
+    wrongOptions:
+    - "investiga\xE7\xF5es criminais em curso"
+    - "den\xFAncias internas verificadas"
+    - "fugas de informa\xE7\xE3o confirmadas"
+    weightDenuncia: 0.5
+    weightExtorsao: 0.3
+    weightLealdade: 0.8
+    awarenessWeight: 0.225
+  - slotID: doc5_cause
+    correctAnswer: erro operacional isolado
+    wrongOptions:
+    - "decis\xE3o deliberada da lideran\xE7a"
+    - "press\xE3o externa de terceiros"
+    - "falha sist\xE9mica encoberta durante meses"
+    weightDenuncia: 0.6
+    weightExtorsao: 0.4
+    weightLealdade: 0.7
+    awarenessWeight: 0.475
+  - slotID: doc5_stance
+    correctAnswer: compromete-se a
+    wrongOptions:
+    - recusa terminantemente
+    - "foi for\xE7ada a"
+    - "est\xE1 disposta a considerar"
+    weightDenuncia: 0.4
+    weightExtorsao: 0.3
+    weightLealdade: 0.6
+    awarenessWeight: 1
+  correctDepartment: 1
