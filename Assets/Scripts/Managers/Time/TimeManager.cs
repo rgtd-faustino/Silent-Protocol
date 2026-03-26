@@ -189,15 +189,21 @@ public class TimeManager : MonoBehaviour {
 
             if (realStage == 2) {
                 // fadiga moderada: café resolve no início, piora no fim
-                if (timerMinutes < duration * 0.25f) return 1;
-                if (timerMinutes < duration * 0.75f) return 0;
+                if (timerMinutes < duration * 0.25f) 
+                    return 1;
+                if (timerMinutes < duration * 0.75f) 
+                    return 0;
+
                 return 1;
             }
 
             if (realStage == 3) {
                 // fadiga severa: café atenua no início, piora depois
-                if (timerMinutes < duration * 0.5f) return 1;
-                if (timerMinutes < duration * 0.75f) return 0;
+                if (timerMinutes < duration * 0.5f) 
+                    return 1;
+                if (timerMinutes < duration * 0.75f) 
+                    return 0;
+
                 return 2;
             }
 

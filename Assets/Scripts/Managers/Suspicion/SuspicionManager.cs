@@ -91,7 +91,8 @@ public class SuspicionManager : MonoBehaviour {
     // chamado pelo NPCScript (e futuramente por câmaras, áreas restritas, etc.)
     // level vai de 1 a 3 — representa a gravidade da situação
     public void IncreaseSuspicion(float level, SuspicionSource source = SuspicionSource.NPCSight) {
-        if (level < 1 || level > 3) return; // valores fora do intervalo são ignorados
+        if (level < 1 || level > 3) 
+            return; // valores fora do intervalo são ignorados
 
         currentIncreaseRate = baseIncreaseSpeed * level;
         timeSinceLastIncrease = 0f;

@@ -1,7 +1,5 @@
 using UnityEngine;
 
-// Dono do estado global do jogo: em que dia estamos, que pisos estão acessíveis,
-// e as condições de vitória e derrota. É o único script que sabe "onde o jogo está".
 public class GameManager : MonoBehaviour {
     public static GameManager Instance;
 
