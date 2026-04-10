@@ -37,7 +37,7 @@ public class TaskManager : MonoBehaviour {
             Destroy(gameObject); return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
     }
 
     void OnEnable() {

@@ -22,7 +22,7 @@ public class PlayerStats : MonoBehaviour {
             return; 
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
     }
 
     // exemplos de como outros sistemas devem usar os atributos:

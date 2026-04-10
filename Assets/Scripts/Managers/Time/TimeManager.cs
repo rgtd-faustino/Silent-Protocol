@@ -50,7 +50,7 @@ public class TimeManager : MonoBehaviour {
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
     }
 
     void Start() {

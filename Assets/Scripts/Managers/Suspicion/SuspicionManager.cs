@@ -54,7 +54,7 @@ public class SuspicionManager : MonoBehaviour {
             Destroy(gameObject); return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
     }
 
 

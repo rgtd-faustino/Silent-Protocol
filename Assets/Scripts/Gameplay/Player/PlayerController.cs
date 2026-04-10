@@ -5,8 +5,8 @@ public class PlayerController : MonoBehaviour {
 
     public static PlayerController Instance;
 
-    [SerializeField] private float NORMAL_SPEED = 6f;
-    [SerializeField] private float CROUCH_SPEED = 4f;
+    private float NORMAL_SPEED = 6f;
+    private float CROUCH_SPEED = 4f;
 
     // documento físico que o jogador está a segurar (apanhado na impressora, para arquivar)
     [HideInInspector] public DocumentTaskData heldDocument = null;
@@ -25,8 +25,8 @@ public class PlayerController : MonoBehaviour {
     // agachado produz menos ruído, no futuro, o atributo Agility de PlayerStats reduzirá este valor percentualmente
     // outros scripts (NPCScript) consultam IsPlayerMakingNoise() e GetNoiseRadius() em vez de calcularem por conta própria
     [Header("Ruído")]
-    [SerializeField] private float normalNoiseRadius = 5f;
-    [SerializeField] private float crouchNoiseRadius = 2f;
+    private float normalNoiseRadius = 5f;
+    private float crouchNoiseRadius = 2f;
     private bool isCrouching = false;
 
     private CharacterController cc;
@@ -43,7 +43,6 @@ public class PlayerController : MonoBehaviour {
             Destroy(gameObject); return; 
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     void Start() {

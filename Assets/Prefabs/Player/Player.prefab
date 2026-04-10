@@ -106,6 +106,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraScript
   mouseSensitivity: 100
+  headBone: {fileID: 0}
+  smoothSpeed: 20
+  interactionDistance: 6
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1001 &8933635492732461629
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -251,8 +257,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e614c944fb6ac34ea62fea988ec08d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  speed: 4
+  NORMAL_SPEED: 6
+  CROUCH_SPEED: 4
+  heldDocument: {fileID: 0}
   cameraTransform: {fileID: 3868747286809740840}
+  canMoveRotate: 1
+  inSusPlace: 0
+  normalNoiseRadius: 5
+  crouchNoiseRadius: 2
 --- !u!4 &8966701323321771478 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2bc0d48ac1068d740b24febfdbc582dd, type: 3}

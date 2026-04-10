@@ -29,7 +29,7 @@ public class DocumentManager : MonoBehaviour {
             Destroy(gameObject); return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+
     }
 
 
