@@ -29,7 +29,7 @@ public class NPCScript : MonoBehaviour {
     // usado pelo NPCManager para atribuir rotas
     [SerializeField] private int currentFloor = 0;
     private PatrolRoute currentRoute;
-    [SerializeField] private Transform homeBase;
+    public Transform homeBase;
     [SerializeField] private bool despawnAtEnd = false;
 
     // rota corrida uma única vez ao spawnar, antes de entrar no loop normal
@@ -44,9 +44,9 @@ public class NPCScript : MonoBehaviour {
     [HideInInspector] public NPCSpawner spawner;
 
     // lido pelo NPCManager para saber se a rececionista pode sair
-    public bool isAtHome;
+    [HideInInspector] public bool isAtHome;
     // lido pelo NPCManager para que só um guarda descansa de cada vez
-    public bool isResting;
+    [HideInInspector] public bool isResting;
 
     private NPCState currentState;
 

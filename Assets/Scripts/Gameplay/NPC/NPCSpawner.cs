@@ -39,6 +39,10 @@ public class NPCSpawner : MonoBehaviour {
                 NPCScript npc = obj.GetComponent<NPCScript>();
                 npc.assignedRoute = assignedRoute;
                 npc.spawner = this;
+                // atribuímos a homeBase pelo código porque os colegas spawnados nos elevadores precisam de voltar a casa
+                // e como há sempre mais do que um elevador ele é atribuído quando é spawnado
+                // para as rececnionistas como elas já existem não há problema porque não passam por este código
+                npc.homeBase = spawnPoint;
             }
         }
     }
