@@ -6,22 +6,19 @@ public class TimeManager : MonoBehaviour {
 
     public static TimeManager Instance;
 
-    // elementos de texto no ecrã que mostram as horas.
     // o tempo aparece tanto no HUD normal como dentro do ecrã do computador
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [SerializeField] private TextMeshProUGUI timeDisplayInComputer;
 
     // daySpeed e nightSpeed controlam quantos "minutos de jogo" passam por segundo real, a noite corre mais depressa
-    // debugSpeedMultiplier serve para testar o jogo mais rapidamente sem ter de esperar horas
     [Header("Velocidade do tempo")]
     [SerializeField] private float daySpeed = 1f;
     [SerializeField] private float nightSpeed = 2f;
-    [SerializeField] private float debugSpeedMultiplier = 50f;
+    [SerializeField] private float debugSpeedMultiplier = 50f; // 50, testar o jogo mais depressa
 
     // outros scripts (ex: PlayerController para a lanterna, BedScript para só deixar dormir à noite) consultam esta variável
     [HideInInspector] public bool isNight = false;
 
-    // (0 = 00:00, 480 = 08:00, 1320 = 22:00, 1440 = 24:00 = fim do dia)
     private const float DayStartMinute = 480f;   // 08:00 — dia começa
     private const float WorkStartMinute = 540f;   // 09:00 — começam as tarefas
     private const float LunchMinute = 750f;   // 12:30 — pausa de almoço
@@ -42,6 +39,9 @@ public class TimeManager : MonoBehaviour {
     private bool firedLunch = false;
     private bool firedAfternoon = false;
     private bool firedNight = false;
+
+    private const float MeetingMinute = 1050f; // 17:30
+    private bool firedMeeting = false;
 
 
     void Awake() {
@@ -108,11 +108,15 @@ public class TimeManager : MonoBehaviour {
             firedNight = true;
             GameEvent.NightStarted(); // avisa o PlayerController (lanterna), NPCs, etc.
         }
+        if (!firedMeeting && currentMinutes >= MeetingMinute) {
+            firedMeeting = true;
+            NPCManager.Instance.TriggerMeeting(); // avisa o GameManager para chamar todos os NPCs para a reunião
+        }
     }
 
     // reseta as flags no início de um novo dia (chamado após Sleep).
     private void ResetDayFlags() {
-        firedWorkStart = firedLunch = firedAfternoon = firedNight = false;
+        firedWorkStart = firedLunch = firedAfternoon = firedNight = firedMeeting = false;
     }
 
 
@@ -249,5 +253,13 @@ public class TimeManager : MonoBehaviour {
         string time = GetTimeDisplay();
         timeDisplay.text = time;
         timeDisplayInComputer.text = time;
+    }
+
+
+
+    // para converter o tempo real usado no tempo de espera por waypoint
+    public float ToRealSeconds(float gameMinutes) {
+        float speed = isNight ? nightSpeed : daySpeed;
+        return gameMinutes / (speed * 0.1f * debugSpeedMultiplier);
     }
 }

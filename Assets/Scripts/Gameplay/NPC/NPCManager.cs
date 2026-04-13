@@ -15,6 +15,29 @@ public class NPCManager : MonoBehaviour {
     // o GetRandomRoute filtra por piso, tipo de NPC e outras condições
     [SerializeField] private FloorRoutes[] floorRoutes;
 
+    // os NPCs que vao para a reunião
+    [SerializeField] private NPCScript bossD1, colega1D1, colega2D1;
+    [SerializeField] private NPCScript bossD2, colega1D2, colega2D2;
+    [SerializeField] private NPCScript bossD3, colega1D3, colega2D3;
+
+    // rota para a sala de reuniões de cada NPC
+    [SerializeField] private PatrolRoute meetingRouteBossD1, meetingRouteColega1D1, meetingRouteColega2D1;
+    [SerializeField] private PatrolRoute meetingRouteBossD2, meetingRouteColega1D2, meetingRouteColega2D2;
+    [SerializeField] private PatrolRoute meetingRouteBossD3, meetingRouteColega1D3, meetingRouteColega2D3;
+
+    public void TriggerMeeting() {
+        bossD1.ForceRoute(meetingRouteBossD1);
+        colega1D1.ForceRoute(meetingRouteColega1D1);
+        colega2D1.ForceRoute(meetingRouteColega2D1);
+        bossD2.ForceRoute(meetingRouteBossD2);
+        colega1D2.ForceRoute(meetingRouteColega1D2);
+        colega2D2.ForceRoute(meetingRouteColega2D2);
+        bossD3.ForceRoute(meetingRouteBossD3);
+        colega1D3.ForceRoute(meetingRouteColega1D3);
+        colega2D3.ForceRoute(meetingRouteColega2D3);
+    }
+
+
     [System.Serializable]
     public class FloorRoutes {
         public int floor;
@@ -31,7 +54,7 @@ public class NPCManager : MonoBehaviour {
     // devolve uma rota aleatória compatível com o tipo e piso do NPC
     // excludeRoute: evita repetir a rota anterior
     // excludeRest: ignora rotas de descanso (usado quando já há um guarda a descansar)
-    public PatrolRoute GetRandomRoute(NPCType type, int floor, PatrolRoute excludeRoute = null, bool excludeRest = false) {
+    public PatrolRoute GetRandomRoute(NPCType type, int floor, int departmentID, PatrolRoute excludeRoute = null, bool excludeRest = false) {
         List<PatrolRoute> compatible = new List<PatrolRoute>();
 
         for (int f = 0; f < floorRoutes.Length; f++) {
@@ -52,8 +75,9 @@ public class NPCManager : MonoBehaviour {
 
                 bool notExcluded = route != excludeRoute;
                 bool restOk = !excludeRest || !route.isRestRoute;
+                bool deptOk = route.departmentID == 0 || route.departmentID == departmentID;
 
-                if (typeAllowed && notExcluded && restOk)
+                if (typeAllowed && notExcluded && restOk && deptOk)
                     compatible.Add(route);
             }
         }

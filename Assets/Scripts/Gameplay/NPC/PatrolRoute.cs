@@ -36,6 +36,8 @@ public class PatrolRoute : MonoBehaviour {
     // filhos que tenham PatrolRoute são ignorados (ex: DESCANSO1 dentro de GUARDAS)
     [HideInInspector] public Transform[] waypoints;
 
+    public int departmentID = 0; // por causa dos colegas rececionistas e chefes no piso executivo (0 = sem departamento)
+
     void Awake() {
         List<Transform> pts = new List<Transform>();
         for (int i = 0; i < transform.childCount; i++) {

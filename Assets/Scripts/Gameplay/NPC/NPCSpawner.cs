@@ -31,7 +31,7 @@ public class NPCSpawner : MonoBehaviour {
 
     private IEnumerator SpawnRoutine() {
         while (true) {
-            yield return new WaitForSeconds(spawnInterval);
+            yield return new WaitForSeconds(TimeManager.Instance.ToRealSeconds(spawnInterval));
 
             if (currentActive < maxActive) {
                 currentActive++;

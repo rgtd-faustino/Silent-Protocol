@@ -48,6 +48,8 @@ public class NPCScript : MonoBehaviour {
     // lido pelo NPCManager para que só um guarda descansa de cada vez
     [HideInInspector] public bool isResting;
 
+    [SerializeField] private int departmentID = 0; // por causa dos colegas rececionistas e chefes no piso executivo (0 = sem departamento)
+
     private NPCState currentState;
 
     void Start() {
@@ -85,7 +87,7 @@ public class NPCScript : MonoBehaviour {
             if (currentRoute.waitTimePerWaypoint > 0f) {
                 animator.SetInteger("State", 0); // idle
                 // fazemos o NPC ficar algum tempo parado no waypoint antes de seguir para o prox
-                yield return new WaitForSeconds(currentRoute.waitTimePerWaypoint);
+                yield return new WaitForSeconds(TimeManager.Instance.ToRealSeconds(currentRoute.waitTimePerWaypoint));
                 animator.SetInteger("State", 1);
             }
 
@@ -190,11 +192,11 @@ public class NPCScript : MonoBehaviour {
 
         } else {
             // apanhamos a próxima rota
-            currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, currentRoute);
+            currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, departmentID, currentRoute);
 
             // se um guarda já estiver em descanso então pede se outra rota mas que não seja de descanso porque só pode haver um a descansar ao msm tempo
             if (currentRoute.isRestRoute && npcType == NPCType.Guard && !NPCManager.Instance.CanGuardRest()) {
-                currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, currentRoute, excludeRest: true);
+                currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, departmentID, currentRoute, excludeRest: true);
             }
         }
 
@@ -227,8 +229,10 @@ public class NPCScript : MonoBehaviour {
 
                 // se houver tempo de espera no waypoint metemos idle no npc
                 if (currentRoute.waitTimePerWaypoint > 0f) {
-                    animator.SetInteger("State", 0);
-                    yield return new WaitForSeconds(currentRoute.waitTimePerWaypoint);
+                    animator.SetInteger("State", 0); // idle
+                    // fazemos o NPC ficar algum tempo parado no waypoint antes de seguir para o prox
+                    yield return new WaitForSeconds(TimeManager.Instance.ToRealSeconds(currentRoute.waitTimePerWaypoint));
+                    animator.SetInteger("State", 1);
                 }
             }
             
@@ -350,5 +354,16 @@ public class NPCScript : MonoBehaviour {
             SetState(NPCState.Patrol);
         else if (!patrolling)
             SetState(NPCState.Idle);
+    }
+
+    // para os trabalhadores e chefes irem para o cubiculo de reunioes de vez em quando, todos ao mesmo tempo
+    public void ForceRoute(PatrolRoute route) {
+        // interrompemos a corrotina atual de patrulha caso haja para irem todos para a reunião
+        if (patrolCoroutine != null) 
+            StopCoroutine(patrolCoroutine);
+
+        currentRoute = route;
+        currentState = NPCState.Patrol;
+        patrolCoroutine = StartCoroutine(PatrolRoutine());
     }
 }
