@@ -74,7 +74,12 @@ public class PlayerController : MonoBehaviour {
         // atalho de debug para testar o sistema de café sem precisar de encontrar uma chávena no jogo
         if (Input.GetKeyDown(KeyCode.B))
             TimeManager.Instance.Coffee();
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+            IntelInventory.Instance.ToggleDossier();
     }
+
+
 
     // chamado pelo DocumentPickup quando o jogador interage com o documento
     public void PickupDocument(DocumentTaskData data) {

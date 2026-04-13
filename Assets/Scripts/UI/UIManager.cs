@@ -169,7 +169,12 @@ public class UIManager : MonoBehaviour {
 
     // ---- Tooltip ----
 
-    public void ShowTooltip() => tooltipObject.SetActive(true);
+    public void ShowTooltip(string mensagem = "E para interagir")
+    {
+        tooltipObject.SetActive(true);
+        // se tiveres um TextMeshPro no tooltip:
+        tooltipObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = mensagem;
+    }
     public void HideTooltip() => tooltipObject.SetActive(false);
 
     // ---- Lock ----

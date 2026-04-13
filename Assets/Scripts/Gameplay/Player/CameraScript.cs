@@ -72,11 +72,18 @@ public class CameraScript : MonoBehaviour {
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, interactableLayer)) {
             InteractableObject target = hit.collider.GetComponent<InteractableObject>();
-            if (target != null) {
-                if (target != currentTarget) { // só atualiza se mudou
+            if (target != null)
+            {
+                if (target != currentTarget)
+                {
                     currentTarget = target;
-                    currentLock = target as LockScript; // guardamos a referencia no current lock se for o target for um cadeado para depois podermos dar sync se o jogador quiser sair da view
-                    UIManager.Instance.ShowTooltip();
+                    currentLock = target as LockScript;
+
+                    // mensagem diferente consoante o tipo
+                    if (target is IntelPickup)
+                        UIManager.Instance.ShowTooltip("E para ler  |  G para guardar");
+                    else
+                        UIManager.Instance.ShowTooltip("E para interagir");
                 }
                 return;
             }
