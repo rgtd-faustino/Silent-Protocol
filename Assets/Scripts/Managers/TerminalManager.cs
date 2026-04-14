@@ -113,7 +113,9 @@ public class TerminalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        bool correct = !pastedContent.ToLower().Contains("des");
+
+        bool correct = pastedContent.ToUpper().Contains("AES256");
+        string extractedHash = ExtractField(pastedContent, "hash:");
 
         if (correct)
         {
@@ -122,7 +124,7 @@ public class TerminalManager : MonoBehaviour
             yield return new WaitForSeconds(0.7f);
 
             hexOutput = "48 65 6c 6c 6f 20 4d 75 6e 64 6f";
-            hashValue = "abc123";
+            hashValue = "extractedHash";
             state = TerminalState.Decrypted;
 
             ui.AddBlank();
@@ -166,7 +168,8 @@ public class TerminalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        bool correct = pastedContent.ToLower().Contains("des");
+        bool correct = pastedContent.ToUpper().Contains("DES_PKT");
+        string extractedHash = ExtractField(pastedContent, "hash:");
 
         if (correct)
         {
@@ -175,7 +178,7 @@ public class TerminalManager : MonoBehaviour
             yield return new WaitForSeconds(0.7f);
 
             hexOutput = "53 65 67 72 65 64 6f 20 65 78 70 6f 73 74 6f";
-            hashValue = "xyz99";
+            hashValue = extractedHash;
             state = TerminalState.Decrypted;
 
             ui.AddBlank();
@@ -191,6 +194,14 @@ public class TerminalManager : MonoBehaviour
             ui.AddLine("  [FALHOU] algoritmo incorreto.", TerminalUI.LineType.Err);
             ui.AddBlank();
         }
+    }
+    private string ExtractField(string text, string key)
+    {
+        int idx = text.IndexOf(key);
+        if (idx < 0) return "???";
+        int start = idx + key.Length;
+        int end = text.IndexOf('_', start);
+        return end < 0 ? text.Substring(start) : text.Substring(start, end - start);
     }
 
     private void TryHexDecode()
@@ -373,5 +384,24 @@ public class TerminalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
         action?.Invoke();
+    }
+
+    // No TerminalUI.cs liga o teu botão "Colar" a este método:
+    // pasteButton.onClick.AddListener(() => manager.PasteFromClipboard());
+
+    public void PasteFromClipboard()
+    {
+        if (!GameClipboard.Instance.HasContent())
+        {
+            ui.AddBlank();
+            ui.AddLine("  clipboard vazio. copia um pacote primeiro.",
+                       TerminalUI.LineType.Err);
+            ui.AddBlank();
+            return;
+        }
+
+        string content = GameClipboard.Instance.Paste();
+        ui.AddLine("  [COLADO DO CLIPBOARD]", TerminalUI.LineType.Dim);
+        HandleInput(content);   // reutiliza a lógica que já tens
     }
 }
