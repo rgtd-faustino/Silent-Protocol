@@ -32,8 +32,8 @@ public class NPCScript : MonoBehaviour {
     public Transform homeBase;
     [SerializeField] private bool despawnAtEnd = false;
 
-    // rota corrida uma única vez ao spawnar, antes de entrar no loop normal
-    private PatrolRoute startRoute;
+    // rota corrida uma única vez ao spawnar, antes de entrar no loop normal, usado pelos colegas nos apartamentos para vaguearem antes direm para os quartos
+    [HideInInspector] public PatrolRoute startRoute;
 
     // rota fixa, este NPC ignora o GetRandomRoute e usa sempre esta
     // usado pelo npc colega com caminho sempre igual porta+secretária+elevador
@@ -68,17 +68,27 @@ public class NPCScript : MonoBehaviour {
             SetState(NPCState.Patrol);
     }
 
-    // não baralhamos a runstartroute porque tem ordem intencional
-    // o método é para fazer os NPCs que tenham uma rota pre definida a sigam sempre
-    // por exemplo o colega que spawna na receção e vai direto para o elevador
+    // o método é para fazer os NPCs que tenham uma rota pre definida a sigam sempre antes direm para as rotas normais
     private IEnumerator RunStartRoute() {
         currentRoute = startRoute;
         currentState = NPCState.Patrol;
         animator.SetInteger("State", 1); // andar
         agent.isStopped = false;
 
+        Transform[] shuffled = (Transform[])currentRoute.waypoints.Clone();  // clone para não alterar a lista original just in case
+        for (int i = shuffled.Length - 1; i > 0; i--) {
+            int rand = Random.Range(0, i + 1);
+            Transform temp = shuffled[i];
+            shuffled[i] = shuffled[rand];
+            shuffled[rand] = temp;
+        }
+
         for (int i = 0; i < currentRoute.waypoints.Length; i++) {
-            agent.SetDestination(currentRoute.waypoints[i].position);
+            // chance de skipar este waypoint
+            if (Random.value < 0.75f)
+                continue;
+
+            agent.SetDestination(shuffled[i].position);
 
             // esperamos que o npc chegue ao waypoint (path pending porque é preciso algumas frames para computar e até la a remaining distance é 0)
             while (agent.pathPending || agent.remainingDistance >= 0.5f)
@@ -195,7 +205,7 @@ public class NPCScript : MonoBehaviour {
             currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, departmentID, currentRoute);
 
             // se um guarda já estiver em descanso então pede se outra rota mas que não seja de descanso porque só pode haver um a descansar ao msm tempo
-            if (currentRoute.isRestRoute && npcType == NPCType.Guard && !NPCManager.Instance.CanGuardRest()) {
+            if (npcType == NPCType.Guard && currentRoute.isRestRoute && !NPCManager.Instance.CanGuardRest()) {
                 currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, departmentID, currentRoute, excludeRest: true);
             }
         }

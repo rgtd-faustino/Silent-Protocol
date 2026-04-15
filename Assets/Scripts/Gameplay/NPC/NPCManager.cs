@@ -58,7 +58,7 @@ public class NPCManager : MonoBehaviour {
         List<PatrolRoute> compatible = new List<PatrolRoute>();
 
         for (int f = 0; f < floorRoutes.Length; f++) {
-            if (floorRoutes[f].floor != floor) 
+            if (floorRoutes[f].floor != floor)
                 continue;
 
             PatrolRoute[] routes = floorRoutes[f].routes;
@@ -67,9 +67,9 @@ public class NPCManager : MonoBehaviour {
                 bool typeAllowed = false;
 
                 for (int j = 0; j < route.allowedTypes.Length; j++) {
-                    if (route.allowedTypes[j] == type) { 
-                        typeAllowed = true; 
-                        break; 
+                    if (route.allowedTypes[j] == type) {
+                        typeAllowed = true;
+                        break;
                     }
                 }
 
@@ -82,7 +82,13 @@ public class NPCManager : MonoBehaviour {
             }
         }
 
-        if (compatible.Count == 0) 
+        // se não encontrou nenhuma rota compatível após excluir a rota anterior, tenta novamente sem exclusão
+        // isto acontece quando o pool do NPC só tem uma rota, excluir a única opção devolvia null e dava erro
+        // ao repetir sem exclusão o NPC fica na mesma rota em vez de ficar parado
+        if (compatible.Count == 0 && excludeRoute != null)
+            return GetRandomRoute(type, floor, departmentID, null, excludeRest);
+
+        if (compatible.Count == 0)
             return null;
 
         float totalWeight = 0f;
