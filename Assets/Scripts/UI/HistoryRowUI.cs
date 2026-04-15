@@ -1,28 +1,73 @@
+﻿// HistoryRowUI.cs
+// Script do prefab HistoryRowPrefab
+// Cada conversa no histórico tem este script
+
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HistoryRowUI : MonoBehaviour
 {
-    public TextMeshProUGUI idText, uidText, encText, riskText;
-    public Image riskBg;
-    public Button ackButton;
+    [SerializeField] private TextMeshProUGUI txtConvId;
+    [SerializeField] private TextMeshProUGUI txtInfo;
+    [SerializeField] private TextMeshProUGUI txtRisk;
+    [SerializeField] private Button btnAck;
 
-    private static readonly Color ColLow = new Color(0.27f, 0.6f, 0.27f);
-    private static readonly Color ColMed = new Color(0.8f, 0.53f, 0.1f);
-    private static readonly Color ColHigh = new Color(0.8f, 0.15f, 0.15f);
+    private static readonly Color ColLowRisk = new Color(0.16f, 0.55f, 0.16f);
+    private static readonly Color ColMedRisk = new Color(0.55f, 0.43f, 0.16f);
+    private static readonly Color ColHighRisk = new Color(0.55f, 0.16f, 0.16f);
 
-    public void Setup(PacketData p, System.Action onAck)
+    private string conversationId;
+    private WiresharkManager manager;
+    private WiresharkUI ui;
+
+    public void Setup(string convId, List<PacketData> packets, WiresharkManager mgr, WiresharkUI wiresharkUI)
     {
-        idText.text = p.id;
-        uidText.text = "uid:" + p.userId;
-        encText.text = p.encryption == EncryptionType.AES256 ? "AES-256"
-                     : p.encryption == EncryptionType.DES ? "DES" : "�";
+        conversationId = convId;
+        manager = mgr;
+        ui = wiresharkUI;
 
-        riskText.text = p.riskLevel.ToString().ToUpper();
-        riskBg.color = p.riskLevel == RiskLevel.Low ? ColLow
-                      : p.riskLevel == RiskLevel.High ? ColHigh : ColMed;
+        txtConvId.text = convId;
 
-        ackButton.onClick.AddListener(() => onAck.Invoke());
+        if (packets.Count > 0)
+        {
+            var first = packets[0];
+            txtInfo.text = first.SrcIP + " ↔ " + first.DstIP + "  [" + packets.Count + " msgs]";
+
+            // risco baseado na suspeita atual — podia ser baseado noutros fatores no futuro
+            float risk = SuspicionManager.Instance.GetSuspicionRatio();
+            if (risk < 0.33f)
+            {
+                txtRisk.text = "BAIXO";
+                txtRisk.color = ColLowRisk;
+            }
+            else if (risk < 0.66f)
+            {
+                txtRisk.text = "MÉDIO";
+                txtRisk.color = ColMedRisk;
+            }
+            else
+            {
+                txtRisk.text = "ALTO";
+                txtRisk.color = ColHighRisk;
+            }
+        }
+
+        btnAck.onClick.AddListener(OnAckPressed);
+    }
+
+    private void OnAckPressed()
+    {
+        List<PacketData> packets = manager.RequestHistoryConversation(conversationId);
+
+        if (packets == null || packets.Count == 0)
+        {
+            Debug.Log("[HistoryRowUI] Sem pacotes para esta conversa.");
+            return;
+        }
+
+        // mostra os pacotes da conversa num popup ou painel lateral
+        ui.ShowHistoryConversation(conversationId, packets);
     }
 }

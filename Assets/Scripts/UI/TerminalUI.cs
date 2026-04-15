@@ -1,11 +1,14 @@
-﻿using System.Collections;
+﻿// TerminalUI.cs — ATUALIZADO
+// Adicionado: botão COLAR que lê do GameClipboard
+// Adicionado: botão COLAR no Start e método PasteFromClipboard
+
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TerminalUI : MonoBehaviour
 {
-
     [Header("Output")]
     [SerializeField] private ScrollRect outputScroll;
     [SerializeField] private Transform outputContent;
@@ -15,6 +18,9 @@ public class TerminalUI : MonoBehaviour
     [SerializeField] private TMP_InputField inputField;
     [SerializeField] private TextMeshProUGUI promptText;
     [SerializeField] private Button enterButton;
+
+    [Header("Clipboard")]
+    [SerializeField] private Button pasteButton; // botão COLAR — liga no Inspector
 
     // cores do terminal
     private static readonly Color ColSys = new Color(0.10f, 0.41f, 0.10f);
@@ -31,7 +37,6 @@ public class TerminalUI : MonoBehaviour
 
     public enum LineType { Sys, Info, Input, Hex, Hash, Plain, Err, Dim, Sep, Prompt, Saved }
 
-    // referência ao manager para passar comandos
     private TerminalManager manager;
 
     void Start()
@@ -40,20 +45,19 @@ public class TerminalUI : MonoBehaviour
         enterButton.onClick.AddListener(OnEnterPressed);
         inputField.onSubmit.AddListener(_ => OnEnterPressed());
 
-        ClearOutput();
-        PrintBoot();
-        FocusInput();
+        // liga o botão COLAR
+        if (pasteButton != null)
+            pasteButton.onClick.AddListener(PasteFromClipboard);
     }
 
     void OnEnable()
     {
-        // só faz boot se já foi inicializado
         if (outputContent == null) return;
         ClearOutput();
         PrintBoot();
         FocusInput();
     }
-    // mensagem de arranque
+
     private void PrintBoot()
     {
         AddLine("╔══════════════════════════════════════════╗", LineType.Sys);
@@ -67,8 +71,34 @@ public class TerminalUI : MonoBehaviour
         AddLine(" ", LineType.Dim);
     }
 
+    // ---------------------------------------------------------------
+    // Clipboard — NOVO
+    // ---------------------------------------------------------------
 
-    // --- API pública — o TerminalManager chama estes métodos ---
+    private void PasteFromClipboard()
+    {
+        if (!GameClipboard.HasContent)
+        {
+            AddLine("  clipboard vazio — copia um pacote primeiro.", LineType.Err);
+            AddBlank();
+            return;
+        }
+
+        // cola o payload encriptado no input field
+        inputField.text = GameClipboard.PacketContent;
+
+        // mostra confirmação no terminal
+        AddLine("  [CLIPBOARD] pacote " + GameClipboard.PacketId + " colado.", LineType.Info);
+        AddLine("  tipo: " + GameClipboard.EncryptionType + "  —  usa ."
+                + GameClipboard.EncryptionType.ToLower() + " para decifrar.", LineType.Dim);
+        AddBlank();
+
+        FocusInput();
+    }
+
+    // ---------------------------------------------------------------
+    // API pública — o TerminalManager chama estes métodos
+    // ---------------------------------------------------------------
 
     public void AddLine(string text, LineType type)
     {
@@ -80,11 +110,7 @@ public class TerminalUI : MonoBehaviour
 
     public void AddBlank() => AddLine(" ", LineType.Dim);
 
-    // muda o texto do prompt (ex: ">" durante perguntas S/N, "titulo >" durante rename)
-    public void SetPrompt(string text)
-    {
-        promptText.text = text;
-    }
+    public void SetPrompt(string text) => promptText.text = text;
 
     public void ClearOutput()
     {
@@ -102,9 +128,10 @@ public class TerminalUI : MonoBehaviour
     {
         inputField.interactable = !locked;
         enterButton.interactable = !locked;
+        if (pasteButton != null)
+            pasteButton.interactable = !locked;
     }
 
-    // lê e limpa o input — chamado pelo manager após processar
     public string ConsumeInput()
     {
         string val = inputField.text.Trim();
@@ -114,8 +141,9 @@ public class TerminalUI : MonoBehaviour
 
     public string GetCurrentPrompt() => promptText.text;
 
-
-    // --- interno ---
+    // ---------------------------------------------------------------
+    // Interno
+    // ---------------------------------------------------------------
 
     private void OnEnterPressed()
     {
@@ -128,7 +156,6 @@ public class TerminalUI : MonoBehaviour
 
     private IEnumerator ScrollToBottom()
     {
-        // espera um frame para o layout recalcular antes de fazer scroll
         yield return null;
         yield return null;
         outputScroll.verticalNormalizedPosition = 0f;

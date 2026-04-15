@@ -1,21 +1,17 @@
-﻿using System.Collections;
+﻿// TerminalManager.cs — ATUALIZADO
+// Substituído o hardcode de hex por CryptoHelper real
+// .aes e .des agora desencriptam o payload do GameClipboard corretamente
+
+using System.Collections;
 using UnityEngine;
 
 public class TerminalManager : MonoBehaviour
 {
-
     private TerminalUI ui;
 
     private enum TerminalState
     {
-        Empty,
-        Pasted,
-        Decrypted,
-        Done,
-        AskSave,
-        AskRename,
-        Renaming,
-        Finished
+        Empty, Pasted, Decrypted, Done, AskSave, AskRename, Renaming, Finished
     }
 
     private TerminalState state = TerminalState.Empty;
@@ -24,6 +20,7 @@ public class TerminalManager : MonoBehaviour
     private string hexOutput = "";
     private string hashValue = "";
     private string decodedText = "";
+    private string encryptionType = ""; // "AES" ou "DES" — detetado automaticamente
 
     void Start()
     {
@@ -34,27 +31,19 @@ public class TerminalManager : MonoBehaviour
     {
         string cmd = val.ToLower().Trim();
 
-        if (state == TerminalState.AskSave)
-        {
-            HandleSaveAnswer(val); return;
-        }
-        if (state == TerminalState.AskRename)
-        {
-            HandleRenameAnswer(val); return;
-        }
-        if (state == TerminalState.Renaming)
-        {
-            HandleRenameInput(val); return;
-        }
+        if (state == TerminalState.AskSave) { HandleSaveAnswer(val); return; }
+        if (state == TerminalState.AskRename) { HandleRenameAnswer(val); return; }
+        if (state == TerminalState.Renaming) { HandleRenameInput(val); return; }
 
         ui.AddLine("user@crypter:~$ " + val, TerminalUI.LineType.Input);
 
         if (cmd == ".clear") { ClearTerminal(); return; }
         if (cmd == ".help") { ShowHelp(); return; }
-        if (cmd == ".aes") { TryAES(); return; }
-        if (cmd == ".des") { TryDES(); return; }
+        if (cmd == ".aes") { TryDecrypt("AES"); return; }
+        if (cmd == ".des") { TryDecrypt("DES"); return; }
         if (cmd == ".hexdecode") { TryHexDecode(); return; }
 
+        // qualquer coisa com mais de 6 chars que não seja comando = pacote colado manualmente
         if (!cmd.StartsWith(".") && val.Length > 6)
         {
             PastePacket(val); return;
@@ -68,6 +57,7 @@ public class TerminalManager : MonoBehaviour
     private void PastePacket(string content)
     {
         pastedContent = content;
+        encryptionType = "";
         state = TerminalState.Pasted;
         hexOutput = "";
         hashValue = "";
@@ -84,10 +74,18 @@ public class TerminalManager : MonoBehaviour
         ui.AddLine("  " + preview, TerminalUI.LineType.Hex);
         ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
         ui.AddLine("  " + pastedContent.Length + " bytes. estrutura encriptada detetada.", TerminalUI.LineType.Dim);
+
+        // dica visual se vier do clipboard
+        if (GameClipboard.HasContent && GameClipboard.PacketContent == content)
+        {
+            ui.AddLine("  pacote: " + GameClipboard.PacketId, TerminalUI.LineType.Dim);
+            encryptionType = GameClipboard.EncryptionType;
+        }
+
         ui.AddBlank();
     }
 
-    private void TryAES()
+    private void TryDecrypt(string attemptedType)
     {
         if (state == TerminalState.Empty)
         {
@@ -105,26 +103,39 @@ public class TerminalManager : MonoBehaviour
         }
 
         ui.AddBlank();
-        ui.AddLine("  > a tentar .AES...", TerminalUI.LineType.Dim);
-        StartCoroutine(ProcessAES());
+        ui.AddLine("  > a tentar ." + attemptedType + "...", TerminalUI.LineType.Dim);
+        StartCoroutine(ProcessDecrypt(attemptedType));
     }
 
-    private IEnumerator ProcessAES()
+    private IEnumerator ProcessDecrypt(string attemptedType)
     {
         yield return new WaitForSeconds(0.5f);
 
-
-        bool correct = pastedContent.ToUpper().Contains("AES256");
-        string extractedHash = ExtractField(pastedContent, "hash:");
+        // se soubermos o tipo (veio do clipboard) validamos, senão o jogador tem de adivinhar
+        bool correct;
+        if (!string.IsNullOrEmpty(encryptionType))
+            correct = (attemptedType == encryptionType);
+        else
+            correct = TryDecryptPayload(attemptedType, out _); // tenta mesmo desencriptar
 
         if (correct)
         {
-            ui.AddLine("  [OK] chave AES validada.", TerminalUI.LineType.Info);
+            string decrypted = CryptoHelper.Decrypt(pastedContent, attemptedType);
+
+            if (string.IsNullOrEmpty(decrypted))
+            {
+                ui.AddLine("  [FALHOU] nao foi possivel decifrar.", TerminalUI.LineType.Err);
+                ui.AddBlank();
+                yield break;
+            }
+
+            ui.AddLine("  [OK] chave " + attemptedType + " validada.", TerminalUI.LineType.Info);
             ui.AddLine("  a decifrar...", TerminalUI.LineType.Dim);
             yield return new WaitForSeconds(0.7f);
 
-            hexOutput = "48 65 6c 6c 6f 20 4d 75 6e 64 6f";
-            hashValue = "extractedHash";
+            // o output do terminal é o hex do texto decifrado (como antes)
+            hexOutput = CryptoHelper.BytesToHexString(System.Text.Encoding.UTF8.GetBytes(decrypted));
+            hashValue = CryptoHelper.GenerateHash(decrypted);
             state = TerminalState.Decrypted;
 
             ui.AddBlank();
@@ -142,66 +153,19 @@ public class TerminalManager : MonoBehaviour
         }
     }
 
-    private void TryDES()
+    // tenta desencriptar e verifica se o resultado é texto legível
+    private bool TryDecryptPayload(string encType, out string result)
     {
-        if (state == TerminalState.Empty)
+        try
         {
-            ui.AddBlank();
-            ui.AddLine("  nenhum pacote carregado.", TerminalUI.LineType.Err);
-            ui.AddBlank();
-            return;
+            result = CryptoHelper.Decrypt(pastedContent, encType);
+            return !string.IsNullOrEmpty(result);
         }
-        if (state == TerminalState.Done || state == TerminalState.Finished)
+        catch
         {
-            ui.AddBlank();
-            ui.AddLine("  pacote ja processado.", TerminalUI.LineType.Dim);
-            ui.AddBlank();
-            return;
+            result = "";
+            return false;
         }
-
-        ui.AddBlank();
-        ui.AddLine("  > a tentar .DES...", TerminalUI.LineType.Dim);
-        StartCoroutine(ProcessDES());
-    }
-
-    private IEnumerator ProcessDES()
-    {
-        yield return new WaitForSeconds(0.5f);
-
-        bool correct = pastedContent.ToUpper().Contains("DES_PKT");
-        string extractedHash = ExtractField(pastedContent, "hash:");
-
-        if (correct)
-        {
-            ui.AddLine("  [OK] chave DES validada.", TerminalUI.LineType.Info);
-            ui.AddLine("  a decifrar...", TerminalUI.LineType.Dim);
-            yield return new WaitForSeconds(0.7f);
-
-            hexOutput = "53 65 67 72 65 64 6f 20 65 78 70 6f 73 74 6f";
-            hashValue = extractedHash;
-            state = TerminalState.Decrypted;
-
-            ui.AddBlank();
-            ui.AddLine("  [OUTPUT]", TerminalUI.LineType.Info);
-            ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
-            ui.AddLine("  " + hexOutput, TerminalUI.LineType.Hex);
-            ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
-            ui.AddLine("  HASH=" + hashValue, TerminalUI.LineType.Hash);
-            ui.AddBlank();
-        }
-        else
-        {
-            ui.AddLine("  [FALHOU] algoritmo incorreto.", TerminalUI.LineType.Err);
-            ui.AddBlank();
-        }
-    }
-    private string ExtractField(string text, string key)
-    {
-        int idx = text.IndexOf(key);
-        if (idx < 0) return "???";
-        int start = idx + key.Length;
-        int end = text.IndexOf('_', start);
-        return end < 0 ? text.Substring(start) : text.Substring(start, end - start);
     }
 
     private void TryHexDecode()
@@ -223,15 +187,9 @@ public class TerminalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        string[] bytes = hexOutput.Split(' ');
-        string plain = "";
-        foreach (string b in bytes)
-        {
-            if (string.IsNullOrEmpty(b)) continue;
-            plain += (char)System.Convert.ToInt32(b, 16);
-        }
-
-        decodedText = plain.Trim();
+        // converte o hex de volta para texto plano
+        byte[] bytes = CryptoHelper.HexStringToBytes(hexOutput);
+        decodedText = System.Text.Encoding.UTF8.GetString(bytes).Trim();
         state = TerminalState.Done;
 
         ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
@@ -268,11 +226,10 @@ public class TerminalManager : MonoBehaviour
             ui.AddLine("  HASH=" + hashValue + " | \"" + decodedText + "\"", TerminalUI.LineType.Hash);
             ui.AddBlank();
 
-            // TODO: quando tiveres o IntelManager chamar aqui
-            // IntelManager.Instance.AddIntel(...)
+            // TODO: IntelManager.Instance.AddIntel(hashValue, decodedText);
+            GameClipboard.Clear();
 
             StartCoroutine(DelayThen(0.4f, AskRename));
-
         }
         else if (ans == "n")
         {
@@ -280,7 +237,6 @@ public class TerminalManager : MonoBehaviour
             ui.AddBlank();
             ui.AddLine("  ════════════════════════════════════════", TerminalUI.LineType.Sep);
             FinishTerminal();
-
         }
         else
         {
@@ -310,7 +266,6 @@ public class TerminalManager : MonoBehaviour
             ui.AddBlank();
             state = TerminalState.Renaming;
             ui.SetPrompt("  titulo >");
-
         }
         else if (ans == "n")
         {
@@ -318,7 +273,6 @@ public class TerminalManager : MonoBehaviour
             ui.AddBlank();
             ui.AddLine("  ════════════════════════════════════════", TerminalUI.LineType.Sep);
             FinishTerminal();
-
         }
         else
         {
@@ -345,8 +299,7 @@ public class TerminalManager : MonoBehaviour
         ui.AddBlank();
         ui.AddLine("  ════════════════════════════════════════", TerminalUI.LineType.Sep);
 
-        // TODO: quando tiveres o IntelManager
-        // IntelManager.Instance.RenameLastIntel(val);
+        // TODO: IntelManager.Instance.RenameLastIntel(val);
 
         FinishTerminal();
     }
@@ -375,6 +328,7 @@ public class TerminalManager : MonoBehaviour
         hexOutput = "";
         hashValue = "";
         decodedText = "";
+        encryptionType = "";
         ui.SetPrompt("user@crypter:~$");
         ui.AddLine("  terminal limpo.", TerminalUI.LineType.Sys);
         ui.AddBlank();
@@ -384,24 +338,5 @@ public class TerminalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(seconds);
         action?.Invoke();
-    }
-
-    // No TerminalUI.cs liga o teu botão "Colar" a este método:
-    // pasteButton.onClick.AddListener(() => manager.PasteFromClipboard());
-
-    public void PasteFromClipboard()
-    {
-        if (!GameClipboard.Instance.HasContent())
-        {
-            ui.AddBlank();
-            ui.AddLine("  clipboard vazio. copia um pacote primeiro.",
-                       TerminalUI.LineType.Err);
-            ui.AddBlank();
-            return;
-        }
-
-        string content = GameClipboard.Instance.Paste();
-        ui.AddLine("  [COLADO DO CLIPBOARD]", TerminalUI.LineType.Dim);
-        HandleInput(content);   // reutiliza a lógica que já tens
     }
 }
