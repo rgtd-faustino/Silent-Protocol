@@ -1,8 +1,10 @@
 ﻿using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class NPCScript : MonoBehaviour {
+public class NPCScript : InteractableObject
+{
 
     public enum NPCType { Colleague, Boss, Receptionist, Guard, Visitor }
     public enum NPCState { Idle, Patrol, Attention, Investigate, Chase }
@@ -50,7 +52,13 @@ public class NPCScript : MonoBehaviour {
 
     [SerializeField] private int departmentID = 0; // por causa dos colegas rececionistas e chefes no piso executivo (0 = sem departamento)
 
+    // arrastar o NPCDialogueData correto aqui no Inspector
+    // no futuro pode ser atribuído individualmente por NPC em vez de por tipo
+    [Header("Diálogo")]
+    [SerializeField] private NPCDialogueData dialogueData;
+
     private NPCState currentState;
+
 
     void Start() {
         playerTransform = NPCManager.Instance.player;
@@ -66,6 +74,44 @@ public class NPCScript : MonoBehaviour {
             StartCoroutine(RunStartRoute());
         else
             SetState(NPCState.Patrol);
+    }
+  
+    // chamado pelo CameraScript quando o jogador carrega E apontado para este NPC
+    public override void Interact()
+    {
+        if (dialogueData == null)
+        {
+            Debug.LogWarning($"[NPCScript] {objectName} não tem NPCDialogueData atribuído.");
+            return;
+        }
+
+        // pausa o NPC para ele não andar enquanto fala
+        if (patrolCoroutine != null)
+        {
+            StopCoroutine(patrolCoroutine);
+            patrolCoroutine = null;
+        }
+        agent.isStopped = true;
+        animator.SetInteger("State", 0); // idle
+
+        // vira o NPC para o jogador
+        Vector3 dir = (playerTransform.position - transform.position);
+        dir.y = 0f;
+        if (dir != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(dir);
+
+        DialogueManager.Instance.OpenDialogue(dialogueData);
+
+        // quando o diálogo fechar, retoma o patrol
+        DialogueManager.Instance.OnDialogueClose += ResumeAfterDialogue;
+    }
+
+    // retoma o movimento após fechar o diálogo — dessubscreve logo para não acumular
+    private void ResumeAfterDialogue()
+    {
+        DialogueManager.Instance.OnDialogueClose -= ResumeAfterDialogue;
+        agent.isStopped = false;
+        SetState(isPatrolling ? NPCState.Patrol : NPCState.Idle);
     }
 
     // o método é para fazer os NPCs que tenham uma rota pre definida a sigam sempre antes direm para as rotas normais
@@ -287,37 +333,44 @@ public class NPCScript : MonoBehaviour {
     // verifica 10 vezes por segundo, suficiente para ser responsivo sem ser caro em termos de CPU
     // a condição PlayerController.Instance.inSusPlace verifica se o jogador está numa zona marcada como suspeita
     // fora dessas zonas, mesmo que o NPC veja o jogador, não gera suspeita
-    private IEnumerator FOVCheckRoutine() {
+    private IEnumerator FOVCheckRoutine()
+    {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
 
-        while (true) {
-            if (PlayerController.Instance.inSusPlace && IsPlayerInFOV()) {
+        while (true)
+        {
+            if (PlayerController.Instance.inSusPlace && IsPlayerInFOV())
+            {
                 lastKnownPlayerPosition = playerTransform.position;
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
                 float level = GetSuspicionLevelByDistance(dist);
 
                 if (level > 0)
                     SuspicionManager.Instance.IncreaseSuspicion(level, SuspicionManager.SuspicionSource.NPCSight);
-
-            } else {
-                // se o jogador saiu do FOV ou da zona suspeita, para de alimentar a subida da suspeita —> o decay corre sozinho no SuspicionManager
-                SuspicionManager.Instance.StopIncreasingSuspicion();
             }
+          
 
             yield return wait;
         }
     }
 
     // verifica se o jogador está dentro do cone de visão deste NPC através da distância e ângulo
-    private bool IsPlayerInFOV() {
-        Vector3 dir = (playerTransform.position - transform.position).normalized;
-        float dist = Vector3.Distance(transform.position, playerTransform.position);
+    private bool IsPlayerInFOV()
+    {
+        Vector3 dir = playerTransform.position - transform.position;
+        dir.y = 0f; 
 
-        if (dist > fovRange) 
-            return 
-                false;
+        Vector3 forward = transform.forward;
+        forward.y = 0f; 
 
-        return Vector3.Angle(transform.forward, dir) <= fovAngle / 2f;
+        float dist = dir.magnitude;
+
+        if (dist > fovRange)
+            return false;
+
+        float angle = Vector3.Angle(forward, dir.normalized);
+
+        return angle <= fovAngle / 2f;
     }
 
     // quanto mais perto, maior o nível de suspeita (1, 1.5 ou 2)
@@ -375,5 +428,9 @@ public class NPCScript : MonoBehaviour {
         currentRoute = route;
         currentState = NPCState.Patrol;
         patrolCoroutine = StartCoroutine(PatrolRoutine());
+    }
+    public bool IsPlayerVisible()
+    {
+        return PlayerController.Instance.inSusPlace && IsPlayerInFOV();
     }
 }

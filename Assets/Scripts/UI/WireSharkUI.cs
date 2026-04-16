@@ -143,6 +143,8 @@ public class WiresharkUI : MonoBehaviour
 
     public void RefreshHistory(Dictionary<string, List<PacketData>> hist)
     {
+        Debug.Log($"[RefreshHistory] hist.Count={hist.Count}, historyContent={historyContent}");
+        if (historyContent == null) { Debug.LogError("[RefreshHistory] historyContent é null!"); return; }
         foreach (Transform child in historyContent)
             Destroy(child.gameObject);
 

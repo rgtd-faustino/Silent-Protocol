@@ -54,6 +54,9 @@ public class PacketGenerator : MonoBehaviour
 
     void Start()
     {
+        if (manager == null)
+            Debug.LogError("[PacketGenerator] WiresharkManager não encontrado! Mesmo GameObject?");
+    
         BuildImportantQueue();
         BuildHistory();
         StartCoroutine(GenerateLoop());
@@ -62,11 +65,35 @@ public class PacketGenerator : MonoBehaviour
     // pré-encripta todos os pacotes importantes e mete-os na fila
     private void BuildImportantQueue()
     {
-        if (conversationData == null) return;
+        if (conversationData == null)
+        {
+            Debug.LogError("conversationData NULL");
+            return;
+        }
+
+        if (conversationData.conversations == null)
+        {
+            Debug.LogError("conversationData.conversations NULL");
+            return;
+        }
+
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManager NULL");
+            return;
+        }
 
         foreach (var conv in conversationData.conversations)
         {
-            if (conv.dayToAppear != GameManager.Instance.CurrentDay) continue;
+            if (conv.messages == null)
+            {
+                Debug.LogError("messages NULL na conversa: " + conv.conversationId);
+                continue;
+            }
+
+            // (conv.dayToAppear != GameManager.Instance.CurrentDay) continue;
+            // TEMPORÁRIO — substitui as duas condições de filtro por:
+            if (conv.dayToAppear > 1) continue;
 
             for (int i = 0; i < conv.messages.Count; i++)
             {
@@ -77,9 +104,8 @@ public class PacketGenerator : MonoBehaviour
                 importantQueue.Enqueue(pkt);
             }
         }
-
-        Debug.Log($"[PacketGenerator] {importantQueue.Count} pacotes importantes na fila.");
     }
+
 
     // constrói o histórico com pacotes que já passaram (appearsLive = false)
     private void BuildHistory()
@@ -88,7 +114,10 @@ public class PacketGenerator : MonoBehaviour
 
         foreach (var conv in conversationData.conversations)
         {
-            if (conv.dayToAppear > GameManager.Instance.CurrentDay) continue;
+            //if (conv.dayToAppear > GameManager.Instance.CurrentDay) continue;
+            // TEMPORÁRIO — substitui as duas condições de filtro por:
+            if (conv.dayToAppear > 1) continue;
+
 
             List<PacketData> histList = new List<PacketData>();
 
