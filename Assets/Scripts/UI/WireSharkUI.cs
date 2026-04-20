@@ -74,16 +74,16 @@ public class WiresharkUI : MonoBehaviour
     public void AddPacketRow(PacketData pkt)
     {
         packetCount++;
-
-        // instancia a linha no topo do content
         GameObject obj = Instantiate(packetRowPrefab, packetContent);
         obj.transform.SetAsFirstSibling();
-
         PacketRowUI row = obj.GetComponent<PacketRowUI>();
         row.Setup(pkt, manager);
         activeRows.Insert(0, row);
 
-        // limita o número de linhas visíveis
+        // DEBUG TEMPORÁRIO
+        Debug.Log($"[UI] Clone criado. PacketContent pos: {packetContent.position}, size: {((RectTransform)packetContent).rect.size}");
+        Debug.Log($"[UI] Clone RectTransform: {((RectTransform)obj.transform).rect.size}");
+
         if (activeRows.Count > 50)
         {
             Destroy(activeRows[activeRows.Count - 1].gameObject);

@@ -21,16 +21,16 @@ public class PacketRowUI : MonoBehaviour
     [SerializeField] private Image importantIndicator; // ponto verde lateral para pacotes importantes
 
     // cores
-    private static readonly Color ColNormal = new Color(0.05f, 0.10f, 0.05f, 0f);
+    private static readonly Color ColNormal = new Color(0.05f, 0.10f, 0.05f, 1f);
     private static readonly Color ColSelected = new Color(0.10f, 0.22f, 0.10f, 1f);
     private static readonly Color ColImportant = new Color(0.08f, 0.18f, 0.08f, 1f);
-    private static readonly Color ColIdText = new Color(0.16f, 0.37f, 0.16f);
-    private static readonly Color ColSrcText = new Color(0.16f, 0.43f, 0.43f);
-    private static readonly Color ColDstText = new Color(0.43f, 0.43f, 0.16f);
-    private static readonly Color ColProtoText = new Color(0.43f, 0.16f, 0.43f);
-    private static readonly Color ColInfoText = new Color(0.23f, 0.48f, 0.23f);
-    private static readonly Color ColAES = new Color(0.16f, 0.43f, 0.16f);
-    private static readonly Color ColDES = new Color(0.43f, 0.29f, 0.16f);
+    private static readonly Color ColIdText = new Color(0.29f, 0.75f,1f);
+    private static readonly Color ColSrcText = new Color(0.29f, 0.80f, 1f);
+    private static readonly Color ColDstText = new Color(0.80f, 0.80f, 1f);
+    private static readonly Color ColProtoText = new Color(0.80f, 0.29f, 1f);
+    private static readonly Color ColInfoText = new Color(0.40f, 0.85f, 1f);
+    private static readonly Color ColAES = new Color(0.29f, 0.80f, 01f);
+    private static readonly Color ColDES = new Color(0.80f, 0.60f, 1f);
 
     private PacketData data;
     private WiresharkManager manager;
