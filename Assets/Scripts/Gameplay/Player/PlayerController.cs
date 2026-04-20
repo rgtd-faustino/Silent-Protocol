@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour {
 
     private float NORMAL_SPEED = 6f;
     private float CROUCH_SPEED = 4f;
+    private float RUN_SPEED = 9f;    // velocidade ao correr (Shift)
 
     // documento físico que o jogador está a segurar (apanhado na impressora, para arquivar)
     [HideInInspector] public DocumentTaskData heldDocument = null;
@@ -21,13 +22,17 @@ public class PlayerController : MonoBehaviour {
     // é lido pelo NPCScript para decidir se gera suspeita ao ver o jogador
     [HideInInspector] public bool inSusPlace = false;
 
-    // o raio de ruído é a distância a que os NPCs conseguem ouvir o jogador
-    // agachado produz menos ruído, no futuro, o atributo Agility de PlayerStats reduzirá este valor percentualmente
-    // outros scripts (NPCScript) consultam IsPlayerMakingNoise() e GetNoiseRadius() em vez de calcularem por conta própria
+    // ---- Ruído ----
+    // raio dentro do qual guardas conseguem ouvir o jogador consoante o tipo de movimento.
+    // Crouching -> raio menor; Running -> raio maior.
+    // NPCScript consulta GetNoiseRadius() e IsPlayerMoving() para decidir se ouve o jogador.
     [Header("Ruído")]
-    private float normalNoiseRadius = 5f;
-    private float crouchNoiseRadius = 2f;
+    [SerializeField] private float normalNoiseRadius = 5f;
+    [SerializeField] private float crouchNoiseRadius = 2f;
+    [SerializeField] private float runNoiseRadius = 10f;  // correr faz muito mais barulho
+
     private bool isCrouching = false;
+    private bool isRunning = false;   // verdadeiro enquanto Shift + movimento
 
     private CharacterController cc;
     private CameraScript camScript;
@@ -39,8 +44,8 @@ public class PlayerController : MonoBehaviour {
 
 
     void Awake() {
-        if (Instance != null && Instance != this) { 
-            Destroy(gameObject); return; 
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject); return;
         }
         Instance = this;
     }
@@ -63,9 +68,10 @@ public class PlayerController : MonoBehaviour {
 
     void Update() {
         // bloqueia todo o input de movimento quando uma UI está aberta.
-        if (!canMoveRotate) 
+        if (!canMoveRotate)
             return;
 
+        HandleRunning();
         HandleMovement();
         HandleRotation();
         HandleCrouch();
@@ -79,6 +85,13 @@ public class PlayerController : MonoBehaviour {
             IntelInventory.Instance.ToggleDossier();
     }
 
+
+    // ---- Running ----
+
+    // correr só é possível de pé e em movimento — agachado tem prioridade
+    private void HandleRunning() {
+        isRunning = !isCrouching && Input.GetKey(KeyCode.LeftShift) && IsPlayerMoving();
+    }
 
 
     // chamado pelo DocumentPickup quando o jogador interage com o documento
@@ -95,11 +108,14 @@ public class PlayerController : MonoBehaviour {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         Vector3 move = transform.right * x + transform.forward * z;
-        cc.Move((isCrouching ? CROUCH_SPEED : NORMAL_SPEED) * Time.deltaTime * move);
+
+        float speed = isCrouching ? CROUCH_SPEED : (isRunning ? RUN_SPEED : NORMAL_SPEED);
+        cc.Move(speed * Time.deltaTime * move);
 
         // passa os valores ao Animator para que as animações de andar/correr/idle correspondam à direção real do movimento
-        animator.SetFloat("X", x);
-        animator.SetFloat("Z", z);
+        float animSpeed = isRunning ? 1f : 0.5f;
+        animator.SetFloat("X", x * animSpeed, 0.1f, Time.deltaTime);
+        animator.SetFloat("Z", z * animSpeed, 0.1f, Time.deltaTime);
     }
 
     // só rotação horizontal porque o eixo vertical (olhar para cima/baixo) é tratado no CameraScript
@@ -108,7 +124,7 @@ public class PlayerController : MonoBehaviour {
         transform.Rotate(Vector3.up * mouseX);
     }
 
-    // a altura e centro do CharacterController mudam com o movimento para que a hitbox  corresponda visualmente à postura da personagem
+    // a altura e centro do CharacterController mudam com o movimento para que a hitbox corresponda visualmente à postura da personagem
     // os valores são diferentes consoante a direção do movimento porque a animação de agachamento lateral tem altura diferente da frontal
     private void HandleCrouch() {
         if (Input.GetKeyDown(KeyCode.LeftControl)) {
@@ -140,23 +156,27 @@ public class PlayerController : MonoBehaviour {
 
     // chamado quando a noite começa (via GameEvent), reservado para HUD da bateria, iluminação, etc.
     private void OnNightStarted() {
-    
+
     }
 
-    // consultado pelo NPCScript para saber se deve reagir ao som
-    // a lógica de redução por Agility está comentada aqui para quando PlayerStats existir —> o placeholder mantém a estrutura
+    // raio de ruído atual, consultado pelo NPCScript para saber se o guarda ouve o jogador.
+    // correndo -> 10 m  |  normal -> 5 m  |  agachado -> 2 m
+    // quando PlayerStats existir: radius *= (1f - PlayerStats.Instance.agility * 0.05f);
     public float GetNoiseRadius() {
-        float radius = isCrouching ? crouchNoiseRadius : normalNoiseRadius;
-        // quando PlayerStats existir: radius *= (1f - PlayerStats.Instance.agility * 0.05f);
-        return radius;
+        if (isCrouching) return crouchNoiseRadius;
+        if (isRunning) return runNoiseRadius;
+        return normalNoiseRadius;
     }
 
-    // verdadeiro se o jogador se estiver a mover-se —> usado pelo sistema de ruído para só gerar som quando há movimento
+    // verdadeiro se o jogador se estiver a mover — usado pelo NPCScript para só gerar som quando há movimento
     public bool IsPlayerMoving() {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         return x != 0 || z != 0;
     }
+
+    // expõe o estado de corrida para o HUD ou outros sistemas (ex: stamina futura)
+    public bool IsRunning() => isRunning;
 
 
     // quando o jogador entra/sai de um collider trigger com tag "SusPlace", atualiza a flag inSusPlace

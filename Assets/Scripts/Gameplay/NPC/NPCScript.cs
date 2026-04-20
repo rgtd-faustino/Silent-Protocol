@@ -3,8 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class NPCScript : InteractableObject
-{
+public class NPCScript : InteractableObject {
 
     public enum NPCType { Colleague, Boss, Receptionist, Guard, Visitor }
     public enum NPCState { Idle, Patrol, Attention, Investigate, Chase }
@@ -19,9 +18,23 @@ public class NPCScript : InteractableObject
     private float fovAngle = 90f;
     private float fovRange = 15f;
 
+    // ---- Deteção noturna por luz ----
+    // quando a lanterna do jogador está ligada, os NPCs veem mais longe à noite.
+    // este valor é somado ao fovRange normal para calcular o alcance efetivo.
+    [Header("Deteção noturna")]
+    [SerializeField] private float lightBonusRange = 10f;
+
+    // ---- Ruído ----
+    // raio máximo dentro do qual este guarda ouve o jogador à noite.
+    // só é usado por Guards — os restantes tipos de NPC ignoram o ruído.
+    // o valor é comparado com PlayerController.GetNoiseRadius(), que varia
+    // consoante o jogador está a correr (10 m), a andar (5 m) ou agachado (2 m).
+    [Header("Ruído (só Guards)")]
+    [SerializeField] private float hearingRadius = 8f;
+
     private Transform playerTransform;
 
-    // usado pelo estado Investigate e é atualizada sempre que o jogador está no FOV
+    // usado pelo estado Investigate e é atualizada sempre que o jogador está no FOV ou é ouvido
     private Vector3 lastKnownPlayerPosition;
 
     private NavMeshAgent agent;
@@ -69,25 +82,26 @@ public class NPCScript : InteractableObject
 
         StartCoroutine(FOVCheckRoutine());
 
+        // guardsreagem a ruído — corrotina separada para não bloquear o FOV check
+        if (npcType == NPCType.Guard)
+            StartCoroutine(NoiseCheckRoutine());
+
         // antes de começarmos o patrol vemos se o npc tem uma rota inicial a fazer antes de começar o loop
         if (startRoute != null)
             StartCoroutine(RunStartRoute());
         else
             SetState(NPCState.Patrol);
     }
-  
+
     // chamado pelo CameraScript quando o jogador carrega E apontado para este NPC
-    public override void Interact()
-    {
-        if (dialogueData == null)
-        {
+    public override void Interact() {
+        if (dialogueData == null) {
             Debug.LogWarning($"[NPCScript] {objectName} não tem NPCDialogueData atribuído.");
             return;
         }
 
         // pausa o NPC para ele não andar enquanto fala
-        if (patrolCoroutine != null)
-        {
+        if (patrolCoroutine != null) {
             StopCoroutine(patrolCoroutine);
             patrolCoroutine = null;
         }
@@ -107,8 +121,7 @@ public class NPCScript : InteractableObject
     }
 
     // retoma o movimento após fechar o diálogo — dessubscreve logo para não acumular
-    private void ResumeAfterDialogue()
-    {
+    private void ResumeAfterDialogue() {
         DialogueManager.Instance.OnDialogueClose -= ResumeAfterDialogue;
         agent.isStopped = false;
         SetState(isPatrolling ? NPCState.Patrol : NPCState.Idle);
@@ -175,10 +188,10 @@ public class NPCScript : InteractableObject
 
 
     private void SetState(NPCState newState) {
-        if (currentState == newState) 
+        if (currentState == newState)
             return;
 
-        // cancelaa a PatrolRoutine que esteja a correr antes de mudar de estado (para só haver uma) e assim
+        // cancela a PatrolRoutine que esteja a correr antes de mudar de estado (para só haver uma) e assim
         // faz com que o NPC não continue a andar para waypoints enquanto está em Chase ou Attention
         if (patrolCoroutine != null) {
             StopCoroutine(patrolCoroutine);
@@ -209,24 +222,24 @@ public class NPCScript : InteractableObject
         animator.SetInteger("State", animState);
 
         switch (newState) {
-            case NPCState.Idle: 
-                EnterIdle(); 
+            case NPCState.Idle:
+                EnterIdle();
                 break;
 
-            case NPCState.Patrol: 
-                EnterPatrol(); 
+            case NPCState.Patrol:
+                EnterPatrol();
                 break;
 
-            case NPCState.Attention: 
-                EnterAttention(); 
+            case NPCState.Attention:
+                EnterAttention();
                 break;
 
-            case NPCState.Investigate: 
-                EnterInvestigate(); 
+            case NPCState.Investigate:
+                EnterInvestigate();
                 break;
 
-            case NPCState.Chase: 
-                EnterChase(); 
+            case NPCState.Chase:
+                EnterChase();
                 break;
         }
     }
@@ -291,7 +304,7 @@ public class NPCScript : InteractableObject
                     animator.SetInteger("State", 1);
                 }
             }
-            
+
             // usamos do while porque só porque não seja um loop não quer dizer que o NPC não 
             // se mova entre waypoints, então caso não seja o npc avança todos e se for repete tudo no fim
         } while (currentRoute.loopWaypoints && currentState == NPCState.Patrol);
@@ -330,42 +343,57 @@ public class NPCScript : InteractableObject
     }
 
 
-    // verifica 10 vezes por segundo, suficiente para ser responsivo sem ser caro em termos de CPU
-    // a condição PlayerController.Instance.inSusPlace verifica se o jogador está numa zona marcada como suspeita
-    // fora dessas zonas, mesmo que o NPC veja o jogador, não gera suspeita
-    private IEnumerator FOVCheckRoutine()
-    {
+    // ---- FOV — deteção visual ----
+
+    // verifica 10 vezes por segundo, suficiente para ser responsivo sem ser caro em termos de CPU.
+    // a condição PlayerController.Instance.inSusPlace verifica se o jogador está numa zona marcada como suspeita.
+    // fora dessas zonas, mesmo que o NPC veja o jogador, não gera suspeita.
+    // à noite, se a lanterna estiver ligada, o nível de suspeita gerado por segundo é aumentado em +1.
+    private IEnumerator FOVCheckRoutine() {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
 
-        while (true)
-        {
-            if (PlayerController.Instance.inSusPlace && IsPlayerInFOV())
-            {
+        while (true) {
+            if (PlayerController.Instance.inSusPlace && IsPlayerInFOV()) {
                 lastKnownPlayerPosition = playerTransform.position;
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
                 float level = GetSuspicionLevelByDistance(dist);
 
+                // lanterna ligada à noite -> nível de suspeita mais alto
+                // (o jogador é literalmente um alvo luminoso no escuro)
+                if (TimeManager.Instance.isNight &&
+                    FlashlightController.Instance != null &&
+                    FlashlightController.Instance.IsOn) {
+                    level = Mathf.Min(3f, level + 1f);
+                }
+
                 if (level > 0)
                     SuspicionManager.Instance.IncreaseSuspicion(level, SuspicionManager.SuspicionSource.NPCSight);
             }
-          
 
             yield return wait;
         }
     }
 
-    // verifica se o jogador está dentro do cone de visão deste NPC através da distância e ângulo
-    private bool IsPlayerInFOV()
-    {
+    // verifica se o jogador está dentro do cone de visão deste NPC através da distância e ângulo.
+    // à noite com lanterna ligada o alcance efetivo aumenta (lightBonusRange).
+    private bool IsPlayerInFOV() {
         Vector3 dir = playerTransform.position - transform.position;
-        dir.y = 0f; 
+        dir.y = 0f;
 
         Vector3 forward = transform.forward;
-        forward.y = 0f; 
+        forward.y = 0f;
 
         float dist = dir.magnitude;
 
-        if (dist > fovRange)
+        // à noite com lanterna o NPC vê mais longe — a luz ilumina o próprio jogador
+        float effectiveRange = fovRange;
+        if (TimeManager.Instance.isNight &&
+            FlashlightController.Instance != null &&
+            FlashlightController.Instance.IsOn) {
+            effectiveRange += lightBonusRange;
+        }
+
+        if (dist > effectiveRange)
             return false;
 
         float angle = Vector3.Angle(forward, dir.normalized);
@@ -373,21 +401,61 @@ public class NPCScript : InteractableObject
         return angle <= fovAngle / 2f;
     }
 
-    // quanto mais perto, maior o nível de suspeita (1, 1.5 ou 2)
-    // estes valores são usados pelo SuspicionManager como multiplicador da velocidade de subida da barra
+    // quanto mais perto, maior o nível de suspeita (1, 1.5 ou 2).
+    // estes valores são usados pelo SuspicionManager como multiplicador da velocidade de subida da barra.
     private float GetSuspicionLevelByDistance(float distance) {
         float third = fovRange / 3f;
-        if (distance < third) 
+        if (distance < third)
             return 2f;
 
-        if (distance < third * 2f) 
+        if (distance < third * 2f)
             return 1.5f;
 
         return 1f;
     }
 
-    // chamado pelo NPCManager quando o estado global de suspeita muda, cada NPC decide a sua própria reação com base no seu tipo
-    // guardas são mais proativos —> entram em Investigate na fase de investigação enquanto colegas e outros só reagem a Attention e Expulsion
+
+    // ---- Ruído — apenas Guards, apenas à noite ----
+
+    // corre a cada 0.2 s — não precisa de ser tão frequente como o FOV porque o som não é tão imediato.
+    // o guarda só reage se:
+    //   1. É noite
+    //   2. O jogador se está a mover
+    //   3. A distância até ao jogador é menor do que o raio de ruído atual do jogador (GetNoiseRadius)
+    //   4. O guarda não está já em Investigate ou Chase (evita interrupções desnecessárias)
+    // ao ouvir o jogador, o guarda vai investigar a última posição conhecida (EnterInvestigate).
+    // isto NÃO aumenta diretamente a barra de suspeita — o perigo real vem de o guarda chegar lá e ver o jogador.
+    private IEnumerator NoiseCheckRoutine() {
+        WaitForSeconds wait = new WaitForSeconds(0.2f);
+
+        while (true) {
+            if (TimeManager.Instance.isNight &&
+                PlayerController.Instance.IsPlayerMoving()) {
+                float dist = Vector3.Distance(transform.position, playerTransform.position);
+                float playerNoiseRadius = PlayerController.Instance.GetNoiseRadius();
+
+                // o guarda ouve o jogador se estiver dentro do raio de ruído
+                // e também dentro do seu próprio alcance de audição (hearingRadius)
+                if (dist <= playerNoiseRadius && dist <= hearingRadius &&
+                    currentState != NPCState.Investigate &&
+                    currentState != NPCState.Chase) {
+                    lastKnownPlayerPosition = playerTransform.position;
+                    Debug.Log($"[{objectName}] Ouviu o jogador a {dist:F1}m — a investigar.");
+
+                    // bump instantâneo pequeno na suspeita para dar feedback ao jogador de que foi ouvido
+                    SuspicionManager.Instance.AddInstantSuspicion(0.05f);
+
+                    SetState(NPCState.Investigate);
+                }
+            }
+
+            yield return wait;
+        }
+    }
+
+
+    // chamado pelo NPCManager quando o estado global de suspeita muda, cada NPC decide a sua própria reação com base no seu tipo.
+    // guardas são mais proativos —> entram em Investigate na fase de investigação enquanto colegas e outros só reagem a Attention e Expulsion.
     public void OnGlobalSuspicionChanged(SuspicionManager.SuspicionState state) {
         switch (state) {
             case SuspicionManager.SuspicionState.None:
@@ -422,15 +490,15 @@ public class NPCScript : InteractableObject
     // para os trabalhadores e chefes irem para o cubiculo de reunioes de vez em quando, todos ao mesmo tempo
     public void ForceRoute(PatrolRoute route) {
         // interrompemos a corrotina atual de patrulha caso haja para irem todos para a reunião
-        if (patrolCoroutine != null) 
+        if (patrolCoroutine != null)
             StopCoroutine(patrolCoroutine);
 
         currentRoute = route;
         currentState = NPCState.Patrol;
         patrolCoroutine = StartCoroutine(PatrolRoutine());
     }
-    public bool IsPlayerVisible()
-    {
+
+    public bool IsPlayerVisible() {
         return PlayerController.Instance.inSusPlace && IsPlayerInFOV();
     }
 }

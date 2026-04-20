@@ -8,7 +8,7 @@ public class DocumentManager : MonoBehaviour {
 
     [SerializeField] private DocumentTaskData[] allDocuments;
 
-    // dicionário que mapeia slotID → palavra escolhida pelo jogador
+    // dicionário que mapeia slotID -> palavra escolhida pelo jogador
     private Dictionary<string, string> choices = new Dictionary<string, string>();
 
     // representa o quanto a empresa aprendeu com os documentos arquivados ao longo dos dias
@@ -105,7 +105,7 @@ public class DocumentManager : MonoBehaviour {
     // guarda a palavra escolhida para um dado slotID —> chamado pelo WriteDocumentUI no OnSubmit, uma vez por lacuna
     public void SaveChoice(string slotID, string chosenWord) {
         choices[slotID] = chosenWord;
-        Debug.Log($"[DocumentManager] Slot '{slotID}' → '{chosenWord}'");
+        Debug.Log($"[DocumentManager] Slot '{slotID}' -> '{chosenWord}'");
     }
 
     // leitura de uma escolha específica —> útil para sistemas futuros que precisem de saber o que o jogador escreveu num slot concreto sem ter acesso a todo o dicionário

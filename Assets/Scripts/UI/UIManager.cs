@@ -138,7 +138,7 @@ public class UIManager : MonoBehaviour {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
-            // relógio esvazia anti-horário: fillAmount de 1 → 0
+            // relógio esvazia anti-horário: fillAmount de 1 -> 0
             sleepRadialClock.fillAmount = 1f - t;
 
             if (sleepCountdownText != null) {

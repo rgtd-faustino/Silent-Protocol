@@ -164,7 +164,7 @@ public class TimeManager : MonoBehaviour {
         }
 
         SetCurrentMinutes(wakeUpMinutes);
-        ResetDayFlags(); // novo dia → eventos podem disparar de novo
+        ResetDayFlags(); // novo dia -> eventos podem disparar de novo
         Debug.Log($"Dormiu {sleepHours:F1}h. Sono acumulado: {accumulatedSleep:F2}h");
     }
 
