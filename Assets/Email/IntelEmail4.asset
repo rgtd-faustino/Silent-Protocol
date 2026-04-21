@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: IntelEmail4
   m_EditorClassIdentifier: Assembly-CSharp::IntelItem
   titulo: Acesso ao Data Center
-  categoria: Codigo
+  categoria: Credenciais
   localizacao: Data Center
   conteudo: "C\xF3digo de acesso: 7743-ALPHA\nV\xE1lido de: 2047-03-10 at\xE9 2047-03-14"
