@@ -82,7 +82,12 @@ public class PlayerController : MonoBehaviour {
             TimeManager.Instance.Coffee();
 
         if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (EmailUI.Instance != null && EmailUI.Instance.emailAppPanel.activeSelf)
+                return; 
+
             IntelInventory.Instance.ToggleDossier();
+        }
     }
 
 
@@ -177,7 +182,6 @@ public class PlayerController : MonoBehaviour {
 
     // expõe o estado de corrida para o HUD ou outros sistemas (ex: stamina futura)
     public bool IsRunning() => isRunning;
-
 
     // quando o jogador entra/sai de um collider trigger com tag "SusPlace", atualiza a flag inSusPlace
     // o NPCScript lê esta flag para decidir se cria suspeita
