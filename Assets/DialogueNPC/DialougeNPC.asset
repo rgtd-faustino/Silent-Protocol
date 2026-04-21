@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6af57b98feb2a3e47a1cc1e94bbdf062, type: 3}
+  m_Name: DialougeNPC
+  m_EditorClassIdentifier: Assembly-CSharp::NPCDialogueData
+  npcType: 0
+  suspicionGreeting: O que estavas a fazer aqui?
+  suspicionThreshold: 0.33
+  displayName: NPC
+  greetingText: "Ol\xE1. Em que posso ajudar?"
+  topics:
+  - {fileID: 11400000, guid: 51cb20955d9f33442ac097a8d985ae31, type: 2}
+  - {fileID: 11400000, guid: b80ded18cfd2d904b80cf2084517e47d, type: 2}
+  - {fileID: 11400000, guid: 8beffe048a4315c4ab914fc987222b6b, type: 2}
+  - {fileID: 11400000, guid: 0a32d50ffbecd7b419e8a2b50adcae6f, type: 2}
+  - {fileID: 11400000, guid: 2aa9c072ff7c5f647a8acedd612d7850, type: 2}
+  confrontationTopic: {fileID: 0}

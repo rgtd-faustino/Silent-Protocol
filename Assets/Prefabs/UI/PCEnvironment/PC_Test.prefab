@@ -210,7 +210,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5497606603003826738}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: EmailManager, Assembly-CSharp
         m_MethodName: BackToInbox
         m_Mode: 1
@@ -1250,7 +1250,6 @@ GameObject:
   - component: {fileID: 677357758873116252}
   - component: {fileID: 5141074027563539540}
   - component: {fileID: 5917633319998997063}
-  - component: {fileID: 5497606603003826738}
   m_Layer: 6
   m_Name: EMAILWindows
   m_TagString: Untagged
@@ -1331,25 +1330,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfa0bd794f6a982479c179767af1dae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Window
---- !u!114 &5497606603003826738
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1793661309715857976}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7e2b0ea56d3afe4ba695b45c096a86e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmailManager
-  inboxPanel: {fileID: 7285632684645986261}
-  emailViewPanel: {fileID: 912355157995729786}
-  emailButtonPrefab: {fileID: 1101296881224210334, guid: d5f02b8a85157804983ff864af1cb864, type: 3}
-  inboxContentParent: {fileID: 5392025191247333196}
-  titleText: {fileID: 8125195219538178258}
-  senderText: {fileID: 4841493082007728391}
-  bodyText: {fileID: 5256080444186946028}
 --- !u!1 &1920396963278195943
 GameObject:
   m_ObjectHideFlags: 0

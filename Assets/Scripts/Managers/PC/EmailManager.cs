@@ -1,69 +1,107 @@
-using UnityEngine;
-using TMPro;
 using System.Collections.Generic;
+using UnityEngine;
 
+/// <summary>
+/// Gere toda a lógica de email: inbox, lixo, e receção de emails em runtime.
+/// Usa o padrão Singleton para ser acedido de qualquer script.
+///
+/// Como enviar um email por evento/script:
+///   EmailManager.Instance.ReceberEmail(meuEmailItem);
+///
+/// Como pré-carregar emails no inspector:
+///   Arrasta EmailItem assets para a lista 'emailsIniciais'.
+/// </summary>
 public class EmailManager : MonoBehaviour
 {
-    [Header("Panels")]
-    public GameObject inboxPanel;
-    public GameObject emailViewPanel;
-    public GameObject emailButtonPrefab;   // arrasta o prefab aqui
-    public Transform inboxContentParent;    // um panel vazio dentro do InboxPanel para colocar os botões
-    private List<EmailData> inboxEmails = new List<EmailData>();
+    public static EmailManager Instance;
 
-    [Header("Email Content UI")]
-    public TextMeshProUGUI titleText;
-    public TextMeshProUGUI senderText;
-    public TextMeshProUGUI bodyText;
+    [Header("Emails que já existem na inbox ao iniciar o jogo")]
+    [SerializeField] private List<EmailItem> emailsIniciais = new List<EmailItem>();
 
+    // listas em runtime
+    private List<EmailItem> inbox = new List<EmailItem>();
+    private List<EmailItem> lixo = new List<EmailItem>();
 
-    public void OpenEmail(EmailData email)
+    // evento para que a UI reaja automaticamente quando chega um novo email
+    public event System.Action<EmailItem> OnEmailRecebido;
+    public event System.Action<EmailItem> OnEmailApagado;
+
+    void Awake()
     {
-        inboxPanel.SetActive(false);
-        emailViewPanel.SetActive(true);
-
-        titleText.text = email.title;
-        senderText.text = email.sender;
-        bodyText.text = email.body;
-
-
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
     }
+
     void Start()
     {
-        TestReceiveEmail();
+        // carrega os emails iniciais definidos no inspector
+        foreach (var email in emailsIniciais)
+            inbox.Add(email);
     }
 
+    // ------------------------------------------------------------------ //
+    // API pública                                                           //
+    // ------------------------------------------------------------------ //
 
-
-    public void BackToInbox()
+    /// <summary>
+    /// Recebe um email em runtime (chamado por triggers, scripts de missão, etc.)
+    /// </summary>
+    public void ReceberEmail(EmailItem email)
     {
-        emailViewPanel.SetActive(false);
-        inboxPanel.SetActive(true);
+        if (inbox.Contains(email) || lixo.Contains(email)) return;
+
+        email.lido = false;
+        email.apagado = false;
+        inbox.Add(email);
+
+        OnEmailRecebido?.Invoke(email);
     }
-    public void ReceiveEmail(EmailData email)
+
+    /// <summary>
+    /// Move o email para o Lixo (não apaga definitivamente).
+    /// </summary>
+    public void ApagarEmail(EmailItem email)
     {
-        inboxEmails.Add(email);
+        if (!inbox.Contains(email)) return;
 
-        // criar botão
-        GameObject newButton = Instantiate(emailButtonPrefab, inboxContentParent);
-        newButton.SetActive(true);
+        inbox.Remove(email);
+        email.apagado = true;
+        lixo.Add(email);
 
-        EmailButton btnScript = newButton.GetComponent<EmailButton>();
-        btnScript.Setup(email, this);  // envia os dados do email + manager
-
+        OnEmailApagado?.Invoke(email);
     }
-    public void TestReceiveEmail()
+
+    /// <summary>
+    /// Remove definitivamente do Lixo.
+    /// </summary>
+    public void ApagarDefinitivamente(EmailItem email)
     {
-        EmailData testEmail = new EmailData();
-        testEmail.title = "Olá João!";
-        testEmail.sender = "Sistema";
-        testEmail.body = "Isto é um email de teste.";
-
-        ReceiveEmail(testEmail); // chama o método que instancia o botão
-        Debug.Log("Email recebido: " + testEmail.title);
+        lixo.Remove(email);
     }
 
+    /// <summary>
+    /// Restaura um email do Lixo para a Inbox.
+    /// </summary>
+    public void RestaurarEmail(EmailItem email)
+    {
+        if (!lixo.Contains(email)) return;
 
+        lixo.Remove(email);
+        email.apagado = false;
+        inbox.Add(email);
+    }
 
+    public List<EmailItem> GetInbox() => new List<EmailItem>(inbox);
+    public List<EmailItem> GetLixo() => new List<EmailItem>(lixo);
 
+    /// <summary>
+    /// Número de emails não lidos na inbox (útil para mostrar badge no HUD).
+    /// </summary>
+    public int GetNaoLidos()
+    {
+        int count = 0;
+        foreach (var e in inbox)
+            if (!e.lido) count++;
+        return count;
+    }
 }
