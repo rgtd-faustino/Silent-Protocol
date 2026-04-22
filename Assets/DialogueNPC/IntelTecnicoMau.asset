@@ -15,5 +15,5 @@ MonoBehaviour:
   titulo: Descodificacao
   categoria: Credenciais
   localizacao: Terminal
-  conteudo: Depois de copiar o pacote e dar enter, meter comando .AES ou .DES para
-    a descodificacao
+  conteudo: Depois de copiar o pacote e dar enter, meter temos que meter um comando
+    qualquer(melhor pesquisar mlhr)
