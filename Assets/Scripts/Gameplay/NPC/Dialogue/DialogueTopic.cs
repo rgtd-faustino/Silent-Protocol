@@ -60,7 +60,7 @@ public class TopicOutcome
     [Header("Tem potêncial de Intel?")]
     public bool temIntel = false;
     public IntelItem intelAssociado;
-    [HideInInspector] public bool intelJaRecolhida = false;
+    public bool intelJaRecolhida = false;
     [Header("Check")]
     // qual stat é avaliada neste outcome
     public StatCheck statCheck;

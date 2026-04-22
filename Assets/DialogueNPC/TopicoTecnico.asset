@@ -34,7 +34,7 @@ MonoBehaviour:
     unlockFloorIndex: 0
   - temIntel: 1
     intelAssociado: {fileID: 11400000, guid: 00f35e80a6a4f1a4f87cf027cb1061d3, type: 2}
-    intelJaRecolhida: 1
+    intelJaRecolhida: 0
     statCheck: 1
     threshold: 5
     luckModifier: 2
