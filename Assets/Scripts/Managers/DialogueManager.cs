@@ -90,7 +90,7 @@ public class DialogueManager : MonoBehaviour
                 CloseDialogue();
             else
                 DialogueUI.Instance.ReturnToTopics(); // volta ao menu de tópicos
-        });
+        },outcome);
     }
 
     // filtra os tópicos do NPCDialogueData conforme:

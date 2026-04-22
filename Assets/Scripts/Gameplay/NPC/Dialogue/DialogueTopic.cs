@@ -17,6 +17,8 @@ public class DialogueTopic : ScriptableObject
     public bool requiresHighSuspicion = false;
     [Range(0f, 1f)] public float suspicionThreshold = 0.33f;
 
+ 
+
     // mínimo de carisma para este tópico aparecer na lista (0 = sempre aparece)
     public int requiredCharisma = 0;
 
@@ -54,7 +56,11 @@ public class DialogueTopic : ScriptableObject
 [System.Serializable]
 public class TopicOutcome
 {
-
+    //se true, então um botão irá aparecer para o jogador guardar a intel
+    [Header("Tem potêncial de Intel?")]
+    public bool temIntel = false;
+    public IntelItem intelAssociado;
+    [HideInInspector] public bool intelJaRecolhida = false;
     [Header("Check")]
     // qual stat é avaliada neste outcome
     public StatCheck statCheck;

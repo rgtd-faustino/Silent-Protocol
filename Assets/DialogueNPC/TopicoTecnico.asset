@@ -19,7 +19,10 @@ MonoBehaviour:
   suspicionThreshold: 0
   requiredCharisma: 3
   outcomes:
-  - statCheck: 0
+  - temIntel: 1
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 0
     threshold: 6
     luckModifier: 1
     suspicionAffects: 0
@@ -29,7 +32,10 @@ MonoBehaviour:
     consequence: 4
     consequenceAmount: 0
     unlockFloorIndex: 0
-  - statCheck: 1
+  - temIntel: 1
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 1
     threshold: 5
     luckModifier: 2
     suspicionAffects: 0
@@ -39,7 +45,10 @@ MonoBehaviour:
     consequence: 0
     consequenceAmount: 0
     unlockFloorIndex: 0
-  - statCheck: 2
+  - temIntel: 0
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 2
     threshold: 0
     luckModifier: 0
     suspicionAffects: 0

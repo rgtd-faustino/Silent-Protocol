@@ -22,6 +22,7 @@ public class DialogueUI : MonoBehaviour
 
     [Header("Painel principal")]
     [SerializeField] private GameObject dialoguePanel;
+    private TopicOutcome currentOutcome;
 
     [Header("Textos")]
     [SerializeField] private TextMeshProUGUI npcNameText;
@@ -38,6 +39,11 @@ public class DialogueUI : MonoBehaviour
     [Header("Painel de tópicos")]
     [SerializeField] private GameObject topicsPanel;
 
+    [Header("Botão Intel")]
+    [SerializeField] private Button saveIntelButton;
+
+
+
     // callback após o jogador ver a resposta do NPC (volta aos tópicos ou fecha)
     private Action pendingCallback;
 
@@ -49,6 +55,9 @@ public class DialogueUI : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        saveIntelButton.onClick.AddListener(OnSaveIntelPressed);
+        saveIntelButton.gameObject.SetActive(false);
 
         closeButton.onClick.AddListener(OnClosePressed);
         dialoguePanel.SetActive(false);
@@ -76,10 +85,15 @@ public class DialogueUI : MonoBehaviour
 
     // mostra a resposta do NPC com typewriter e esconde os botões de tópico
     // onDone é chamado quando o jogador clicar para continuar após ler a resposta
-    public void ShowNPCResponse(string response, Action onDone)
+    public void ShowNPCResponse(string response, Action onDone, TopicOutcome outcome = null)
     {
         topicsPanel.SetActive(false);
         pendingCallback = onDone;
+
+        currentOutcome = outcome;
+        bool hasIntel = outcome != null && outcome.temIntel && outcome.intelAssociado != null && !outcome.intelJaRecolhida;
+        saveIntelButton.gameObject.SetActive(hasIntel);
+
         ShowResponse(response, onDone);
     }
 
@@ -88,6 +102,7 @@ public class DialogueUI : MonoBehaviour
     {
         topicsPanel.SetActive(true);
         npcResponseText.text = "";
+        saveIntelButton.gameObject.SetActive(false);
     }
 
     // configura os 3 botões com os tópicos filtrados
@@ -164,7 +179,14 @@ public class DialogueUI : MonoBehaviour
             cb();
         }
     }
+    private void OnSaveIntelPressed()
+    {
+        if (currentOutcome == null) return;
 
+        IntelInventory.Instance.AdicionarIntel(currentOutcome.intelAssociado);
+        currentOutcome.intelJaRecolhida = true;
+        saveIntelButton.gameObject.SetActive(false);
+    }
     private void OnClosePressed()
     {
         DialogueManager.Instance.CloseDialogue();
