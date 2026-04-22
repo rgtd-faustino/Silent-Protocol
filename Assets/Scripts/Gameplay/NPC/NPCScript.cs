@@ -18,18 +18,14 @@ public class NPCScript : InteractableObject {
     private float fovAngle = 90f;
     private float fovRange = 15f;
 
-    // ---- Deteção noturna por luz ----
-    // quando a lanterna do jogador está ligada, os NPCs veem mais longe à noite.
-    // este valor é somado ao fovRange normal para calcular o alcance efetivo.
-    [Header("Deteção noturna")]
+    // quando a lanterna do jogador está ligada os NPCs veem mais longe à noite
+    // este valor é somado ao fovRange normal para calcular o alcance efetivo
     [SerializeField] private float lightBonusRange = 10f;
 
-    // ---- Ruído ----
-    // raio máximo dentro do qual este guarda ouve o jogador à noite.
-    // só é usado por Guards — os restantes tipos de NPC ignoram o ruído.
-    // o valor é comparado com PlayerController.GetNoiseRadius(), que varia
+    // raio máximo dentro do qual o guarda ouve o jogador à noite
+    // ou seja, os restantes tipos de NPC ignoram o ruído.
+    // o valor é comparado com o PlayerController.GetNoiseRadius(), que varia
     // consoante o jogador está a correr (10 m), a andar (5 m) ou agachado (2 m).
-    [Header("Ruído (só Guards)")]
     [SerializeField] private float hearingRadius = 8f;
 
     private Transform playerTransform;
@@ -343,12 +339,9 @@ public class NPCScript : InteractableObject {
     }
 
 
-    // ---- FOV — deteção visual ----
-
-    // verifica 10 vezes por segundo, suficiente para ser responsivo sem ser caro em termos de CPU.
-    // a condição PlayerController.Instance.inSusPlace verifica se o jogador está numa zona marcada como suspeita.
-    // fora dessas zonas, mesmo que o NPC veja o jogador, não gera suspeita.
-    // à noite, se a lanterna estiver ligada, o nível de suspeita gerado por segundo é aumentado em +1.
+    // verifica 10 vezes por segundo, suficiente para ser responsivo sem usar muito o CPU
+    // a condição PlayerController.Instance.inSusPlace verifica se o jogador está numa zona suspeita
+    // à noite, se a lanterna estiver ligada, o nível de suspeita gerado por segundo é aumentado em +1
     private IEnumerator FOVCheckRoutine() {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
 
@@ -358,11 +351,10 @@ public class NPCScript : InteractableObject {
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
                 float level = GetSuspicionLevelByDistance(dist);
 
-                // lanterna ligada à noite -> nível de suspeita mais alto
-                // (o jogador é literalmente um alvo luminoso no escuro)
+                // lanterna ligada à noite -> nível de suspeita mais alto porque o jogador é um alvo luminoso no escuro
                 if (TimeManager.Instance.isNight &&
                     FlashlightController.Instance != null &&
-                    FlashlightController.Instance.IsOn) {
+                    FlashlightController.Instance.isOn) {
                     level = Mathf.Min(3f, level + 1f);
                 }
 
@@ -385,11 +377,9 @@ public class NPCScript : InteractableObject {
 
         float dist = dir.magnitude;
 
-        // à noite com lanterna o NPC vê mais longe — a luz ilumina o próprio jogador
+        // à noite com lanterna o NPC vê mais longe porque a luz ilumina o próprio jogador
         float effectiveRange = fovRange;
-        if (TimeManager.Instance.isNight &&
-            FlashlightController.Instance != null &&
-            FlashlightController.Instance.IsOn) {
+        if (TimeManager.Instance.isNight && FlashlightController.Instance.isOn) {
             effectiveRange += lightBonusRange;
         }
 
@@ -414,35 +404,24 @@ public class NPCScript : InteractableObject {
         return 1f;
     }
 
-
-    // ---- Ruído — apenas Guards, apenas à noite ----
-
-    // corre a cada 0.2 s — não precisa de ser tão frequente como o FOV porque o som não é tão imediato.
-    // o guarda só reage se:
-    //   1. É noite
-    //   2. O jogador se está a mover
-    //   3. A distância até ao jogador é menor do que o raio de ruído atual do jogador (GetNoiseRadius)
-    //   4. O guarda não está já em Investigate ou Chase (evita interrupções desnecessárias)
-    // ao ouvir o jogador, o guarda vai investigar a última posição conhecida (EnterInvestigate).
-    // isto NÃO aumenta diretamente a barra de suspeita — o perigo real vem de o guarda chegar lá e ver o jogador.
+    // a cada 0.2s tal como o FOV, o guarda só reage à noite e se o jogador se estiver a mexer, estiver dentro do seu raio de ruído e não estiver já em investigate ou chase
+    // porque evita interrupções desnecessárias
+    // se ouvir o jogador, o guarda vai investigar a última posição conhecida (EnterInvestigate).
     private IEnumerator NoiseCheckRoutine() {
         WaitForSeconds wait = new WaitForSeconds(0.2f);
 
         while (true) {
-            if (TimeManager.Instance.isNight &&
-                PlayerController.Instance.IsPlayerMoving()) {
+            if (TimeManager.Instance.isNight && PlayerController.Instance.IsPlayerMoving()) {
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
                 float playerNoiseRadius = PlayerController.Instance.GetNoiseRadius();
 
                 // o guarda ouve o jogador se estiver dentro do raio de ruído
                 // e também dentro do seu próprio alcance de audição (hearingRadius)
-                if (dist <= playerNoiseRadius && dist <= hearingRadius &&
-                    currentState != NPCState.Investigate &&
-                    currentState != NPCState.Chase) {
+                if (dist <= playerNoiseRadius && dist <= hearingRadius && currentState != NPCState.Investigate && currentState != NPCState.Chase) {
                     lastKnownPlayerPosition = playerTransform.position;
-                    Debug.Log($"[{objectName}] Ouviu o jogador a {dist:F1}m — a investigar.");
+                    Debug.Log($"[{objectName}] Ouviu o jogador a {dist:F1}m! A investigar.");
 
-                    // bump instantâneo pequeno na suspeita para dar feedback ao jogador de que foi ouvido
+                    // leve subida instantânea pequena na suspeita para dar feedback ao jogador de que foi ouvido
                     SuspicionManager.Instance.AddInstantSuspicion(0.05f);
 
                     SetState(NPCState.Investigate);

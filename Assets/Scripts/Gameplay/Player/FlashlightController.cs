@@ -1,61 +1,57 @@
 ﻿using UnityEngine;
 
-// Gere a lanterna do jogador durante a noite.
-// Ligar a lanterna aumenta o alcance de visão dos NPCs (ver NPCScript.IsPlayerInFOV)
-// e o nível de suspeita gerado por segundo quando o jogador é visto (ver NPCScript.FOVCheckRoutine).
-// A bateria drena em tempo real enquanto está ligada; recarrega completamente ao dormir / início de novo dia.
+// ligar a lanterna aumenta o alcance de visão dos NPCs (ver NPCScript.IsPlayerInFOV)
+// e o nível de suspeita gerado por segundo quando o jogador é visto (ver NPCScript.FOVCheckRoutine)
+// a bateria drena em tempo real enquanto está ligada; recarrega completamente ao início de cada nova noite
 public class FlashlightController : MonoBehaviour {
 
     public static FlashlightController Instance;
 
     [Header("Referências")]
-    // luz Spot filho da câmara — arrastar aqui no Inspector
     [SerializeField] private Light flashlight;
 
     [Header("Bateria")]
-    // duração total em segundos reais (120s ≈ 2 minutos reais com debugSpeedMultiplier normal)
-    [SerializeField] private float maxBattery = 120f;
+    // minutos de jogo, a noite tem 600, mas o jogador não precisa da luz a noite toda
+    [SerializeField] private float maxBattery = 90f; // 9 segundos reais com debug = 50, senão 7.5 minutos reais
     private float currentBattery;
 
-    [Header("Deteção")]
-    // bónus de alcance (metros) que os NPCs ganham quando a lanterna está ligada
-    // consultado pelo NPCScript em IsPlayerInFOV
-    public float lightDetectionBonus = 10f;
-
-    public bool IsOn { get; private set; } = false;
+    public bool isOn = false;
 
     void Awake() {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) { 
+            Destroy(gameObject); 
+            return; 
+        }
         Instance = this;
     }
 
     void Start() {
         currentBattery = maxBattery;
-
-        if (flashlight != null)
-            flashlight.enabled = false;
+        flashlight.enabled = false;
 
         // recarregar bateria no início de cada novo dia (após dormir)
-        GameEvent.OnDayChanged += OnDayChanged;
+        GameEvent.OnNightStarted += OnNightStarted;
     }
 
     void OnDestroy() {
-        GameEvent.OnDayChanged -= OnDayChanged;
+        GameEvent.OnNightStarted -= OnNightStarted;
     }
 
     void Update() {
         // a lanterna só funciona à noite
-        if (!TimeManager.Instance.isNight) {
+        /*if (!TimeManager.Instance.isNight) {
             if (IsOn) TurnOff();
             return;
-        }
+        }*/
 
         if (Input.GetKeyDown(KeyCode.F))
             Toggle();
 
-        // drenar bateria enquanto está ligada
-        if (IsOn) {
-            currentBattery = Mathf.Max(0f, currentBattery - Time.deltaTime);
+        // gastar bateria enquanto está ligada
+        if (isOn) {
+            float deltaMinutes = TimeManager.Instance.lastDeltaMinutes;
+
+            currentBattery = Mathf.Max(0f, currentBattery - deltaMinutes);
             if (currentBattery <= 0f) {
                 TurnOff();
                 Debug.Log("[Lanterna] Bateria esgotada.");
@@ -64,27 +60,34 @@ public class FlashlightController : MonoBehaviour {
     }
 
     private void Toggle() {
-        if (IsOn) TurnOff(); else TurnOn();
+        if (isOn) 
+            TurnOff(); 
+        else 
+            TurnOn();
     }
 
     public void TurnOn() {
-        if (currentBattery <= 0f) return;
-        IsOn = true;
-        if (flashlight != null) flashlight.enabled = true;
+        if (currentBattery <= 0f) 
+            return;
+        isOn = true;
+
+        flashlight.enabled = true;
     }
 
     public void TurnOff() {
-        IsOn = false;
-        if (flashlight != null) flashlight.enabled = false;
+        isOn = false;
+        flashlight.enabled = false;
     }
 
-    // recarrega a bateria a cada novo dia (chamado após o jogador dormir)
-    private void OnDayChanged(int day) {
+    // recarrega a bateria a cada nova noite
+    private void OnNightStarted() {
         TurnOff();
         currentBattery = maxBattery;
         Debug.Log("[Lanterna] Bateria recarregada.");
     }
 
-    // 0 = sem bateria, 1 = cheia — usado pelo HUD para mostrar barra de bateria
-    public float GetBatteryRatio() => currentBattery / maxBattery;
+    // 0 = sem bateria, 1 = cheia —> usado pelo HUD para mostrar barra de bateria
+    public float GetBatteryRatio() {
+        return currentBattery / maxBattery;
+    }
 }
