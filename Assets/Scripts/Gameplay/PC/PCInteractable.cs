@@ -13,16 +13,20 @@ public class PCInteractable : InteractableObject {
             ClosePC();
     }
 
-    private void OpenPC() {
+    private void OpenPC()
+    {
         pcCanvas.SetActive(true);
-
         PlayerController.Instance.canMoveRotate = false;
-        UIManager.Instance.ChangeCursorState(CursorLockMode.None); // cursor livre para clicar na UI
-
-        // atualiza os botões do PC (ex: impressão) com base no estado atual das tasks —> feito aqui porque o canvas acaba de ficar visível
+        UIManager.Instance.ChangeCursorState(CursorLockMode.None);
         UIManager.Instance.RefreshPCInterface();
-
         isOpen = true;
+
+        // reset ao estado do servidor se existir
+        Server1UI srv1 = pcCanvas.GetComponentInChildren<Server1UI>();
+        if (srv1 != null) srv1.OnOpen();
+
+        Server2UI srv2 = pcCanvas.GetComponentInChildren<Server2UI>();
+        if (srv2 != null) srv2.OnOpen();
     }
 
     private void Update() {
