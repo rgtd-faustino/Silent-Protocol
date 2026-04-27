@@ -65,7 +65,7 @@ public class DocumentManager : MonoBehaviour {
 
             // o awareness sobe com base no peso do slot e no número de dias passados
             // documentos mais tarde no jogo têm maior impacto porque a empresa já tem contexto
-            awarenessGain += blank.awarenessWeight * deptMultiplier * (GameManager.Instance.CurrentDay / (float)GameManager.TotalDays);
+            awarenessGain += blank.awarenessWeight * deptMultiplier * (GameManager.Instance.currentDay / (float)GameManager.TotalDays);
         }
 
         // se arquivado no departamento errado, a própria ação de "ficheiro mal colocado" já gera awareness independentemente do conteúdo

@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4420437564159342610, guid: 77b7173fbbb245b46ba195e4859a0962, type: 3}
       propertyPath: m_Name
-      value: Recenionista_V2 Variant
+      value: Recenionista_V2
       objectReference: {fileID: 0}
     - target: {fileID: 5593922429333228140, guid: 77b7173fbbb245b46ba195e4859a0962, type: 3}
       propertyPath: npcType

@@ -66,6 +66,11 @@ public class NPCScript : InteractableObject {
     [Header("Diálogo")]
     [SerializeField] private NPCDialogueData dialogueData;
 
+    [Header("Cards (CanvasGroup em cada card central)")]
+    [SerializeField] private CanvasGroup mainMenuCard;
+    [SerializeField] private CanvasGroup charCreationCard;
+    [SerializeField] private CanvasGroup pauseCard;
+
     private NPCState currentState;
 
 

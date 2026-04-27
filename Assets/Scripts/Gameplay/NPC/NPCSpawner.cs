@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCSpawner : MonoBehaviour {
+    [SerializeField] private List<GameObject> npcPrefabs = new List<GameObject>();
 
     [SerializeField] private GameObject npcPrefab;
     [SerializeField] private GameObject npcPrefab1;
     [SerializeField] private GameObject npcPrefab2;
     [SerializeField] private GameObject npcPrefab3;
-
     // ponto de spawn na cena (porta de entrada, receção, etc.)
     private Transform spawnPoint;
 
@@ -38,19 +38,9 @@ public class NPCSpawner : MonoBehaviour {
         while (true) {
             yield return new WaitForSeconds(TimeManager.Instance.ToRealSeconds(spawnInterval));
 
-            if (currentActive < maxActive) {
-                // filtra os prefabs que estão preenchidos e escolhe um random
-                List<GameObject> available = new List<GameObject>();
-
-                if (npcPrefab != null) 
-                    available.Add(npcPrefab);
-                if (npcPrefab1 != null) 
-                    available.Add(npcPrefab1);
-                if (npcPrefab2 != null) 
-                    available.Add(npcPrefab2);
-
+            if (currentActive < maxActive && npcPrefabs.Count > 0) {
                 currentActive++;
-                GameObject obj = Instantiate(available[Random.Range(0, available.Count)], spawnPoint.position, spawnPoint.rotation);
+                GameObject obj = Instantiate(npcPrefabs[Random.Range(0, npcPrefabs.Count)], spawnPoint.position, spawnPoint.rotation);
                 NPCScript npc = obj.GetComponent<NPCScript>();
                 npc.assignedRoute = assignedRoute;
                 npc.startRoute = startRoute;

@@ -104,7 +104,7 @@ public class DialogueManager : MonoBehaviour
         Debug.Log("PlayerStats: " + PlayerStats.Instance);
         Debug.Log("SuspicionManager: " + SuspicionManager.Instance);
         float suspicion = SuspicionManager.Instance.GetSuspicionRatio();
-        int charisma = PlayerStats.Instance.charisma;
+        int charisma = PlayerStats.Instance.GetCarisma();
 
         List<DialogueTopic> result = new List<DialogueTopic>();
 

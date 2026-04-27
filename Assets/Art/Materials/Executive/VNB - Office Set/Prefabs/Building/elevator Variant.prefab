@@ -8,6 +8,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 981517628099576250, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1838117617032798217, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3384203524565274218, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 6207368271659874205, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
       propertyPath: m_LocalScale.x
       value: 50
@@ -64,6 +76,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: elevator Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 7570810454401412978, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.01463
+      objectReference: {fileID: 0}
+    - target: {fileID: 7570810454401412978, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0147
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 7771809817172703912, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
@@ -74,13 +94,59 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8786688594736801336, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2175865251962937488}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3384203524565274218, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1536933686640173687}
+    - targetCorrespondingSourceObject: {fileID: 3384203524565274218, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6266330497564582124}
   m_SourcePrefab: {fileID: 100100000, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
 --- !u!4 &2179187092273586562 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8786688594736801336, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
   m_PrefabInstance: {fileID: 7480076166000674746}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5276400758080702928 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3384203524565274218, guid: 28abd8ac7a54b984593f0ff0131fc847, type: 3}
+  m_PrefabInstance: {fileID: 7480076166000674746}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1536933686640173687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5276400758080702928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe465a578b1aa20448d887f0ef892b2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ElevatorInteractable
+  objectName: objeto
+  elevatorUI: {fileID: 0}
+--- !u!65 &6266330497564582124
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5276400758080702928}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.0031412973, y: 0.0032913394, z: 0.0031412975}
+  m_Center: {x: -1.3414448e-11, y: 0.00007501902, z: 0}
 --- !u!1001 &8716321228943668361
 PrefabInstance:
   m_ObjectHideFlags: 0

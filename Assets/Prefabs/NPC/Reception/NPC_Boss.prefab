@@ -86,7 +86,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b78778552a282bb48916ead2a6293a00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCScript
+  objectName: objeto
   npcType: 1
+  lightBonusRange: 10
+  hearingRadius: 8
   currentFloor: 0
   homeBase: {fileID: 0}
   despawnAtEnd: 1
@@ -96,6 +99,7 @@ MonoBehaviour:
   isAtHome: 0
   isResting: 0
   departmentID: 0
+  dialogueData: {fileID: 0}
 --- !u!195 &-6942289538492100020
 NavMeshAgent:
   m_ObjectHideFlags: 0

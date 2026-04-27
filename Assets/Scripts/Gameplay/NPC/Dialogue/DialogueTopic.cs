@@ -6,7 +6,8 @@ public class DialogueTopic : ScriptableObject
 {
 
     [Header("Identificação")]
-    public string topicID;          // ID único, ex: "ask_decoding", "invite_coffee"
+    public string topicID;          //
+                                    // único, ex: "ask_decoding", "invite_coffee"
     public string buttonLabel;       // texto que aparece no botão, ex: "Como se faz a descodificação?"
 
     [Header("Tipo de tópico")]
@@ -38,8 +39,8 @@ public class DialogueTopic : ScriptableObject
     // Se nenhum passar devolve o último (deve ser sempre o fallback)
     public TopicOutcome Evaluate()
     {
-        int charisma = PlayerStats.Instance.charisma;
-        int luck = PlayerStats.Instance.luck;
+        int charisma = PlayerStats.Instance.GetCarisma();
+        int luck = PlayerStats.Instance.GetSorte();
         float suspicion = SuspicionManager.Instance.GetSuspicionRatio();
 
         for (int i = 0; i < outcomes.Length; i++)
