@@ -76,7 +76,7 @@ public class WiresharkManager : MonoBehaviour
 
         // aplica suspeita — usa o SuspicionManager existente
         float suspicionLevel = Random.Range(1f, 2f);
-        SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel, SuspicionManager.SuspicionSource.TerminalAccess);
+        SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel, GetInstanceID(), SuspicionManager.SuspicionSource.TerminalAccess);
 
         // para a suspeita após um pequeno delay — o ACK é um evento pontual
         StartCoroutine(StopSuspicionAfterDelay(2f));
@@ -89,6 +89,6 @@ public class WiresharkManager : MonoBehaviour
     private System.Collections.IEnumerator StopSuspicionAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        SuspicionManager.Instance.StopIncreasingSuspicion();
+        SuspicionManager.Instance.StopIncreasingSuspicion(GetInstanceID());
     }
 }

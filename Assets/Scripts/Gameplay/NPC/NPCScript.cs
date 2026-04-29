@@ -38,7 +38,7 @@ public class NPCScript : InteractableObject {
 
     private Coroutine patrolCoroutine;
     // usado pelo NPCManager para atribuir rotas
-    [SerializeField] private int currentFloor = 0;
+    public int currentFloor = 0;
     private PatrolRoute currentRoute;
     public Transform homeBase;
     [SerializeField] private bool despawnAtEnd = false;
@@ -72,6 +72,7 @@ public class NPCScript : InteractableObject {
     [SerializeField] private CanvasGroup pauseCard;
 
     private NPCState currentState;
+    private bool isFloorActive = true;
 
 
     void Start() {
@@ -181,6 +182,7 @@ public class NPCScript : InteractableObject {
 
     void OnDestroy() {
         NPCManager.Instance.UnregisterNPC(this);
+        SuspicionManager.Instance.StopIncreasingSuspicion(GetInstanceID());
 
         // se foi spawnado avisamos para o contador diminuir de npcs ativos
         if (spawner != null)
@@ -351,6 +353,12 @@ public class NPCScript : InteractableObject {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
 
         while (true) {
+            // se o jogador não estiver no piso não precisamos de estar a ver isto nesses NPCs
+            if (!isFloorActive) { 
+                yield return wait; 
+                continue; 
+            }
+
             if (PlayerController.Instance.inSusPlace && IsPlayerInFOV()) {
                 lastKnownPlayerPosition = playerTransform.position;
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
@@ -364,7 +372,7 @@ public class NPCScript : InteractableObject {
                 }
 
                 if (level > 0)
-                    SuspicionManager.Instance.IncreaseSuspicion(level, SuspicionManager.SuspicionSource.NPCSight);
+                    SuspicionManager.Instance.IncreaseSuspicion(level, GetInstanceID(), SuspicionManager.SuspicionSource.NPCSight);
             }
 
             yield return wait;
@@ -416,6 +424,13 @@ public class NPCScript : InteractableObject {
         WaitForSeconds wait = new WaitForSeconds(0.2f);
 
         while (true) {
+            // se o jogador não estiver no piso não é preciso cada NPC estar a procurar por barulho
+            if (!isFloorActive) { 
+                yield return wait; 
+                continue; 
+            }
+
+
             if (TimeManager.Instance.isNight && PlayerController.Instance.IsPlayerMoving()) {
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
                 float playerNoiseRadius = PlayerController.Instance.GetNoiseRadius();
@@ -484,5 +499,26 @@ public class NPCScript : InteractableObject {
 
     public bool IsPlayerVisible() {
         return PlayerController.Instance.inSusPlace && IsPlayerInFOV();
+    }
+
+    public void SetFloorActive(bool active) {
+        isFloorActive = active;
+
+        if (active) {
+            agent.isStopped = false;
+            currentState = NPCState.Idle;
+            SetState(isPatrolling ? NPCState.Patrol : NPCState.Idle);
+
+        } else {
+            SuspicionManager.Instance.StopIncreasingSuspicion(GetInstanceID());
+
+            if (patrolCoroutine != null) {
+                StopCoroutine(patrolCoroutine);
+                patrolCoroutine = null;
+            }
+
+            agent.isStopped = true;
+            animator.SetInteger("State", 0);
+        }
     }
 }

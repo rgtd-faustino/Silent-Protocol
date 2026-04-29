@@ -7,10 +7,11 @@ public class PlayerController : MonoBehaviour {
 
     private float NORMAL_SPEED = 6f;
     private float CROUCH_SPEED = 4f;
-    private float RUN_SPEED = 9f;    // velocidade ao correr (Shift)
+    private float RUN_SPEED = 9f;
 
     // documento físico que o jogador está a segurar (apanhado na impressora, para arquivar)
     [HideInInspector] public DocumentTaskData heldDocument = null;
+    [HideInInspector] public bool hasFlashlight = false;
 
     // para poder rodar o jogador com o rato
     public Transform cameraTransform;
@@ -22,11 +23,9 @@ public class PlayerController : MonoBehaviour {
     // é lido pelo NPCScript para decidir se gera suspeita ao ver o jogador
     [HideInInspector] public bool inSusPlace = false;
 
-    // ---- Ruído ----
     // raio dentro do qual guardas conseguem ouvir o jogador consoante o tipo de movimento.
     // Crouching -> raio menor; Running -> raio maior.
     // NPCScript consulta GetNoiseRadius() e IsPlayerMoving() para decidir se ouve o jogador.
-    [Header("Ruído")]
     [SerializeField] private float normalNoiseRadius = 5f;
     [SerializeField] private float crouchNoiseRadius = 2f;
     [SerializeField] private float runNoiseRadius = 10f;  // correr faz muito mais barulho

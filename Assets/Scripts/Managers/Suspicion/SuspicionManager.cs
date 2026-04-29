@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class SuspicionManager : MonoBehaviour {
 
@@ -16,10 +16,9 @@ public class SuspicionManager : MonoBehaviour {
     [SerializeField] private float decayDelay = 10f;
     [SerializeField] private float decaySpeed = 0.03f;
 
-    // currentIncreaseRate: taxa de subida atual (0 se não há fonte ativa)
     // timeSinceLastIncrease: contador para o decayDelay
     // isDecaying: flag que ativa o decay após o delay expirar
-    private float currentIncreaseRate = 0f;
+    private Dictionary<int, float> activeSources = new Dictionary<int, float>();
     private float timeSinceLastIncrease = 0f;
     private bool isDecaying = false;
 
@@ -58,10 +57,14 @@ public class SuspicionManager : MonoBehaviour {
 
 
     void Update() {
-        if (currentIncreaseRate > 0) {
-            // há uma fonte ativa -> a suspeita sobe.
-            currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + currentIncreaseRate * Time.deltaTime);
+        float totalRate = 0f;
+        // apanhamos a suspeita total de todas as fontes
+        foreach (float value in activeSources.Values) 
+            totalRate += value;
 
+        // há uma fonte ativa -> a suspeita sobe
+        if (totalRate > 0f) {
+            currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + totalRate * Time.deltaTime);
             // reset do contador de decay -> enquanto há fonte ativa o timer não avança
             timeSinceLastIncrease = 0f;
             isDecaying = false;
@@ -89,19 +92,19 @@ public class SuspicionManager : MonoBehaviour {
 
     // chamado pelo NPCScript (e futuramente por câmaras, áreas restritas, etc.)
     // level vai de 1 a 3 — representa a gravidade da situação
-    public void IncreaseSuspicion(float level, SuspicionSource source = SuspicionSource.NPCSight) {
+    public void IncreaseSuspicion(float level, int sourceId, SuspicionSource source = SuspicionSource.NPCSight) {
         if (level < 1 || level > 3)
             return; // valores fora do intervalo são ignorados
 
-        currentIncreaseRate = baseIncreaseSpeed * level;
+        activeSources[sourceId] = baseIncreaseSpeed * level;
         timeSinceLastIncrease = 0f;
         isDecaying = false;
     }
 
     // chamado pelo NPCScript quando o jogador sai do FOV ou da zona suspeita.
     // pára a subida mas não dá reset o valor porque o decay trata disso com o delay.
-    public void StopIncreasingSuspicion() {
-        currentIncreaseRate = 0f;
+    public void StopIncreasingSuspicion(int sourceId) {
+        activeSources.Remove(sourceId);
     }
 
 

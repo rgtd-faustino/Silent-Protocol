@@ -67,7 +67,7 @@ public class FlashlightController : MonoBehaviour {
     }
 
     public void TurnOn() {
-        if (currentBattery <= 0f) 
+        if (currentBattery <= 0f || PlayerController.Instance.hasFlashlight == false) 
             return;
         isOn = true;
 

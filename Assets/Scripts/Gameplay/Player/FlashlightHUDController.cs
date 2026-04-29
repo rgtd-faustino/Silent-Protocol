@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using TMPro;
 
 public class FlashlightHUDController : MonoBehaviour {
+    public static FlashlightHUDController Instance;
+
     [Header("Filament")]
     [SerializeField] private Image filamentLit;
     [SerializeField] private Image filamentDead;
@@ -27,12 +29,26 @@ public class FlashlightHUDController : MonoBehaviour {
     private bool isDead = false;
 
     void Awake() {
+        if(Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
         canvasGroup = GetComponent<CanvasGroup>();
+        canvasGroup.alpha = 0f; // invisivel em vez de desativar o gameobject para o awake correr
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
     }
 
     void Update() {
         float ratio = FlashlightController.Instance.GetBatteryRatio();
         UpdateVisuals(ratio);
+    }
+
+    public void Show() {
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
     }
 
     private void UpdateVisuals(float ratio) {

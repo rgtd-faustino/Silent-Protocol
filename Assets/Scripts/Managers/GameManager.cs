@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour {
 
     public void SetCurrentFloor(int floorNumber) {
         currentFloor = floorNumber;
+        NPCManager.Instance.SetActiveFloor(floorNumber);
         Debug.Log($"[GameManager] Jogador moveu-se para F{floorNumber}.");
     }
 

@@ -47,7 +47,7 @@ public class ArchiveScript : InteractableObject {
 
             // engano de departamento levanta suspeita imediata —> parece incompetência ou sabotagem
             // IncreaseSuspicion recebe o level (1-3) e a source; usamos 1.5 porque é um erro claro mas não catastrófico
-            SuspicionManager.Instance.IncreaseSuspicion(1.5f, SuspicionManager.SuspicionSource.DocumentMisfiled);
+            SuspicionManager.Instance.IncreaseSuspicion(1.5f, GetInstanceID(), SuspicionManager.SuspicionSource.DocumentMisfiled);
         }
     }
 }

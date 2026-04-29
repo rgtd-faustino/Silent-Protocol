@@ -24,17 +24,12 @@ public class NPCManager : MonoBehaviour {
     [SerializeField] private PatrolRoute meetingRouteBossD1, meetingRouteColega1D1, meetingRouteColega2D1;
     [SerializeField] private PatrolRoute meetingRouteBossD2, meetingRouteColega1D2, meetingRouteColega2D2;
     [SerializeField] private PatrolRoute meetingRouteBossD3, meetingRouteColega1D3, meetingRouteColega2D3;
-    // em NPCManager.cs
+
     private void Update()
     {
-        bool anyNPCSees = false;
-        foreach (NPCScript npc in activeNPCs)
-        {
-            if (npc.IsPlayerVisible()) { anyNPCSees = true; break; }
-        }
-        if (!anyNPCSees)
-            SuspicionManager.Instance.StopIncreasingSuspicion();
+
     }
+
     public void TriggerMeeting() {
         bossD1.ForceRoute(meetingRouteBossD1);
         colega1D1.ForceRoute(meetingRouteColega1D1);
@@ -160,5 +155,10 @@ public class NPCManager : MonoBehaviour {
     public void SetAllPatrolling(bool patrolling) {
         foreach (NPCScript npc in activeNPCs)
             npc.SetPatrolling(patrolling);
+    }
+
+    public void SetActiveFloor(int floor) {
+        foreach (NPCScript npc in activeNPCs)
+            npc.SetFloorActive(npc.currentFloor == floor);
     }
 }

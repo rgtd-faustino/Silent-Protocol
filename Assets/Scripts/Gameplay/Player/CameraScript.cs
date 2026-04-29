@@ -44,8 +44,13 @@ public class CameraScript : MonoBehaviour {
         xRotation = Mathf.Clamp(xRotation, -90f, 90f); // limita para não virar demasiado
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        if (currentTarget != null && Input.GetKeyDown(interactKey))
+        if (currentTarget != null && Input.GetKeyDown(interactKey)) {
             currentTarget.Interact();
+            UIManager.Instance.HideTooltip();
+            currentTarget = null;
+            currentLock = null;
+        }
+
     }
 
     // late update porque é a última frame a ser executada e é por isso que a usamos na câmara
