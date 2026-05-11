@@ -19,7 +19,7 @@ public class DoorScript : InteractableObject {
             Debug.Log("Será que consigo destrancá-la?");
             return;
         }
-
+        Debug.Log("Miau");
         isOpen = !isOpen;
         StopAllCoroutines();
         Quaternion destino = isOpen ? Quaternion.Euler(0f, anguloAberta, 0f) : Quaternion.Euler(0f, 0f, 0f);
@@ -28,9 +28,7 @@ public class DoorScript : InteractableObject {
 
     private IEnumerator AnimarPorta(Quaternion destino) {
         while (Quaternion.Angle(transform.localRotation, destino) > 0.1f) {
-            transform.localRotation = Quaternion.Lerp(
-                transform.localRotation, destino, Time.deltaTime * velocidade
-            );
+            transform.localRotation = Quaternion.Lerp(transform.localRotation, destino, Time.deltaTime * velocidade);
             yield return null;
         }
         transform.localRotation = destino;

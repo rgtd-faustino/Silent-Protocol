@@ -8,7 +8,7 @@ public class CameraScript : MonoBehaviour {
 
     [Header("Head Tracking")]
     public Transform headBone;
-    public float smoothSpeed = 20f; // 0 = sem smooth, valores altos = mais responsivo
+    public float smoothSpeed = 20f;
 
     [Header("Interaction")]
     public float interactionDistance = 6f;
@@ -17,18 +17,14 @@ public class CameraScript : MonoBehaviour {
     private InteractableObject currentTarget;
     private LockScript currentLock;
 
-
     void Start() {
         StartCoroutine(DetectInteractableRoutine());
     }
 
     void Update() {
-        // se a lock view está aberta e o jogador clica no E então fecha a view
         if (UIManager.Instance.IsLockViewOpen() && Input.GetKeyDown(interactKey)) {
-            // se for o cadeado então damos sync
-            if (currentLock != null) {
+            if (currentLock != null)
                 currentLock.SyncViewClosed();
-            }
 
             UIManager.Instance.CloseLockView();
             UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
@@ -41,29 +37,27 @@ public class CameraScript : MonoBehaviour {
 
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // limita para não virar demasiado
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         if (currentTarget != null && Input.GetKeyDown(interactKey)) {
             currentTarget.Interact();
             UIManager.Instance.HideTooltip();
+            currentTarget.HideGlitch(); // esconde antes de limpar a referência
             currentTarget = null;
             currentLock = null;
         }
-
     }
 
-    // late update porque é a última frame a ser executada e é por isso que a usamos na câmara
     void LateUpdate() {
         if (headBone == null) return;
-
-        // segue a posição do osso da cabeça após as animações serem calculadas
-        // smooth para não tremer
-        // subimos 0.12 para a câmara ficar ao nível dos olhos
-        transform.position = Vector3.Lerp(transform.position, headBone.position + Vector3.up * 0.12f, smoothSpeed * Time.deltaTime);
+        transform.position = Vector3.Lerp(
+            transform.position,
+            headBone.position + Vector3.up * 0.12f,
+            smoothSpeed * Time.deltaTime
+        );
     }
 
-    // meter corrotina 1/10 segundos
     private IEnumerator DetectInteractableRoutine() {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
         while (true) {
@@ -75,16 +69,18 @@ public class CameraScript : MonoBehaviour {
     void DetectInteractable() {
         Ray ray = new Ray(transform.position, transform.forward);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, interactableLayer)) {
+        if (Physics.SphereCast(ray, 0.25f, out RaycastHit hit, interactionDistance, interactableLayer)) {
             InteractableObject target = hit.collider.GetComponent<InteractableObject>();
-            if (target != null)
-            {
-                if (target != currentTarget)
-                {
+            if (target != null) {
+                if (target != currentTarget) {
+                    // esconde o anterior antes de mudar
+                    if (currentTarget != null)
+                        currentTarget.HideGlitch();
+
                     currentTarget = target;
+                    currentTarget.ShowGlitch();
                     currentLock = target as LockScript;
 
-                    // mensagem diferente consoante o tipo
                     if (target is IntelPickup)
                         UIManager.Instance.ShowTooltip("E para ler  |  G para guardar");
                     else
@@ -94,9 +90,11 @@ public class CameraScript : MonoBehaviour {
             }
         }
 
-        if (currentTarget != null) { // só esconde se havia algo antes
+        // perdeu o target
+        if (currentTarget != null) {
             UIManager.Instance.HideTooltip();
-            currentTarget = null;
+            currentTarget.HideGlitch(); // primeiro
+            currentTarget = null;       // depois
             currentLock = null;
         }
     }
