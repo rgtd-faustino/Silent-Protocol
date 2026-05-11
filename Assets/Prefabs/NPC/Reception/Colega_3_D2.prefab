@@ -67,7 +67,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: bee8193c19e75334b99b41e3c7111d04, type: 3}
       propertyPath: m_Avatar
       value: 
-      objectReference: {fileID: 9000000, guid: 836d30e7fd6f27a458a9404f4375b456, type: 3}
+      objectReference: {fileID: 9000000, guid: bee8193c19e75334b99b41e3c7111d04, type: 3}
     - target: {fileID: 5866666021909216657, guid: bee8193c19e75334b99b41e3c7111d04, type: 3}
       propertyPath: m_Controller
       value: 
@@ -150,6 +150,9 @@ MonoBehaviour:
   isResting: 0
   departmentID: 0
   dialogueData: {fileID: 0}
+  mainMenuCard: {fileID: 0}
+  charCreationCard: {fileID: 0}
+  pauseCard: {fileID: 0}
 --- !u!195 &1435847534553652519
 NavMeshAgent:
   m_ObjectHideFlags: 0
