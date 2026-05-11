@@ -82,17 +82,39 @@ public class InteractableObject : MonoBehaviour {
         if (mf == null) mf = GetComponentInChildren<MeshFilter>();
         if (mf == null || mf.sharedMesh == null) return;
 
-        Mesh mesh = Instantiate(mf.sharedMesh);
-        int[] tris = mesh.triangles;
-        Vector3[] bary = new Vector3[mesh.vertexCount];
+        Mesh src = mf.sharedMesh;
+        int[] srcTris = src.triangles;
+        int triCount = srcTris.Length;          // 1 vértice por índice de triângulo
 
-        for (int i = 0; i < tris.Length; i += 3) {
-            if (bary[tris[i]].sqrMagnitude < 0.01f) bary[tris[i]] = new Vector3(1, 0, 0);
-            if (bary[tris[i + 1]].sqrMagnitude < 0.01f) bary[tris[i + 1]] = new Vector3(0, 1, 0);
-            if (bary[tris[i + 2]].sqrMagnitude < 0.01f) bary[tris[i + 2]] = new Vector3(0, 0, 1);
+        Vector3[] srcVerts = src.vertices;
+        Vector3[] srcNorms = src.normals;
+        Vector2[] srcUVs = src.uv;
+
+        Vector3[] newVerts = new Vector3[triCount];
+        Vector3[] newNorms = new Vector3[triCount];
+        Vector2[] newUVs = new Vector2[triCount];
+        Vector3[] newBary = new Vector3[triCount];
+        int[] newTris = new int[triCount];
+
+        Vector3[] baryTable = { new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1) };
+
+        for (int i = 0; i < triCount; i++) {
+            newVerts[i] = srcVerts[srcTris[i]];
+            newNorms[i] = srcNorms.Length > srcTris[i] ? srcNorms[srcTris[i]] : Vector3.up;
+            newUVs[i] = srcUVs.Length > srcTris[i] ? srcUVs[srcTris[i]] : Vector2.zero;
+            newBary[i] = baryTable[i % 3];
+            newTris[i] = i;
         }
 
-        mesh.SetUVs(1, bary);
+        Mesh mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // suporta meshes grandes
+        mesh.vertices = newVerts;
+        mesh.normals = newNorms;
+        mesh.uv = newUVs;
+        mesh.triangles = newTris;
+        mesh.SetUVs(1, newBary);
+        mesh.RecalculateBounds();
+
         mf.mesh = mesh;
     }
 }
