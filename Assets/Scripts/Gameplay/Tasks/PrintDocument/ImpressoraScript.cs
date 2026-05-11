@@ -1,35 +1,45 @@
 using UnityEngine;
 
-public class ImpressoraScript : InteractableObject {
+public class ImpressoraScript : InteractableObject
+{
 
-    // controla se esta impressora específica pode ser usada agora
-    // começa a false e só muda quando o TaskManager chamar ActivatePrinterTask() senão qualquer impressora completaria a task a qualquer momento
-    private bool canInteract = false;
+    private bool documentReady = false;
     public GameObject documentPickupPrefab;
 
-
-
-    private void Awake() {
+    private void Awake()
+    {
         objectName = "Impressora";
     }
 
-    public override void Interact() {
-        if (canInteract) {
-            TaskManager.Instance.CompleteTask("Imprimir documento", true);
+    // chamado pelo TaskManager quando esta impressora é a selecionada
+    // spawna o documento imediatamente — o jogador só precisa de ir lá apanhá-lo
+    public void ActivatePrinterTask()
+    {
+        DocumentPickup pickup = Instantiate(
+            documentPickupPrefab,
+            transform.position + Vector3.up * 0.1f,
+            Quaternion.identity,
+            transform
+        ).GetComponent<DocumentPickup>();
 
-            // instancia o documento físico em cima da impressora
-            // e inicia-o com os dados do documento do dia para que o ArchiveScript saiba para onde deve ir
-            DocumentPickup pickup = Instantiate(documentPickupPrefab, transform.position + Vector3.up * 0.1f, Quaternion.identity, transform).GetComponent<DocumentPickup>();
-            pickup.Initialize(DocumentManager.Instance.GetDocumentForToday());
-            canInteract = false;
+        pickup.Initialize(DocumentManager.Instance.GetDocumentForToday());
 
-        } else {
-            Debug.Log("[ImpressoraScript] Ainda não consigo interagir com isto.");
-        }
+        // regista que há um documento à espera nesta impressora
+        documentReady = true;
     }
 
-    // chamado pelo TaskManager quando esta impressora é a selecionada para a task
-    public void ActivatePrinterTask() {
-        canInteract = true;
+    // chamado quando o jogador interage com a impressora DEPOIS de o documento já ter sido spawnado
+    // a task completa-se aqui, quando o jogador apanha o documento
+    public override void Interact()
+    {
+        if (!documentReady)
+        {
+            Debug.Log("[ImpressoraScript] Não há nenhum documento para apanhar.");
+            return;
+        }
+
+        TaskManager.Instance.CompleteTask("Imprimir documento", true);
+        documentReady = false;
+        Debug.Log("[ImpressoraScript] Documento apanhado. Task completa.");
     }
 }

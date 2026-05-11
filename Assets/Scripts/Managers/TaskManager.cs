@@ -1,142 +1,176 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-public class TaskManager : MonoBehaviour {
+public class TaskManager : MonoBehaviour
+{
     public static TaskManager Instance;
 
-    [Header("UI das tasks")]
-    [SerializeField] private TaskItemUI morningTaskUI;
-    [SerializeField] private TaskItemUI afternoonTaskUI;
+    // ---------------------------------------------------------------
+    // Prefab de UI — vai ser instanciado uma vez por task
+    // Arrasta aqui o teu prefab de TaskItemUI no Inspector
+    // ---------------------------------------------------------------
+    [Header("Prefab de UI para cada task")]
+    [SerializeField] private TaskItemUI taskItemUIPrefab;
+
+    // Container onde os TaskItemUI instanciados vão aparecer no ecrã
+    // (um VerticalLayoutGroup funciona bem aqui)
+    [SerializeField] private Transform taskListContainer;
 
     [Header("Impressoras disponíveis para a task de imprimir")]
     public GameObject printerList;
 
-    private const float LunchStart = 720f;
-    private const float AfternoonStart = 780f;
-    private const float DinnerStart = 1140f;
-
-    private string[] morningOptions = { "Escrever documento", "Imprimir documento" };
-    //private string[] afternoonOptions = { "Arquivar documento", "Entregar documento" };
+    // ---------------------------------------------------------------
+    // HORÁRIOS POR DIA
+    // daySchedules[0] = Dia 1, daySchedules[1] = Dia 2, etc.
+    // ---------------------------------------------------------------
+    [Header("Horários  (um DaySchedule asset por dia, por ordem)")]
+    [SerializeField] private DaySchedule[] daySchedules;
 
     public enum TaskDifficulty { Small, Medium, Major }
 
-    private class TaskEntry {
+    // ---------------------------------------------------------------
+    // Estrutura interna de cada task ativa
+    // ---------------------------------------------------------------
+    private class TaskEntry
+    {
         public string name;
+        public float spawnMinutes;
         public float deadlineMinutes;
         public TaskDifficulty difficulty;
         public TaskItemUI ui;
+        public bool spawned;
         public bool completed;
         public bool failed;
     }
 
-    private TaskEntry morningTask;
-    private TaskEntry afternoonTask;
-    private bool afternoonSpawned = false;
+    // lista de todas as tasks do dia (sem limite de quantidade)
+    private List<TaskEntry> activeTasks = new List<TaskEntry>();
 
-    void Awake() {
-        if (Instance != null && Instance != this) {
-            Destroy(gameObject); return;
-        }
+    // ---------------------------------------------------------------
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-
     }
 
-    void OnEnable() {
-        // subscrevemo nos aos eventos relevantes
-        GameEvent.OnWorkHoursStarted += ActivateTasks;
-        GameEvent.OnAfternoonStarted += SpawnAfternoonTask;
-    }
+    void OnEnable() => GameEvent.OnWorkHoursStarted += ActivateTasks;
+    void OnDisable() => GameEvent.OnWorkHoursStarted -= ActivateTasks;
 
-    // para não haver fugas de memória ou problemas desse género
-    void OnDisable() {
-        GameEvent.OnWorkHoursStarted -= ActivateTasks;
-        GameEvent.OnAfternoonStarted -= SpawnAfternoonTask;
-    }
-
-    void Update() {
-        float now = TimeManager.Instance.GetCurrentTimeInHours() * 60f;
-        CheckDeadline(morningTask, now);
-        CheckDeadline(afternoonTask, now);
-    }
-
-    private void ActivateTasks() {
+    void Update()
+    {
         float now = TimeManager.Instance.GetCurrentTimeInHours() * 60f;
 
-        morningTaskUI.gameObject.SetActive(false);
-        afternoonTaskUI.gameObject.SetActive(false);
-
-        SpawnTask(morningOptions, now, LunchStart, ref morningTask, morningTaskUI, TaskDifficulty.Medium);
-        afternoonSpawned = false;
+        foreach (TaskEntry task in activeTasks)
+        {
+            TrySpawnTask(task, now);
+            CheckDeadline(task, now);
+        }
     }
 
-    private void SpawnAfternoonTask() {
-        if (afternoonSpawned) 
+    // ---------------------------------------------------------------
+    // Carrega o schedule do dia e prepara todas as TaskEntry
+    // ---------------------------------------------------------------
+    private void ActivateTasks()
+    {
+        // limpa tasks e UI do dia anterior
+        foreach (TaskEntry t in activeTasks)
+        {
+            if (t.ui != null) Destroy(t.ui.gameObject);
+        }
+        activeTasks.Clear();
+
+        DaySchedule schedule = GetScheduleForToday();
+
+        if (schedule == null || schedule.tasks == null || schedule.tasks.Length == 0)
+        {
+            Debug.LogWarning($"[TaskManager] Nenhum DaySchedule com tasks encontrado para o dia {GameManager.Instance.currentDay}.");
             return;
-
-        // a task da tarde depende diretamente da manhã:
-        // Escrever -> Entregar
-        // Imprimir -> Arquivar
-        string afternoonName;
-        switch (morningTask.name) {
-            case "Escrever documento":
-                afternoonName = "Entregar documento";
-                break;
-
-            case "Imprimir documento":
-                afternoonName = "Arquivar documento";
-                break;
-
-            default:
-                afternoonName = "Não vai acontecer";
-                break;
         }
 
+        foreach (DaySchedule.ScheduledTask scheduled in schedule.tasks)
+        {
+            if (string.IsNullOrEmpty(scheduled.taskName)) continue;
 
-        SpawnTask(new[] { afternoonName }, AfternoonStart, DinnerStart, ref afternoonTask, afternoonTaskUI, TaskDifficulty.Medium);
-        afternoonSpawned = true;
+            // valida horas
+            if (scheduled.deadlineHour <= scheduled.spawnHour)
+            {
+                Debug.LogWarning($"[TaskManager] Task '{scheduled.taskName}': deadlineHour ({scheduled.deadlineHour}) tem de ser maior que spawnHour ({scheduled.spawnHour}). Task ignorada.");
+                continue;
+            }
+
+            // instancia um TaskItemUI para esta task (começa escondido)
+            TaskItemUI ui = Instantiate(taskItemUIPrefab, taskListContainer);
+            ui.gameObject.SetActive(false);
+
+            TaskEntry entry = new TaskEntry
+            {
+                name = scheduled.taskName,
+                spawnMinutes = scheduled.spawnHour * 60f,
+                deadlineMinutes = scheduled.deadlineHour * 60f,
+                difficulty = scheduled.difficulty,
+                ui = ui,
+                spawned = false,
+                completed = false,
+                failed = false
+            };
+
+            activeTasks.Add(entry);
+        }
+
+        Debug.Log($"[TaskManager] Dia {GameManager.Instance.currentDay}: {activeTasks.Count} task(s) preparada(s).");
     }
 
-    private void SpawnTask(string[] options, float periodStart, float periodEnd, ref TaskEntry entry, TaskItemUI ui, TaskDifficulty difficulty) {
-        string name = options[Random.Range(0, options.Length)];
+    // ---------------------------------------------------------------
+    // Mostra a task na UI quando chega a hora de spawn
+    // ---------------------------------------------------------------
+    private void TrySpawnTask(TaskEntry task, float now)
+    {
+        if (task.spawned || task.failed) return;
+        if (now < task.spawnMinutes) return;
 
-        float window = periodEnd - periodStart;
-        float deadlineMin = periodStart + window * 0.70f;
-        float deadlineMax = periodEnd - 15f;
-        float deadline = Random.Range(deadlineMin, deadlineMax);
+        task.spawned = true;
+        task.ui.gameObject.SetActive(true);
 
-        entry = new TaskEntry {
-            name = name,
-            deadlineMinutes = deadline,
-            difficulty = difficulty,
-            ui = ui
-        };
+        int dh = (int)(task.deadlineMinutes / 60f);
+        int dm = (int)(task.deadlineMinutes % 60f);
+        task.ui.SetTask(task.name, $"{dh:00}:{dm:00}");
 
-        int h = (int)(deadline / 60f);
-        int m = (int)(deadline % 60f);
-        ui.SetTask(name, $"{h:00}:{m:00}");
-
-        Debug.Log($"[TaskManager] Task criada: '{name}' | Deadline: {h:00}:{m:00}");
+        Debug.Log($"[TaskManager] Task '{task.name}' apareceu. Deadline: {dh:00}:{dm:00}");
     }
 
-    private void CheckDeadline(TaskEntry task, float now) {
-        if (task == null || task.completed || task.failed) return;
+    // ---------------------------------------------------------------
+    // Verifica se a deadline passou sem a task ter sido completada
+    // ---------------------------------------------------------------
+    private void CheckDeadline(TaskEntry task, float now)
+    {
+        if (!task.spawned || task.completed || task.failed) return;
         if (now < task.deadlineMinutes) return;
 
         task.failed = true;
         task.ui.SetFailed();
         HandleTaskComplete(task.difficulty, false);
-        Debug.Log($"[TaskManager] Task '{task.name}' falhada.");
+        Debug.Log($"[TaskManager] Task '{task.name}' falhada por tempo.");
     }
 
-    public void CompleteTask(string taskName, bool doneCorrectly) {
-        TaskEntry task = null;
-
-        if (morningTask != null && morningTask.name == taskName && !morningTask.completed && !morningTask.failed)
-            task = morningTask;
-        else if (afternoonTask != null && afternoonTask.name == taskName && !afternoonTask.completed && !afternoonTask.failed)
-            task = afternoonTask;
+    // ---------------------------------------------------------------
+    // Chamado pelos objetos do mundo (ArchiveScript, ImpressoraScript, etc.)
+    // ---------------------------------------------------------------
+    public void CompleteTask(string taskName, bool doneCorrectly)
+    {
+        // procura a primeira task ativa com esse nome (spawned, não completada, não falhada)
+        TaskEntry task = activeTasks.Find(t =>
+            t.name == taskName &&
+            t.spawned &&
+            !t.completed &&
+            !t.failed
+        );
 
         if (task == null)
+        {
+            Debug.LogWarning($"[TaskManager] Tentativa de completar '{taskName}' mas não há task ativa com esse nome.");
             return;
+        }
 
         task.completed = true;
         task.ui.SetCompleted();
@@ -144,64 +178,55 @@ public class TaskManager : MonoBehaviour {
         Debug.Log($"[TaskManager] Task '{taskName}' completada. Correto: {doneCorrectly}");
     }
 
-    private void HandleTaskComplete(TaskDifficulty difficulty, bool doneCorrectly) {
-        float multiplier;
-
-        switch (difficulty) {
-            case TaskDifficulty.Small:
-                multiplier = 0.1f;
-                break;
-
-            case TaskDifficulty.Medium:
-                multiplier = 0.25f;
-                break;
-
-            case TaskDifficulty.Major:
-                multiplier = 0.5f;
-                break;
-
-            default:
-                multiplier = 0f;
-                break;
-        }
-
+    private void HandleTaskComplete(TaskDifficulty difficulty, bool doneCorrectly)
+    {
+        float multiplier = difficulty switch
+        {
+            TaskDifficulty.Small => 0.1f,
+            TaskDifficulty.Medium => 0.25f,
+            TaskDifficulty.Major => 0.5f,
+            _ => 0f
+        };
         SuspicionManager.Instance.ChangeSuspicionOnTaskComplete(multiplier, doneCorrectly);
     }
 
-    public void ActivatePrinterTask() {
+    // ---------------------------------------------------------------
+    // Ativa uma impressora aleatória para a task de imprimir
+    // ---------------------------------------------------------------
+    public ImpressoraScript ActivatePrinterTask()
+    {
         int index = Random.Range(0, printerList.transform.childCount);
-        printerList.transform.GetChild(index).gameObject.GetComponent<ImpressoraScript>().ActivatePrinterTask();
+        ImpressoraScript printer = printerList.transform.GetChild(index).GetComponent<ImpressoraScript>();
+        printer.ActivatePrinterTask();
+        return printer;
     }
 
-    public bool HasActiveMorningTask(string name) {
-        if (morningTask == null) 
-            return false;
+    // ---------------------------------------------------------------
+    // Helpers usados por WriteDocumentUI, UIManager, etc.
+    // ---------------------------------------------------------------
 
-        if (morningTask.name != name) 
-            return false;
-
-        if (morningTask.completed) 
-            return false;
-
-        if (morningTask.failed) 
-            return false;
-
-        return true;
+    // devolve true se existir pelo menos uma task ativa (spawned, não terminada) com esse nome
+    public bool HasActiveTask(string name)
+    {
+        return activeTasks.Exists(t =>
+            t.name == name &&
+            t.spawned &&
+            !t.completed &&
+            !t.failed
+        );
     }
 
-    public bool HasActiveAfternoonTask(string name) {
-        if (afternoonTask == null) 
-            return false;
+    // mantidos por compatibilidade com WriteDocumentUI e UIManager existentes
+    public bool HasActiveMorningTask(string name) => HasActiveTask(name);
+    public bool HasActiveAfternoonTask(string name) => HasActiveTask(name);
 
-        if (afternoonTask.name != name) 
-            return false;
-
-        if (afternoonTask.completed) 
-            return false;
-
-        if (afternoonTask.failed) 
-            return false;
-
-        return true;
+    // ---------------------------------------------------------------
+    // Seleciona o DaySchedule correto para o dia atual
+    // ---------------------------------------------------------------
+    private DaySchedule GetScheduleForToday()
+    {
+        int index = GameManager.Instance.currentDay - 1;
+        if (daySchedules == null || index < 0 || index >= daySchedules.Length) return null;
+        return daySchedules[index];
     }
-}
+}   

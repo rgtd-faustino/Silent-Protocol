@@ -16,9 +16,14 @@ public class PCInteractable : InteractableObject {
     private void OpenPC()
     {
         pcCanvas.SetActive(true);
+
         PlayerController.Instance.canMoveRotate = false;
-        UIManager.Instance.ChangeCursorState(CursorLockMode.None);
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         UIManager.Instance.RefreshPCInterface();
+
         isOpen = true;
 
         // reset ao estado do servidor se existir
@@ -35,11 +40,14 @@ public class PCInteractable : InteractableObject {
             ClosePC();
     }
 
-    private void ClosePC() {
+    private void ClosePC()
+    {
         pcCanvas.SetActive(false);
 
         PlayerController.Instance.canMoveRotate = true;
-        UIManager.Instance.ChangeCursorState(CursorLockMode.Locked); // cursor volta a estar escondido
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
         isOpen = false;
     }
