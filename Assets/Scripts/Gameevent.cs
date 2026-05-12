@@ -15,10 +15,13 @@ public static class GameEvent {
     public static event Action OnGameOver;
     public static event Action<int> OnEndingReached; // 0=denúncia, 1=extorsão, 2=lealdade
 
-    // --- Intel ---
 
     // --- Suspeita ---
     public static event Action<SuspicionManager.SuspicionState> OnSuspicionStateChanged;
+
+    // --- Câmaras ---
+    /// <summary>Disparado quando o uso das câmaras ultrapassa o threshold (para UI e NPCs reagirem).</summary>
+    public static event Action<float> OnCameraOveruseWarning; // float = nível de perigo [0-1]
 
 
     public static void DayChanged(int day) => OnDayChanged?.Invoke(day);
@@ -30,4 +33,5 @@ public static class GameEvent {
     public static void GameOver() => OnGameOver?.Invoke();
     public static void EndingReached(int ending) => OnEndingReached?.Invoke(ending);
     public static void SuspicionStateChanged(SuspicionManager.SuspicionState s) => OnSuspicionStateChanged?.Invoke(s);
+    public static void CameraOveruseWarning(float dangerLevel) => OnCameraOveruseWarning?.Invoke(dangerLevel);
 }

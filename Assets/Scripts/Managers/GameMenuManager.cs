@@ -51,17 +51,21 @@ public class GameMenuManager : MonoBehaviour {
 
     [Header("Efeito Typewriter")]
     [SerializeField] private string titleFullText = "AUTHENTICATION\nREQUIRED";
-    [SerializeField] private float charDelay = 0.045f; // segundos entre cada letra
-    [SerializeField] private float cursorBlinkRate = 0.52f; // segundos entre piscar o cursor
+    private float charDelay = 0.045f; // segundos entre cada letra
+    private float cursorBlinkRate = 0.52f; // segundos entre piscar o cursor
     [SerializeField] private string cursorChar = "_";
 
+    [Header("Scanlines Menu")]
+    [SerializeField] private RawImage menuScanlines;
+    private float menuScanlineSpeed = 0.2f;
+
     [Header("Transições")]
-    [SerializeField] private float fadeDuration = 0.25f; // duração do fade entre painéis
+    private float fadeDuration = 0.25f; // duração do fade entre painéis
     // o card começa a 92% do tamanho e cresce para 100% enquanto o faz fade in
-    [SerializeField] private float cardStartScale = 0.92f;
+    private float cardStartScale = 0.92f;
     // duração da animação scale+fade do card, ligeiramente mais longa que o fadeDuration
     // para que o BG já esteja totalmente visível quando o card começa a crescer
-    [SerializeField] private float cardEntranceDuration = 0.35f;
+    private float cardEntranceDuration = 0.35f;
 
     public MenuState CurrentState = MenuState.None;
 
@@ -102,8 +106,19 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     void Update() {
+        float y = menuScanlines.uvRect.y + menuScanlineSpeed * Time.unscaledDeltaTime;
+        if (y > 1f) y -= 1f;
+        menuScanlines.uvRect = new Rect(0f, y, 1f, 1f);
+
+        // pulso de opacidade — seno lento para dar o efeito "vivo" igual ao terminal
+        float pulse = Mathf.Sin(Time.unscaledTime * 1.2f) * 0.5f + 0.5f; // 0 a 1
+        Color sc = menuScanlines.color;
+        sc.a = Mathf.Lerp(0.12f, 0.28f, pulse);
+        menuScanlines.color = sc;
+
         // escape pausa/retoma o jogo —> não funciona no menu principal nem na criação de personagem
         if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (CameraSystem.Instance != null && CameraSystem.Instance.IsActive) return;
             if (CurrentState == MenuState.Playing)
                 GoTo(MenuState.Paused);
             else if (CurrentState == MenuState.Paused)
