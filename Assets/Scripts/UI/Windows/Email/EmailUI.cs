@@ -3,30 +3,20 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Controla a UI da aplicação de email no computador do jogador.
-///
-/// Estrutura da UI esperada (ver guia abaixo):
-///
-///  EmailApp (Panel raiz)
-///  ├── Sidebar
-///  │   ├── BtnInbox          (Button)
-///  │   └── BtnLixo           (Button)
-///  ├── EmailListPanel
-///  │   └── EmailListContent  (Transform – filho de ScrollRect)
-///  ├── EmailDetailPanel
-///  │   ├── TxtTitulo         (TextMeshProUGUI)
-///  │   ├── TxtRemetente      (TextMeshProUGUI)
-///  │   ├── TxtDataHora       (TextMeshProUGUI)
-///  │   ├── TxtCorpo          (TextMeshProUGUI)
-///  │   ├── BtnApagar         (Button) — visível só na Inbox
-///  │   ├── BtnRestaurar      (Button) — visível só no Lixo
-///  │   └── BtnGuardarIntel   (Button) — visível só se temIntel = true
-///  └── EmailEntryPrefab      (prefab com Button + TxtTitulo + TxtRemetente + IconoNaoLido)
-/// </summary>
 public class EmailUI : MonoBehaviour
 {
-    public static EmailUI Instance;
+    // ------------------------------------------------------------------ //
+    // Referência ao manager LOCAL deste PC                                  //
+    // ------------------------------------------------------------------ //
+
+    [Header("Manager deste PC")]
+    [Tooltip("Arrasta aqui o PCEmailManager do mesmo PC. Se estiver no mesmo " +
+             "GameObject pode deixar em branco — é auto-detectado.")]
+    public PCEmailManager emailManager;
+
+    // ------------------------------------------------------------------ //
+    // Referências de UI                                                     //
+    // ------------------------------------------------------------------ //
 
     [Header("Painel Raiz")]
     public GameObject emailAppPanel;
@@ -34,14 +24,12 @@ public class EmailUI : MonoBehaviour
     [Header("Sidebar")]
     public Button btnInbox;
     public Button btnLixo;
-    // imagem/objeto de badge para não-lidos (opcional)
     public GameObject badgeNaoLidos;
     public TextMeshProUGUI txtBadgeCount;
 
     [Header("Lista de Emails")]
-    public Transform emailListContent;       // Content do ScrollRect
-    public GameObject emailEntryPrefab;      // prefab de cada linha da lista
-    private HashSet<EmailItem> intelJaGuardada = new HashSet<EmailItem>();
+    public Transform emailListContent;
+    public GameObject emailEntryPrefab;
 
     [Header("Painel de Detalhe")]
     public GameObject emailDetailPanel;
@@ -53,15 +41,16 @@ public class EmailUI : MonoBehaviour
     public Button btnRestaurar;
     public Button btnGuardarIntel;
 
-
     // ------------------------------------------------------------------ //
     // Estado interno                                                        //
     // ------------------------------------------------------------------ //
-
+    // permite saber se algum email está aberto
+    public static bool AlgumEmailAberto = false;
     private enum Vista { Inbox, Lixo }
     private Vista vistaAtual = Vista.Inbox;
     private EmailItem emailSelecionado = null;
     private List<GameObject> entradasAtivas = new List<GameObject>();
+    private HashSet<EmailItem> intelJaGuardada = new HashSet<EmailItem>();
 
     // ------------------------------------------------------------------ //
     // Unity                                                                 //
@@ -69,26 +58,33 @@ public class EmailUI : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
+        // Auto-detecta o manager se não foi atribuído no Inspector
+        if (emailManager == null)
+            emailManager = GetComponent<PCEmailManager>();
+
+        if (emailManager == null)
+            Debug.LogError($"[EmailUI] Nenhum PCEmailManager encontrado em '{gameObject.name}'. " +
+                           "Arrasta-o para o campo 'emailManager' no Inspector.", this);
     }
 
     void Start()
     {
-        // botões da sidebar
+        if (emailManager == null) return;
+
+        // Botões da sidebar
         btnInbox.onClick.AddListener(() => MudarVista(Vista.Inbox));
         btnLixo.onClick.AddListener(() => MudarVista(Vista.Lixo));
 
-        // botões do detalhe
+        // Botões do detalhe
         btnApagar.onClick.AddListener(ApagarEmailAtual);
         btnRestaurar.onClick.AddListener(RestaurarEmailAtual);
         btnGuardarIntel.onClick.AddListener(GuardarIntelAtual);
 
-        // reage a novos emails em tempo real
-        EmailManager.Instance.OnEmailRecebido += OnEmailRecebido;
-        EmailManager.Instance.OnEmailApagado += _ => AtualizarBadge();
+        // Reage a eventos do manager LOCAL deste PC
+        emailManager.OnEmailRecebido += OnEmailRecebido;
+        emailManager.OnEmailApagado += _ => AtualizarBadge();
 
-        // estado inicial
+        // Estado inicial
         emailDetailPanel.SetActive(false);
         AtualizarLista();
         AtualizarBadge();
@@ -96,14 +92,13 @@ public class EmailUI : MonoBehaviour
 
     void OnDestroy()
     {
-        if (EmailManager.Instance == null) return;
-        EmailManager.Instance.OnEmailRecebido -= OnEmailRecebido;
+        if (emailManager == null) return;
+        emailManager.OnEmailRecebido -= OnEmailRecebido;
     }
 
     void Update()
     {
-        // abre/fecha a app de email com Tab (ou o teu sistema de PC pode chamar ToggleApp diretamente)
-        // Remove este bloco se o PC já chama ToggleApp pelo seu próprio script.
+        // Remove este bloco se o teu sistema de PC já chama ToggleApp diretamente.
         if (Input.GetKeyDown(KeyCode.Tab))
             ToggleApp();
     }
@@ -116,6 +111,7 @@ public class EmailUI : MonoBehaviour
     {
         bool abrir = !emailAppPanel.activeSelf;
         emailAppPanel.SetActive(abrir);
+        AlgumEmailAberto = abrir;
 
         if (abrir)
         {
@@ -144,14 +140,12 @@ public class EmailUI : MonoBehaviour
 
     private void AtualizarLista()
     {
-        // limpar entradas antigas
-        foreach (var go in entradasAtivas)
-            Destroy(go);
+        foreach (var go in entradasAtivas) Destroy(go);
         entradasAtivas.Clear();
 
         List<EmailItem> emails = vistaAtual == Vista.Inbox
-            ? EmailManager.Instance.GetInbox()
-            : EmailManager.Instance.GetLixo();
+            ? emailManager.GetInbox()
+            : emailManager.GetLixo();
 
         foreach (var email in emails)
             CriarEntrada(email);
@@ -162,12 +156,10 @@ public class EmailUI : MonoBehaviour
         var go = Instantiate(emailEntryPrefab, emailListContent);
         entradasAtivas.Add(go);
 
-        // --- adapta os nomes abaixo à tua hierarquia de prefab ---
         var labels = go.GetComponentsInChildren<TextMeshProUGUI>();
         if (labels.Length >= 1) labels[0].text = email.titulo;
         if (labels.Length >= 2) labels[1].text = email.remetenteNome;
 
-        // ícone de não-lido (objeto com nome "IconoNaoLido" no prefab, opcional)
         var icone = go.transform.Find("IconoNaoLido");
         if (icone != null) icone.gameObject.SetActive(!email.lido);
 
@@ -183,24 +175,23 @@ public class EmailUI : MonoBehaviour
         emailSelecionado = email;
         email.lido = true;
         AtualizarBadge();
-
-        // atualizar ícone de não-lido na lista sem reconstruir tudo
         AtualizarLista();
 
-        // preencher detalhe
         txtTitulo.text = email.titulo;
         txtRemetente.text = $"{email.remetenteNome}  <{email.remetente}>";
         txtDataHora.text = email.dataHora;
         txtCorpo.text = email.corpo;
 
-        // mostrar botões corretos conforme a vista
         bool naInbox = vistaAtual == Vista.Inbox;
         btnApagar.gameObject.SetActive(naInbox);
         btnRestaurar.gameObject.SetActive(!naInbox);
         btnGuardarIntel.gameObject.SetActive(email.temIntel && email.intelAssociado != null);
         btnGuardarIntel.interactable = !intelJaGuardada.Contains(email);
+
         var label = btnGuardarIntel.GetComponentInChildren<TextMeshProUGUI>();
-        if (label != null) label.text = intelJaGuardada.Contains(email) ? "Intel Guardada ✓" : "▼ GUARDAR INTEL";
+        if (label != null)
+            label.text = intelJaGuardada.Contains(email) ? "Intel Guardada ✓" : "▼ GUARDAR INTEL";
+
         emailDetailPanel.SetActive(true);
     }
 
@@ -211,7 +202,7 @@ public class EmailUI : MonoBehaviour
     private void ApagarEmailAtual()
     {
         if (emailSelecionado == null) return;
-        EmailManager.Instance.ApagarEmail(emailSelecionado);
+        emailManager.ApagarEmail(emailSelecionado);
         emailDetailPanel.SetActive(false);
         emailSelecionado = null;
         AtualizarLista();
@@ -220,7 +211,7 @@ public class EmailUI : MonoBehaviour
     private void RestaurarEmailAtual()
     {
         if (emailSelecionado == null) return;
-        EmailManager.Instance.RestaurarEmail(emailSelecionado);
+        emailManager.RestaurarEmail(emailSelecionado);
         emailDetailPanel.SetActive(false);
         emailSelecionado = null;
         AtualizarLista();
@@ -245,7 +236,7 @@ public class EmailUI : MonoBehaviour
 
     private void AtualizarBadge()
     {
-        int naoLidos = EmailManager.Instance.GetNaoLidos();
+        int naoLidos = emailManager.GetNaoLidos();
         if (badgeNaoLidos != null)
             badgeNaoLidos.SetActive(naoLidos > 0);
         if (txtBadgeCount != null)
@@ -255,7 +246,6 @@ public class EmailUI : MonoBehaviour
     private void OnEmailRecebido(EmailItem email)
     {
         AtualizarBadge();
-        // se a app estiver aberta e estivermos na inbox, atualiza a lista em direto
         if (emailAppPanel.activeSelf && vistaAtual == Vista.Inbox)
             AtualizarLista();
     }

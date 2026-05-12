@@ -82,8 +82,8 @@ public class PlayerController : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            if (EmailUI.Instance != null && EmailUI.Instance.emailAppPanel.activeSelf)
-                return; 
+            if (EmailUI.AlgumEmailAberto)
+                return;
 
             IntelInventory.Instance.ToggleDossier();
         }
