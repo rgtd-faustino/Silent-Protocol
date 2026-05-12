@@ -2,9 +2,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Gere os efeitos visuais de sono na câmara com base no sleep stage do TimeManager.
-///
+
+/// Gera os efeitos visuais de sono na câmara com base no sleep stage do TimeManager.
 /// SETUP NO UNITY:
 /// 1. Cria um Canvas (Screen Space – Overlay, Sort Order alto tipo 100) chamado "SleepEffectCanvas"
 /// 2. Dentro do Canvas, cria um Image que cobre o ecrã todo (Anchor: stretch/stretch, Left/Right/Top/Bottom = 0)
