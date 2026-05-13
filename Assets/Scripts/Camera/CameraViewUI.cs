@@ -7,7 +7,6 @@ public class CameraViewUI : MonoBehaviour
 {
     public static CameraViewUI Instance;
 
-    // ─── Inspector ───────────────────────────────────────────────────────────
     [Header("Root")]
     [SerializeField] private GameObject rootPanel;          // the whole overlay
 
@@ -30,6 +29,12 @@ public class CameraViewUI : MonoBehaviour
     [SerializeField] private Image overuseVignette;         // Layer 7: red vignette
     [SerializeField] private TextMeshProUGUI overuseText;   // "SURVEILLANCE DETECTED"
 
+    [Header("Lock State")]
+    [Tooltip("Overlay escuro opcional mostrado quando a câmara está locked.")]
+    [SerializeField] private Image lockOverlay;
+    [Tooltip("Label opcional — ex: 'SINAL ENCRIPTADO — [H] PARA HACKEAR'.")]
+    [SerializeField] private TextMeshProUGUI lockLabel;
+
     [Header("Navigation Hint")]
     [SerializeField] private TextMeshProUGUI navHint;       // "[A] ANTERIOR | [D] PRÓXIMO | [E] SAIR"
 
@@ -44,7 +49,6 @@ public class CameraViewUI : MonoBehaviour
     [SerializeField] private float switchFlashDuration = 0.12f;
     [SerializeField] private int   noiseFrameInterval  = 3;     // frames between noise update
 
-    // ─── Runtime ─────────────────────────────────────────────────────────────
     private CameraSystem system;
     private SurveillanceCamera currentCam;
     private bool isOpen = false;
@@ -55,7 +59,6 @@ public class CameraViewUI : MonoBehaviour
 
     private Coroutine flashCoroutine;
 
-    // ─────────────────────────────────────────────────────────────────────────
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -75,7 +78,6 @@ public class CameraViewUI : MonoBehaviour
         UpdateOveruseWarning();
     }
 
-    // ─── Open / Close ────────────────────────────────────────────────────────
     public void Show(CameraSystem cameraSystem)
     {
         system = cameraSystem;
@@ -86,8 +88,7 @@ public class CameraViewUI : MonoBehaviour
         ApplyCameraFeed(currentCam);
         RefreshHUDLabels();
 
-        if (navHint != null)
-            navHint.text = "[A] PREV  |  [D] NEXT  |  [X] EXIT";
+        UpdateLockState();
     }
 
     public void Hide()
@@ -96,15 +97,13 @@ public class CameraViewUI : MonoBehaviour
         rootPanel.SetActive(false);
     }
 
-    public void OnCameraChanged(SurveillanceCamera newCam)
-    {
+    public void OnCameraChanged(SurveillanceCamera newCam) {
         currentCam = newCam;
         ApplyCameraFeed(newCam);
         RefreshHUDLabels();
         TriggerSwitchFlash();
+        UpdateLockState();
     }
-
-    // ─── Input ───────────────────────────────────────────────────────────────
     private void HandleInput()
     {
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
@@ -115,20 +114,21 @@ public class CameraViewUI : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Escape))
             system.CloseCameraView();
+
+        if (Input.GetKeyDown(KeyCode.H) && currentCam != null && !system.IsUnlocked(system.CurrentCameraIndex))
+            TriggerHackPuzzle();
     }
 
-    // ─── Feed ────────────────────────────────────────────────────────────────
     private void ApplyCameraFeed(SurveillanceCamera cam)
     {
         if (feedImage == null || cam == null) return;
         feedImage.texture = cam.renderTexture;
 
         // Chroma offset images share the same RT
-        if (chromaR != null) { chromaR.texture = cam.renderTexture; chromaR.color = new Color(1f, 0.2f, 0.2f, 0.35f); }
-        if (chromaB != null) { chromaB.texture = cam.renderTexture; chromaB.color = new Color(0.2f, 0.2f, 1f, 0.35f); }
+        chromaR.texture = cam.renderTexture; chromaR.color = new Color(1f, 0.2f, 0.2f, 0.35f);
+        chromaB.texture = cam.renderTexture; chromaB.color = new Color(0.2f, 0.2f, 1f, 0.35f);
     }
 
-    // ─── Scanlines ───────────────────────────────────────────────────────────
     private void UpdateScanlines()
     {
         if (scanlineOverlay == null) return;
@@ -144,11 +144,8 @@ public class CameraViewUI : MonoBehaviour
         scanlineOverlay.color = c;
     }
 
-    // ─── Static Noise ────────────────────────────────────────────────────────
     private void UpdateNoise()
     {
-        if (staticNoiseImage == null || noiseFrames == null || noiseFrames.Length == 0) return;
-
         frameCount++;
         // Noise flickers faster as signal degrades
         float integrity = system.SignalIntegrity;
@@ -170,10 +167,8 @@ public class CameraViewUI : MonoBehaviour
         staticNoiseImage.color = nc;
     }
 
-    // ─── Chromatic Aberration ────────────────────────────────────────────────
     private void UpdateChroma()
     {
-        if (chromaR == null || chromaB == null) return;
 
         float integrity = system.SignalIntegrity;
         float heat      = system.ResidualHeat;
@@ -196,11 +191,8 @@ public class CameraViewUI : MonoBehaviour
         Color cb = chromaB.color; cb.a = distortion / chromaMaxOffset * 0.35f; chromaB.color = cb;
     }
 
-    // ─── HUD ─────────────────────────────────────────────────────────────────
     private void UpdateHUD()
     {
-        // Camera index
-        if (cameraIndexText != null)
             cameraIndexText.text = $"{system.CurrentCameraIndex + 1} / {system.CameraCount}";
     }
 
@@ -213,7 +205,6 @@ public class CameraViewUI : MonoBehaviour
             floorText.text = $"FLOOR {currentCam.floor}";
     }
 
-    // ─── Overuse Warning ─────────────────────────────────────────────────────
     private void UpdateOveruseWarning()
     {
         float heat      = system.ResidualHeat;
@@ -222,15 +213,10 @@ public class CameraViewUI : MonoBehaviour
 
         bool highDanger = danger > 0.6f;
 
-        if (overuseVignette != null)
-        {
             Color vc = overuseVignette.color;
             vc.a = Mathf.Lerp(0f, 0.45f, danger);
             overuseVignette.color = vc;
-        }
 
-        if (overuseText != null)
-        {
             overuseText.gameObject.SetActive(highDanger);
             if (highDanger)
             {
@@ -239,10 +225,8 @@ public class CameraViewUI : MonoBehaviour
                 Color tc = overuseText.color; tc.a = blink; overuseText.color = tc;
                 overuseText.text = "ABUSO DE CÂMARA!";
             }
-        }
     }
 
-    // ─── Switch Flash ────────────────────────────────────────────────────────
     private void TriggerSwitchFlash()
     {
         if (switchFlash == null) return;
@@ -265,4 +249,36 @@ public class CameraViewUI : MonoBehaviour
         switchFlash.gameObject.SetActive(false);
         flashCoroutine = null;
     }
+
+    private void UpdateLockState() {
+        if (system == null) return;
+        bool locked = !system.IsUnlocked(system.CurrentCameraIndex);
+
+        // Oculta o feed quando locked
+        feedImage.enabled = !locked;
+        chromaR.enabled = !locked;
+        chromaB.enabled = !locked;
+
+        // Overlay e label opcionais
+        if (lockOverlay != null) lockOverlay.gameObject.SetActive(locked);
+        if (lockLabel != null) lockLabel.gameObject.SetActive(locked);
+
+        // Label da câmara mostra estado de encriptação
+        if (locked)
+            cameraLabel.text = "SINAL ENCRIPTADO";
+
+        // Hint inclui tecla de hack quando locked
+        navHint.text = locked ? "[H] HACKEAR  |  [A] PREV  |  [D] NEXT  |  [X] SAIR" : "[A] PREV  |  [D] NEXT  |  [X] SAIR";
+    }
+
+    private void TriggerHackPuzzle() {
+        CameraHackPuzzle.Instance.Open(system.CurrentCameraIndex, () => {
+            system.UnlockCamera(system.CurrentCameraIndex);
+            ApplyCameraFeed(currentCam);
+            RefreshHUDLabels();
+            UpdateLockState();
+        });
+    }
+
+    public void ShowLockedState() => UpdateLockState();
 }

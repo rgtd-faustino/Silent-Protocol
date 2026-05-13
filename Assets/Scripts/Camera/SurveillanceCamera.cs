@@ -3,7 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class SurveillanceCamera : MonoBehaviour
 {
-    // ─── Inspector ───────────────────────────────────────────────────────────
     [Header("Identity")]
     public string cameraLabel = "CAM-01";
     public int floor = 1;
@@ -24,13 +23,11 @@ public class SurveillanceCamera : MonoBehaviour
     [Tooltip("If false, the camera stays locked at its rest angle.")]
     [SerializeField] public bool panEnabled = true;
 
-    // ─── Runtime ─────────────────────────────────────────────────────────────
     private Camera cam;
     private float baseYRotation;    // rest angle (set in Awake from initial rotation)
     private float panPhase = 0f;    // [0-1] drives a sine sweep
     private bool _initialised = false;
 
-    // ─────────────────────────────────────────────────────────────────────────
     public void Initialise()
     {
         cam = GetComponent<Camera>();
@@ -51,7 +48,6 @@ public class SurveillanceCamera : MonoBehaviour
         UpdatePan();
     }
 
-    // ─── Patrol Pan ──────────────────────────────────────────────────────────
     private void UpdatePan() {
         if (!panEnabled) {
             // snap de volta ao centro se o pan for desligado em runtime

@@ -1,13 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// CameraTerminal — InteractableObject subclass.
-///
-/// Place this on any security monitor / terminal in the scene.
-/// When the player presses E, it opens CameraViewUI via CameraSystem.
-///
-/// Integrates with the existing InteractableObject + CameraScript tooltip system.
-/// </summary>
 public class CameraTerminal : InteractableObject
 {
     [Header("Camera Terminal")]

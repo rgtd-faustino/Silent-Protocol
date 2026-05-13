@@ -44,7 +44,8 @@ public class SuspicionManager : MonoBehaviour {
         Camera,             // acesso excessivo a câmaras
         Noise,              // barulho à noite (guarda ouviu o jogador)
         TerminalAccess,     // acesso a terminais fora do posto de trabalho
-        DocumentMisfiled    // documento arquivado no departamento errado
+        DocumentMisfiled,    // documento arquivado no departamento errado
+        Hacking // hackear as camaras para lhes aceder 
     }
 
 
