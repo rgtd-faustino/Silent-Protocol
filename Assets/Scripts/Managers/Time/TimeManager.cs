@@ -44,7 +44,7 @@ public class TimeManager : MonoBehaviour {
     private const float MeetingMinute = 1050f; // 17:30
     private bool firedMeeting = false;
     private bool firedDayEnd = false;
-
+    private bool firedDayStart = true;
     void Awake() {
         if (Instance != null && Instance != this) {
             Destroy(gameObject); return;
@@ -71,12 +71,16 @@ public class TimeManager : MonoBehaviour {
         accumulatedSleep += deltaMinutes / 60f;
 
         // para que o tempo dê reset ao fim de 24 horas
-        if (currentMinutes >= DayEndMinute) {
-            if (!firedDayEnd) {
+        if (currentMinutes >= DayEndMinute)
+        {
+            if (!firedDayEnd)
+            {
                 firedDayEnd = true;
-                GameEvent.DayEnded(); // dispara mesmo sem dormir
+                GameEvent.DayEnded();
             }
             currentMinutes %= DayEndMinute;
+            ResetDayFlags(); // firedDayStart fica false — vai disparar às 08:00
+                             
         }
 
         isNight = currentMinutes >= NightStartMinute || currentMinutes < DayStartMinute;
@@ -118,11 +122,18 @@ public class TimeManager : MonoBehaviour {
             firedMeeting = true;
             NPCManager.Instance.TriggerMeeting(); // avisa o GameManager para chamar todos os NPCs para a reunião
         }
+        if (!firedDayStart && currentMinutes >= DayStartMinute)
+        {
+            firedDayStart = true;
+            Debug.Log($"FireDayEvents: DayStart disparado! Dia atual: {DayManager.Instance.CurrentDay}");
+            DayManager.Instance.OnDayEnded();//para dar a daymanager disparar o envento de dizer que o dia mudou
+        }
     }
-
+        
     // reseta as flags no início de um novo dia (chamado após Sleep)
     private void ResetDayFlags() {
-        firedWorkStart = firedLunch = firedAfternoon = firedNight = firedMeeting = firedDayEnd = false;
+        
+        firedWorkStart = firedLunch = firedAfternoon = firedNight = firedMeeting = firedDayEnd = firedDayStart = false;
     }
 
 
@@ -150,33 +161,32 @@ public class TimeManager : MonoBehaviour {
 
 
     // aplica os efeitos de uma noite de sono: avança o tempo para a hora de acordar e recalcula a fadiga acumulada
-    public void Sleep(float wakeUpHours) {
+    public void Sleep(float wakeUpHours)
+    {
         float wakeUpMinutes = wakeUpHours * 60f;
         float sleepHours;
 
-        // calcular quantas horas de sono efetivo houve, tendo em conta que a meia-noite pode estar no meio (ex: dormir às 23:00, acordar às 07:00).
         if (wakeUpMinutes > currentMinutes)
             sleepHours = (wakeUpMinutes - currentMinutes) / 60f;
         else
             sleepHours = ((1440f - currentMinutes) + wakeUpMinutes) / 60f;
 
-        // 7 horas é o mínimo recomendado, se o jogador dormiu o suficiente a fadiga é completamente eliminada
-        // mas se dormiu menos, só se recupera parcialmente (proporcionalmente às horas dormidas)
         if (sleepHours >= 7f)
             accumulatedSleep = 0f;
-        else {
+        else
+        {
             float recoveryRatio = sleepHours / 7f;
             accumulatedSleep = Mathf.Max(0f, accumulatedSleep * (1f - recoveryRatio));
         }
 
         SetCurrentMinutes(wakeUpMinutes);
-        ResetDayFlags(); // novo dia -> eventos podem disparar de novo
+        ResetDayFlags();
+        firedDayStart = true;
         Debug.Log($"Dormiu {sleepHours:F1}h. Sono acumulado: {accumulatedSleep:F2}h");
 
-        if (!firedDayEnd) {
-            firedDayEnd = true;
-            GameEvent.DayEnded();
-        }
+        GameEvent.DayEnded();
+        DayManager.Instance.OnDayEnded();
+
     }
 
 
