@@ -22,7 +22,6 @@ public class CameraViewUI : MonoBehaviour
 
     [Header("HUD Chrome")]
     [SerializeField] private TextMeshProUGUI cameraLabel;   // "CAM-03 / F2"
-    [SerializeField] private TextMeshProUGUI floorText;     // "FLOOR 2"
     [SerializeField] private TextMeshProUGUI cameraIndexText; // "1 / 6"
 
     [Header("Overuse Warning")]
@@ -114,9 +113,6 @@ public class CameraViewUI : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Escape))
             system.CloseCameraView();
-
-        if (Input.GetKeyDown(KeyCode.H) && currentCam != null && !system.IsUnlocked(system.CurrentCameraIndex))
-            TriggerHackPuzzle();
     }
 
     private void ApplyCameraFeed(SurveillanceCamera cam)
@@ -198,11 +194,7 @@ public class CameraViewUI : MonoBehaviour
 
     private void RefreshHUDLabels()
     {
-        if (currentCam == null) return;
-        if (cameraLabel != null)
-            cameraLabel.text = $"{currentCam.cameraLabel}  //  F{currentCam.floor}";
-        if (floorText != null)
-            floorText.text = $"FLOOR {currentCam.floor}";
+        cameraLabel.text = $"{currentCam.cameraLabel}  //  F{currentCam.floor}";
     }
 
     private void UpdateOveruseWarning()
@@ -260,25 +252,13 @@ public class CameraViewUI : MonoBehaviour
         chromaB.enabled = !locked;
 
         // Overlay e label opcionais
-        if (lockOverlay != null) lockOverlay.gameObject.SetActive(locked);
-        if (lockLabel != null) lockLabel.gameObject.SetActive(locked);
-
-        // Label da câmara mostra estado de encriptação
-        if (locked)
-            cameraLabel.text = "SINAL ENCRIPTADO";
+        lockOverlay.gameObject.SetActive(locked);
+        lockLabel.gameObject.SetActive(locked);
 
         // Hint inclui tecla de hack quando locked
-        navHint.text = locked ? "[H] HACKEAR  |  [A] PREV  |  [D] NEXT  |  [X] SAIR" : "[A] PREV  |  [D] NEXT  |  [X] SAIR";
+        navHint.text = "[A] PREV  |  [D] NEXT  |  [X] SAIR";
     }
 
-    private void TriggerHackPuzzle() {
-        CameraHackPuzzle.Instance.Open(system.CurrentCameraIndex, () => {
-            system.UnlockCamera(system.CurrentCameraIndex);
-            ApplyCameraFeed(currentCam);
-            RefreshHUDLabels();
-            UpdateLockState();
-        });
-    }
 
     public void ShowLockedState() => UpdateLockState();
 }

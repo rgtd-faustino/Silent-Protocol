@@ -25,7 +25,7 @@ public class CameraSystem : MonoBehaviour {
     private float residualPerSession = 0.15f;
 
     [Tooltip("Each camera switch adds this residual heat.")]
-    private float residualPerSwitch = 0.06f;
+    private float residualPerSwitch = 0.02f;
 
     [Tooltip("Rate at which residual heat decays per second when camera is closed.")]
     private float residualDecayRate = 0.02f;
@@ -74,7 +74,7 @@ public class CameraSystem : MonoBehaviour {
     }
 
     void Update() {
-        if (isActive && !CameraHackPuzzle.Instance.IsOpen) {
+        if (isActive && !CameraHackPuzzle.Instance.IsOpen && IsUnlocked(currentCameraIndex)) {
             float dt = Time.deltaTime;
             cumulativeWatchSeconds += dt;
 
@@ -119,13 +119,15 @@ public class CameraSystem : MonoBehaviour {
 
     public void NextCamera() {
         currentCameraIndex = (currentCameraIndex + 1) % allCameras.Length;
-        residualHeat = Mathf.Min(1f, residualHeat + residualPerSwitch);
+        if (IsUnlocked(currentCameraIndex))
+            residualHeat = Mathf.Min(1f, residualHeat + residualPerSwitch);
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }
 
     public void PreviousCamera() {
         currentCameraIndex = (currentCameraIndex - 1 + allCameras.Length) % allCameras.Length;
-        residualHeat = Mathf.Min(1f, residualHeat + residualPerSwitch);
+        if (IsUnlocked(currentCameraIndex))
+            residualHeat = Mathf.Min(1f, residualHeat + residualPerSwitch);
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }
 

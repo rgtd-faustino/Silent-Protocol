@@ -40,7 +40,6 @@ public class CameraHackPuzzle : MonoBehaviour {
     private static readonly Color C_Jam = new Color(0.95f, 0.18f, 0.18f, 0.88f);
     private static readonly Color C_Player = new Color(0.18f, 0.85f, 0.95f, 0.88f);
     private static readonly Color C_Matched = new Color(0.18f, 1.00f, 0.42f, 0.92f);
-    private static readonly Color C_Hovered = new Color(1.00f, 1.00f, 0.35f, 0.65f);
 
     private float[] jamPattern;
     private float[] playerVals;
