@@ -218,4 +218,29 @@ public class IntelInventory : MonoBehaviour
         // por agora só um log para confirmar
         Debug.Log($"[IntelInventory] Filtro ativo: {filtroAtual}");
     }
+
+    [Header("Save System")]
+    public IntelItem[] allPossibleIntel;
+
+    public List<string> GetCollectedIntelNames() {
+        List<string> names = new List<string>();
+        foreach (var item in entradas) {
+            names.Add(item.name);
+        }
+        return names;
+    }
+
+    public void RestoreIntelFromNames(List<string> names) {
+        entradas.Clear();
+        if (names == null) return;
+        foreach (string n in names) {
+            foreach (var possible in allPossibleIntel) {
+                if (possible.name == n) {
+                    entradas.Add(possible);
+                    break;
+                }
+            }
+        }
+        AtualizarTotalIntel();
+    }
 }

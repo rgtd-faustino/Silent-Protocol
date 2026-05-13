@@ -90,4 +90,9 @@ public class FlashlightController : MonoBehaviour {
     public float GetBatteryRatio() {
         return currentBattery / maxBattery;
     }
+
+    // setter para o SaveManager restaurar a bateria
+    public void SetBatteryRatio(float ratio) {
+        currentBattery = ratio * maxBattery;
+    }
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class GameManager : MonoBehaviour {
     public static GameManager Instance;
@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour {
     public int currentFloor = 1;
     public const int TotalDays = 5;
 
-    // pisos desbloqueados por índice (0=receção, 1=executivo, 2=servidores, 3=suítes, 4=CEO)
+    // pisos desbloqueados por ï¿½ndice (0=receï¿½ï¿½o, 1=executivo, 2=servidores, 3=suï¿½tes, 4=CEO)
     private bool[] floorUnlocked = new bool[5];
 
     void Awake() {
@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour {
     }
 
     void Start() {
-        // receção e andar executivo acessíveis desde o início
+        // receï¿½ï¿½o e andar executivo acessï¿½veis desde o inï¿½cio
         UnlockFloor(0);
         UnlockFloor(1);
 
@@ -40,15 +40,15 @@ public class GameManager : MonoBehaviour {
         SaveProgress();
 
         if (currentDay >= TotalDays) {
-            // o jogador chegou ao fim — vai para o ecrã de escolha de final
-            // (lógica de final a implementar quando o sistema de intel estiver pronto)
-            Debug.Log("[GameManager] Último dia concluído.");
+            // o jogador chegou ao fim ï¿½ vai para o ecrï¿½ de escolha de final
+            // (lï¿½gica de final a implementar quando o sistema de intel estiver pronto)
+            Debug.Log("[GameManager] ï¿½ltimo dia concluï¿½do.");
             return;
         }
 
         currentDay++;
         GameEvent.DayChanged(currentDay);
-        Debug.Log($"[GameManager] Dia {currentDay} começa.");
+        Debug.Log($"[GameManager] Dia {currentDay} comeï¿½a.");
     }
 
     private void HandleGameOver() {
@@ -68,7 +68,15 @@ public class GameManager : MonoBehaviour {
     }
 
     private void SaveProgress() {
-        // integrar com Unity SaveSystem ou PlayerPrefs quando necessário
+        // integrar com Unity SaveSystem ou PlayerPrefs quando necessï¿½rio
         Debug.Log($"[GameManager] Progresso guardado (dia {currentDay}).");
+    }
+
+    // --- getters e setters para o SaveManager ---
+    public bool[] GetFloorsUnlocked() { return (bool[])floorUnlocked.Clone(); }
+
+    public void SetFloorsUnlocked(bool[] floors) {
+        if (floors == null || floors.Length != floorUnlocked.Length) return;
+        System.Array.Copy(floors, floorUnlocked, floorUnlocked.Length);
     }
 }

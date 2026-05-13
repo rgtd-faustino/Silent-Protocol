@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class SuspicionManager : MonoBehaviour {
@@ -8,29 +8,29 @@ public class SuspicionManager : MonoBehaviour {
     [SerializeField] private float maxSuspicion = 1f;
     private float currentSuspicion = 0f;
 
-    // baseIncreaseSpeed: velocidade base a que a suspeita sobe por segundo quando há uma fonte ativa (ex: NPC a ver o jogador).
+    // baseIncreaseSpeed: velocidade base a que a suspeita sobe por segundo quando hï¿½ uma fonte ativa (ex: NPC a ver o jogador).
     // multiplicada pelo "level" da fonte (1, 1.5 ou 2) para fontes mais graves
-    // decayDelay: segundos sem descer mais depois da fonte parar antes da suspeita começar a baixar
+    // decayDelay: segundos sem descer mais depois da fonte parar antes da suspeita comeï¿½ar a baixar
     // decaySpeed: velocidade a que a suspeita baixa por segundo durante o decay
     [SerializeField] private float baseIncreaseSpeed = 0.1f;
     [SerializeField] private float decayDelay = 10f;
     [SerializeField] private float decaySpeed = 0.03f;
 
     // timeSinceLastIncrease: contador para o decayDelay
-    // isDecaying: flag que ativa o decay após o delay expirar
+    // isDecaying: flag que ativa o decay apï¿½s o delay expirar
     private Dictionary<int, float> activeSources = new Dictionary<int, float>();
     private float timeSinceLastIncrease = 0f;
     private bool isDecaying = false;
 
     // estado atual (None/Attention/Investigation/Expulsion)
-    // guardado para detetar mudanças e disparar o evento apenas quando muda
+    // guardado para detetar mudanï¿½as e disparar o evento apenas quando muda
     private SuspicionState currentState = SuspicionState.None;
 
 
-    // None          — comportamento normal
-    // Attention     — NPCs observam mais (>33% da barra)
-    // Investigation — guardas aumentam patrulhas (>66%)
-    // Expulsion     — Game Over (100%)
+    // None          ï¿½ comportamento normal
+    // Attention     ï¿½ NPCs observam mais (>33% da barra)
+    // Investigation ï¿½ guardas aumentam patrulhas (>66%)
+    // Expulsion     ï¿½ Game Over (100%)
     public enum SuspicionState {
         None,
         Attention,
@@ -39,10 +39,10 @@ public class SuspicionManager : MonoBehaviour {
     }
 
     public enum SuspicionSource {
-        NPCSight,           // NPC vê o jogador numa zona suspeita
-        RestrictedArea,     // jogador está numa zona restrita
-        Camera,             // acesso excessivo a câmaras
-        Noise,              // barulho à noite (guarda ouviu o jogador)
+        NPCSight,           // NPC vï¿½ o jogador numa zona suspeita
+        RestrictedArea,     // jogador estï¿½ numa zona restrita
+        Camera,             // acesso excessivo a cï¿½maras
+        Noise,              // barulho ï¿½ noite (guarda ouviu o jogador)
         TerminalAccess,     // acesso a terminais fora do posto de trabalho
         DocumentMisfiled,    // documento arquivado no departamento errado
         Hacking // hackear as camaras para lhes aceder 
@@ -63,10 +63,10 @@ public class SuspicionManager : MonoBehaviour {
         foreach (float value in activeSources.Values) 
             totalRate += value;
 
-        // há uma fonte ativa -> a suspeita sobe
+        // hï¿½ uma fonte ativa -> a suspeita sobe
         if (totalRate > 0f) {
             currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + totalRate * Time.deltaTime);
-            // reset do contador de decay -> enquanto há fonte ativa o timer não avança
+            // reset do contador de decay -> enquanto hï¿½ fonte ativa o timer nï¿½o avanï¿½a
             timeSinceLastIncrease = 0f;
             isDecaying = false;
 
@@ -77,7 +77,7 @@ public class SuspicionManager : MonoBehaviour {
             if (timeSinceLastIncrease >= decayDelay)
                 isDecaying = true;
 
-            // baixa a suspeita gradualmente após o delay
+            // baixa a suspeita gradualmente apï¿½s o delay
             if (isDecaying && currentSuspicion > 0) {
                 currentSuspicion = Mathf.Max(0f,
                     currentSuspicion - decaySpeed * Time.deltaTime);
@@ -91,11 +91,11 @@ public class SuspicionManager : MonoBehaviour {
     }
 
 
-    // chamado pelo NPCScript (e futuramente por câmaras, áreas restritas, etc.)
-    // level vai de 1 a 3 — representa a gravidade da situação
+    // chamado pelo NPCScript (e futuramente por cï¿½maras, ï¿½reas restritas, etc.)
+    // level vai de 1 a 3 ï¿½ representa a gravidade da situaï¿½ï¿½o
     public void IncreaseSuspicion(float level, int sourceId, SuspicionSource source = SuspicionSource.NPCSight) {
         if (level < 1 || level > 3)
-            return; // valores fora do intervalo são ignorados
+            return; // valores fora do intervalo sï¿½o ignorados
 
         activeSources[sourceId] = baseIncreaseSpeed * level;
         timeSinceLastIncrease = 0f;
@@ -103,15 +103,15 @@ public class SuspicionManager : MonoBehaviour {
     }
 
     // chamado pelo NPCScript quando o jogador sai do FOV ou da zona suspeita.
-    // pára a subida mas não dá reset o valor porque o decay trata disso com o delay.
+    // pï¿½ra a subida mas nï¿½o dï¿½ reset o valor porque o decay trata disso com o delay.
     public void StopIncreasingSuspicion(int sourceId) {
         activeSources.Remove(sourceId);
     }
 
 
-    // aumento pontual (one-shot) da suspeita — não é rate-based, não é cancelado pelo StopIncreasingSuspicion.
-    // usado para eventos discretos como um guarda ouvir um ruído ou o jogador entrar brevemente numa zona proibida.
-    // amount deve ser um valor pequeno (ex: 0.05) para não dominar a mecânica de visão.
+    // aumento pontual (one-shot) da suspeita ï¿½ nï¿½o ï¿½ rate-based, nï¿½o ï¿½ cancelado pelo StopIncreasingSuspicion.
+    // usado para eventos discretos como um guarda ouvir um ruï¿½do ou o jogador entrar brevemente numa zona proibida.
+    // amount deve ser um valor pequeno (ex: 0.05) para nï¿½o dominar a mecï¿½nica de visï¿½o.
     public void AddInstantSuspicion(float amount) {
         currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + amount);
         timeSinceLastIncrease = 0f;
@@ -120,15 +120,15 @@ public class SuspicionManager : MonoBehaviour {
     }
 
 
-    // completar tarefas de trabalho baixa a suspeita (o jogador parece um funcionário normal), mas falhar ou completar incorretamente sobe.
-    // amount é um multiplicador baseado na dificuldade da task (definido no TaskManager: Small=0.1, Medium=0.25, Major=0.5).
+    // completar tarefas de trabalho baixa a suspeita (o jogador parece um funcionï¿½rio normal), mas falhar ou completar incorretamente sobe.
+    // amount ï¿½ um multiplicador baseado na dificuldade da task (definido no TaskManager: Small=0.1, Medium=0.25, Major=0.5).
     public void ChangeSuspicionOnTaskComplete(float amount, bool doneCorrectly) {
         if (doneCorrectly)
             currentSuspicion = Mathf.Max(0f, currentSuspicion - amount);
         else
             currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + amount);
 
-        // reset do decay para que a mudança seja processada imediatamente em vez de esperar pelo próximo ciclo de Update.
+        // reset do decay para que a mudanï¿½a seja processada imediatamente em vez de esperar pelo prï¿½ximo ciclo de Update.
         timeSinceLastIncrease = 0f;
         isDecaying = false;
         CheckStateChange();
@@ -150,14 +150,14 @@ public class SuspicionManager : MonoBehaviour {
         else
             newState = SuspicionState.None;
 
-        // só dispara se o estado realmente mudou
+        // sï¿½ dispara se o estado realmente mudou
         if (newState != currentState) {
             currentState = newState;
 
             // GameEvent.SuspicionStateChanged notifica o NPCManager, que por sua vez notifica todos os NPCs
             GameEvent.SuspicionStateChanged(newState);
 
-            // expulsion é Game Over -> dispara evento separado para que o GameManager possa reagir.
+            // expulsion ï¿½ Game Over -> dispara evento separado para que o GameManager possa reagir.
             if (newState == SuspicionState.Expulsion)
                 GameEvent.GameOver();
         }
@@ -169,5 +169,10 @@ public class SuspicionManager : MonoBehaviour {
     }
     public float GetSuspicionRatio() {
         return currentSuspicion / maxSuspicion;
+    }
+
+    // setter para o SaveManager restaurar a suspeita
+    public void SetSuspicionDirect(float ratio) {
+        currentSuspicion = ratio * maxSuspicion;
     }
 }

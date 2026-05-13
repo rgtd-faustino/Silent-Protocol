@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,52 +7,52 @@ public class CameraHackPuzzle : MonoBehaviour {
     public static CameraHackPuzzle Instance;
     public static int HackLevel = 0; // incrementa a cada câmara desbloqueada (0 a 7)
 
-    [Header("Root")]
     [SerializeField] private GameObject rootPanel;
 
-    [Header("Signal Containers")]
+    // onde estão as barras dos sinais
     [SerializeField] private RectTransform jamContainer;
     [SerializeField] private RectTransform playerContainer;
 
-    [Header("HUD")]
-    [SerializeField] private Slider resonanceSlider;
+    [SerializeField] private Slider resonanceSlider; // o quão perto está o jogador de concluir o puzzle
     [SerializeField] private TextMeshProUGUI resonanceLabel;
     [SerializeField] private TextMeshProUGUI timerLabel;
     [SerializeField] private TextMeshProUGUI statusLabel;
 
-    [Header("Jam Bars")]
+    // barras que representam os sinais
     [SerializeField] private Image[] jamBars;
-    [Header("Player Bars")]
     [SerializeField] private Image[] playerBars;
-    [SerializeField] private TextMeshProUGUI[] bandArrows;
+    [SerializeField] private TextMeshProUGUI[] bandArrows; // setas que indicam qual é a barra atualmente a ser mudada pelo jogador
 
+    // número de barras
     private int numBands = 8;
-    private float scrollStep = 0.01f;
+    private float scrollStep = 0.01f; // multiplicado por deltaTime * 60 dá ~0.6 por segundo —> rápido o suficiente mas controlado
 
-    // Configurados dinamicamente por ApplyDifficulty
-    private float tolerance;
+    private float tolerance; // o quão perto pode estar a barra do jogador comparando à original
     private float holdRequired;
     private float timeLimit;
     private float oscillationAmplitude;
     private float oscillationSpeed;
 
-    private static readonly Color C_Jam = new Color(0.95f, 0.18f, 0.18f, 0.88f);
-    private static readonly Color C_Player = new Color(0.18f, 0.85f, 0.95f, 0.88f);
-    private static readonly Color C_Matched = new Color(0.18f, 1.00f, 0.42f, 0.92f);
+    // cores das barras
+    private Color C_Jam = new Color(0.95f, 0.18f, 0.18f, 0.88f);
+    private Color C_Player = new Color(0.18f, 0.85f, 0.95f, 0.88f);
+    private Color C_Matched = new Color(0.18f, 1.00f, 0.42f, 0.92f);
 
-    private float[] jamPattern;
-    private float[] playerVals;
-    private int selectedBand = 0;
+    private float[] jamPattern; // padrão do tamanho das barras do sinal original
+    private float[] playerVals; // valores que o jogador terá de meter em cada barra para espelhar o inverso das barras do sinal original
+    private int selectedBand = 0; // barra atualmente a ser mudada pelo jogador
     private float holdTimer;
     private float countdown;
-    private float lastResonance; // usada para glitch sem loop duplo
-    private bool active;
+    [HideInInspector] public bool active;
     private bool finished;
-    public bool IsOpen => active;
-    private Action onSuccess;
+    private int hackingCameraIndex = 0;
 
     void Awake() {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         resonanceSlider.minValue = 0f;
         resonanceSlider.maxValue = 1f;
@@ -64,13 +63,17 @@ public class CameraHackPuzzle : MonoBehaviour {
     void Update() {
         if (!active || finished) return;
 
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.X)) {
+        // para sair do menu
+        if (Input.GetKeyDown(KeyCode.X)) {
             StartCoroutine(Cancel());
             return;
         }
 
         countdown -= Time.deltaTime;
-        if (countdown <= 0f) { StartCoroutine(Fail()); return; }
+        if (countdown <= 0f) {
+            StartCoroutine(Fail());
+            return;
+        }
 
         HandleKeyboardNavigation();
         HandleKeyboardAdjust();
@@ -78,46 +81,37 @@ public class CameraHackPuzzle : MonoBehaviour {
         EvaluateResonance();
     }
 
-
-    public void Open(int camIndex, Action successCallback) {
-        onSuccess = successCallback;
+    public void Open(int camIndex) {
+        hackingCameraIndex = camIndex;
         ApplyDifficulty(HackLevel);
 
-        jamPattern = GeneratePattern(camIndex);
+        jamPattern = GeneratePattern(camIndex); // criamos o padrão do tamanho das barras do sinal original
         playerVals = new float[numBands];
-        for (int i = 0; i < numBands; i++) playerVals[i] = 0.5f;
+
+        for (int i = 0; i < numBands; i++)
+            playerVals[i] = 0.5f; // começamos todas na metade do tamanho da barra
 
         holdTimer = 0f;
-        lastResonance = 0f;
         countdown = timeLimit;
         finished = false;
         active = true;
+        selectedBand = 0;
 
         rootPanel.SetActive(true);
 
         float jamH = jamContainer.rect.height;
         float playerH = playerContainer.rect.height;
+
         for (int i = 0; i < numBands; i++) {
             jamBars[i].color = C_Jam;
             playerBars[i].color = C_Player;
-            SetHeight(jamBars[i], 0f, jamH);
-            SetHeight(playerBars[i], 0f, playerH);
+            SetBarHeight(jamBars[i], 0f, jamH);
+            SetBarHeight(playerBars[i], 0f, playerH);
+            bandArrows[i].gameObject.SetActive(i == selectedBand); // só mostramos a seta da barra atualmente a ser mudada
         }
 
-        for (int i = 0; i < numBands; i++) {
-            bandArrows[i].gameObject.SetActive(i == selectedBand);
-        }
-
-        selectedBand = 0;
-        resonanceLabel.color = Color.white;
         statusLabel.text = "OBJETIVO: torna o azul o espelho invertido do vermelho";
     }
-
-    public void ForceClose() {
-        active = false;
-        rootPanel.SetActive(false);
-    }
-
 
     private void ApplyDifficulty(int level) {
         // t vai de 0 (câmara 1) a 1 (câmara 8)
@@ -130,33 +124,40 @@ public class CameraHackPuzzle : MonoBehaviour {
         oscillationSpeed = Mathf.Lerp(0.4f, 2.2f, t); // oscilação acelera
     }
 
-
+    // para o padrão ser igual para a mesma câmara caso o jogador a falhe à primeira
     private float[] GeneratePattern(int seed) {
-        var rng = new System.Random(seed * 7919 + 1337);
-        var p = new float[numBands];
+        Random.InitState(seed);
+        float[] p = new float[numBands];
+
         for (int i = 0; i < numBands; i++)
-            p[i] = (float)(rng.NextDouble() * 0.68 + 0.16);
+            p[i] = Random.Range(0.16f, 0.84f);
+
         return p;
     }
 
-    // Valor atual do JAM com oscilação — cada banda tem fase diferente
+    // isto faz com que as barras oscilem ou seja aumentem ou diminuem de altura
+    // o band * 0.9 é para cada barra oscilar numa fase ligeiramente diferente do que as outras
+    // para que não fiquem a mexerem-se todas em sincronia
     private float GetJamValue(int band) {
         float osc = oscillationAmplitude * Mathf.Sin(Time.time * oscillationSpeed + band * 0.9f);
         return Mathf.Clamp01(jamPattern[band] + osc);
     }
 
-    private float InverseOf(int band) => 1f - GetJamValue(band);
+    private float InverseOf(int band) {
+        return 1f - GetJamValue(band);
+    }
 
-    private void SetHeight(Image bar, float normalized, float containerH) {
-        var rt = bar.rectTransform;
+    private void SetBarHeight(Image bar, float normalized, float containerH) {
+        RectTransform rt = bar.rectTransform;
         rt.sizeDelta = new Vector2(rt.sizeDelta.x, normalized * containerH);
     }
 
-
     private void HandleKeyboardNavigation() {
         int prev = selectedBand;
+
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             selectedBand = (selectedBand - 1 + numBands) % numBands;
+
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
             selectedBand = (selectedBand + 1) % numBands;
 
@@ -169,110 +170,143 @@ public class CameraHackPuzzle : MonoBehaviour {
     private void HandleKeyboardAdjust() {
         bool up = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
         bool down = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow);
-        if (!up && !down) return;
+
+        if (!up && !down)
+            return;
+
         float dir = up ? 1f : -1f;
-        playerVals[selectedBand] =
-            Mathf.Clamp01(playerVals[selectedBand] + dir * scrollStep * Time.deltaTime * 60f);
+        playerVals[selectedBand] = Mathf.Clamp01(playerVals[selectedBand] + dir * scrollStep * Time.deltaTime * 60f);
     }
 
-
+    // isto vai a cada barra e vê o quão perto a barra do jogador está face à barra original se estiver dentro da tolerância conta como 1, senão menos
+    // depois divide pelo numero de barras para ter uma percentagem de 0 a 1 e com essa ressonância atualiza os visuais
+    // as barras vermelhas tremem se a ressonância for baixa
+    // as barras azuis ficam verdes e a pulsar quando estão certas
     private void RefreshVisuals() {
         float jamH = jamContainer.rect.height;
         float playerH = playerContainer.rect.height;
-        float t = Time.time;
 
-        // Primeira passagem: calcular ressonância global (usada para efeito de glitch)
+        // primeira passagem: calcular a ressonância global
         float resonance = 0f;
         for (int i = 0; i < numBands; i++) {
             float diff = Mathf.Abs(playerVals[i] - InverseOf(i));
-            resonance += (diff <= tolerance) ? 1f : Mathf.Clamp01(1f - diff / tolerance);
-        }
-        resonance /= numBands;
-        lastResonance = resonance;
 
-        // Segunda passagem: atualizar visuais
+            if (diff <= tolerance)
+                resonance += 1f;
+            else
+                resonance += Mathf.Clamp01(1f - diff / tolerance);
+        }
+
+        resonance /= numBands;
+
+        // segunda passagem: atualizar os visuais de cada barra
         bool glitching = resonance < 0.35f && oscillationAmplitude > 0f;
 
         for (int i = 0; i < numBands; i++) {
             float jamVal = GetJamValue(i);
-            float target = 1f - jamVal;
-            float diff = Mathf.Abs(playerVals[i] - target);
+            float diff = Mathf.Abs(playerVals[i] - (1f - jamVal));
             bool matched = diff <= tolerance;
 
-            // JAM bar com glitch quando ressonância é baixa
-            float glitch = glitching ? UnityEngine.Random.Range(-0.018f, 0.018f) : 0f;
-            SetHeight(jamBars[i], Mathf.Clamp01(jamVal + glitch), jamH);
+            // barra vermelha com glitch quando ressonância é baixa
+            float glitch = 0f;
+            if (glitching)
+                glitch = Random.Range(-0.018f, 0.018f); // tremor pequeno —> o mesmo valor que o chromaMaxOffset
+
+            SetBarHeight(jamBars[i], Mathf.Clamp01(jamVal + glitch), jamH);
             jamBars[i].color = C_Jam;
 
-            // Player bar
-            SetHeight(playerBars[i], playerVals[i], playerH);
+            // barra azul do jogador
+            SetBarHeight(playerBars[i], playerVals[i], playerH);
 
             if (matched) {
-                float pulse = (Mathf.Sin(t * 6f + i) + 1f) * 0.5f;
-                playerBars[i].color = Color.Lerp(C_Matched, Color.white, pulse * 0.4f);
+                // pulsa entre verde e branco quando está na posição certa
+                float pulse = (Mathf.Sin(Time.time * 6f + i) + 1f) * 0.5f; // 6 rad/s dá ~1 pulso por segundo, o + i faz cada barra pulsar desfasada
+                playerBars[i].color = Color.Lerp(C_Matched, Color.white, pulse * 0.4f); // vai só até 40% de branco para não perder a cor verde
+
             } else {
                 playerBars[i].color = C_Player;
             }
         }
 
-        // Slider e label de ressonância
+        // atualizar slider e label com a percentagem de ressonância
         resonanceSlider.value = resonance;
 
-        Color resColor = resonance < 0.4f ? new Color(0.95f, 0.18f, 0.18f) :
-                         resonance < 0.75f ? new Color(1.00f, 0.85f, 0.10f) :
-                                             new Color(0.18f, 1.00f, 0.42f);
-        resonanceLabel.color = resColor;
-        resonanceLabel.text = $"RESSONÂNCIA  {Mathf.RoundToInt(resonance * 100f)}%";
+        Color resColor;
+        if (resonance < 0.4f)
+            resColor = new Color(0.95f, 0.18f, 0.18f); // vermelho
+        else if (resonance < 0.75f)
+            resColor = new Color(1.00f, 0.85f, 0.10f); // amarelo
+        else
+            resColor = new Color(0.18f, 1.00f, 0.42f); // verde
 
-        // Timer vermelho quando < 10s
-        timerLabel.color = countdown < 10f ? new Color(1f, 0.2f, 0.2f) : Color.white;
-        timerLabel.text = $"{Mathf.CeilToInt(countdown):00}s";
+        resonanceLabel.color = resColor;
+        resonanceLabel.text = "RESSONÂNCIA  " + Mathf.RoundToInt(resonance * 100f) + "%";
+        timerLabel.text = Mathf.CeilToInt(countdown) + "s";
     }
 
-
+    // isto vê se todas as barras estão dentro da tolerância ao mesmo tempo
+    // se sim começa a contar o contador de tempo porque o jogador tem que ter tudo igual durante esse tempo para passar no puzzle
     private void EvaluateResonance() {
         bool allMatched = true;
-        for (int i = 0; i < numBands; i++)
-            if (Mathf.Abs(playerVals[i] - InverseOf(i)) > tolerance) { allMatched = false; break; }
+
+        for (int i = 0; i < numBands; i++) {
+            if (Mathf.Abs(playerVals[i] - InverseOf(i)) > tolerance) {
+                allMatched = false;
+                break;
+            }
+        }
 
         if (allMatched) {
             holdTimer += Time.deltaTime;
-            statusLabel.text = $"A MANTER RESSONÂNCIA  {holdTimer:F1} / {holdRequired:F1}";
+            statusLabel.text = "A MANTER RESSONÂNCIA  " + holdTimer.ToString("F1") + " / " + holdRequired.ToString("F1");
+
             if (holdTimer >= holdRequired && !finished)
                 StartCoroutine(Succeed());
+
         } else {
-            holdTimer = Mathf.Max(0f, holdTimer - Time.deltaTime * 1.5f);
+            holdTimer = Mathf.Max(0f, holdTimer - Time.deltaTime * 1.5f); // desce 1.5x mais depressa do que sobe para penalizar sair da posição
         }
     }
 
-
+    // muda a UI com base no resultado do jogador
     private IEnumerator Succeed() {
-        finished = active = false;
+        finished = true;
+        active = false;
         HackLevel++;
+
         statusLabel.text = "SINAL ANULADO  ·  ACESSO CONCEDIDO";
         resonanceLabel.text = "RESSONÂNCIA  100%";
         resonanceLabel.color = new Color(0.18f, 1f, 0.42f);
         resonanceSlider.value = 1f;
+
         yield return new WaitForSeconds(1.4f);
+
         rootPanel.SetActive(false);
-        onSuccess.Invoke();
+        CameraSystem.Instance.UnlockCamera(hackingCameraIndex);
+        PlayerController.Instance.canMoveRotate = true;
     }
 
     private IEnumerator Fail() {
-        finished = active = false;
+        finished = true;
+        active = false;
         statusLabel.text = "SINAL PERDIDO  ·  ACESSO NEGADO";
+
         SuspicionManager.Instance.IncreaseSuspicion(3f, GetInstanceID(), SuspicionManager.SuspicionSource.Hacking);
         yield return new WaitForSeconds(1.2f);
+
         rootPanel.SetActive(false);
-        CameraViewUI.Instance.ShowLockedState();
+        CameraViewUI.Instance.UpdateLockState();
         PlayerController.Instance.canMoveRotate = true;
     }
 
     private IEnumerator Cancel() {
-        finished = active = false;
+        finished = true;
+        active = false;
         rootPanel.SetActive(false);
-        CameraViewUI.Instance.ShowLockedState();
+
+        CameraViewUI.Instance.UpdateLockState();
         PlayerController.Instance.canMoveRotate = true;
+
         yield break;
     }
 }

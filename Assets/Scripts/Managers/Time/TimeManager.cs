@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -283,4 +283,12 @@ public class TimeManager : MonoBehaviour {
         float speed = isNight ? nightSpeed : daySpeed;
         return gameMinutes / (speed * 0.1f * debugSpeedMultiplier);
     }
+
+    // getters e setters para o SaveManager
+    public float GetCurrentMinutes() { return currentMinutes; }
+    public float GetAccumulatedSleep() { return accumulatedSleep; }
+    public int GetCoffeesTaken() { return coffeesTaken; }
+
+    public void SetAccumulatedSleep(float value) { accumulatedSleep = value; }
+    public void SetCoffeesTaken(int value) { coffeesTaken = value; }
 }

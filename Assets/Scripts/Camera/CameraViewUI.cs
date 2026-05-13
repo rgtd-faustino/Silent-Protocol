@@ -3,71 +3,60 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class CameraViewUI : MonoBehaviour
-{
+public class CameraViewUI : MonoBehaviour {
     public static CameraViewUI Instance;
 
-    [Header("Root")]
-    [SerializeField] private GameObject rootPanel;          // the whole overlay
+    [SerializeField] private GameObject rootPanel;
 
-    [Header("Feed Layers")]
-    [SerializeField] private RawImage feedImage;            // Layer 0: camera RT
-    [SerializeField] private RawImage scanlineOverlay;      // Layer 1: scrolling scanlines
-    [SerializeField] private RawImage staticNoiseImage;     // Layer 2: static noise sprite
-    [SerializeField] private RawImage chromaR;              // Layer 3a: red channel offset
-    [SerializeField] private RawImage chromaB;              // Layer 3b: blue channel offset
+    [SerializeField] private RawImage feedImage; // feed da carama de vigilancia  
+    [SerializeField] private RawImage scanlineOverlay; // scan lines efeito
+    [SerializeField] private RawImage staticNoiseImage; // imagem textura de noise
+    [SerializeField] private RawImage chromaR;
+    [SerializeField] private RawImage chromaB;
 
-    [Header("Signal Flash")]
-    [SerializeField] private Image switchFlash;             // Layer 5: white flash on switch
+    [SerializeField] private Image switchFlash; // flash branco ao mudar de câmara
 
-    [Header("HUD Chrome")]
-    [SerializeField] private TextMeshProUGUI cameraLabel;   // "CAM-03 / F2"
+    [SerializeField] private TextMeshProUGUI cameraLabel; // "CAM-03 / F2"
     [SerializeField] private TextMeshProUGUI cameraIndexText; // "1 / 6"
 
-    [Header("Overuse Warning")]
-    [SerializeField] private Image overuseVignette;         // Layer 7: red vignette
-    [SerializeField] private TextMeshProUGUI overuseText;   // "SURVEILLANCE DETECTED"
+    [SerializeField] private Image overuseVignette; // ecrã vermelho para indicar abuso de alternar entre câmaras
+    [SerializeField] private TextMeshProUGUI overuseText;
 
-    [Header("Lock State")]
-    [Tooltip("Overlay escuro opcional mostrado quando a câmara está locked.")]
+    // para quando a câmara ainda n foi desbloqueada para mostrarmos exatamente isso ao jogador
     [SerializeField] private Image lockOverlay;
-    [Tooltip("Label opcional — ex: 'SINAL ENCRIPTADO — [H] PARA HACKEAR'.")]
     [SerializeField] private TextMeshProUGUI lockLabel;
 
-    [Header("Navigation Hint")]
-    [SerializeField] private TextMeshProUGUI navHint;       // "[A] ANTERIOR | [D] PRÓXIMO | [E] SAIR"
+    [SerializeField] private TextMeshProUGUI navHint; // "[A] ANTERIOR | [D] PRÓXIMO | [E] SAIR"
 
-    [Header("Noise Textures")]
-    [Tooltip("Array of small noise/static sprites. Cycled rapidly for the static effect.")]
     [SerializeField] private Texture2D[] noiseFrames;
 
-    [Header("Tuning")]
-    [SerializeField] private float scanlineScrollSpeed = 0.08f;
-    [SerializeField] private float chromaMaxOffset     = 0.018f;
-    [SerializeField] private float ghostPulseSpeed     = 1.8f;
-    [SerializeField] private float switchFlashDuration = 0.12f;
-    [SerializeField] private int   noiseFrameInterval  = 3;     // frames between noise update
+    private float scanlineScrollSpeed = 0.08f; // velocidade a que as scanlines descem (baixo para não distrair demasiado)
+    private float chromaMaxOffset = 0.018f; // deslocamento máximo do efeito de aberração cromática (0.018 é subtil mas visível)
+    private float switchFlashDuration = 0.12f; // duração do flash branco ao mudar de câmara (rápido para não interromper o jogo)
+    private int noiseFrameInterval = 3; // atualiza o noise a cada 3 frames com sinal perfeito, menos com sinal mau
 
     private CameraSystem system;
     private SurveillanceCamera currentCam;
     private bool isOpen = false;
 
-    private float scanlineY   = 0f;
-    private int   frameCount  = 0;
-    private int   noiseIndex  = 0;
+    private float scanlineY = 0f;
+    private int frameCount = 0;
+    private int noiseIndex = 0;
 
     private Coroutine flashCoroutine;
 
-    void Awake()
-    {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+    void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
         rootPanel.SetActive(false);
     }
 
-    void Update()
-    {
-        if (!isOpen || system == null) return;
+    void Update() {
+        if (!isOpen || system == null)
+            return;
 
         HandleInput();
         UpdateScanlines();
@@ -77,21 +66,19 @@ public class CameraViewUI : MonoBehaviour
         UpdateOveruseWarning();
     }
 
-    public void Show(CameraSystem cameraSystem)
-    {
+    public void Show(CameraSystem cameraSystem) {
         system = cameraSystem;
         isOpen = true;
         rootPanel.SetActive(true);
 
-        currentCam = system.ActiveCamera;
+        currentCam = system.ActiveCamera();
         ApplyCameraFeed(currentCam);
         RefreshHUDLabels();
 
         UpdateLockState();
     }
 
-    public void Hide()
-    {
+    public void Hide() {
         isOpen = false;
         rootPanel.SetActive(false);
     }
@@ -103,8 +90,7 @@ public class CameraViewUI : MonoBehaviour
         TriggerSwitchFlash();
         UpdateLockState();
     }
-    private void HandleInput()
-    {
+    private void HandleInput() {
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             system.PreviousCamera();
 
@@ -114,67 +100,64 @@ public class CameraViewUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Escape))
             system.CloseCameraView();
     }
-
-    private void ApplyCameraFeed(SurveillanceCamera cam)
-    {
-        if (feedImage == null || cam == null) return;
+    private void ApplyCameraFeed(SurveillanceCamera cam) {
         feedImage.texture = cam.renderTexture;
 
-        // Chroma offset images share the same RT
-        chromaR.texture = cam.renderTexture; chromaR.color = new Color(1f, 0.2f, 0.2f, 0.35f);
-        chromaB.texture = cam.renderTexture; chromaB.color = new Color(0.2f, 0.2f, 1f, 0.35f);
+        chromaR.texture = cam.renderTexture;
+        chromaR.color = new Color(1f, 0.2f, 0.2f, 0.35f);
+
+        chromaB.texture = cam.renderTexture;
+        chromaB.color = new Color(0.2f, 0.2f, 1f, 0.35f);
     }
 
-    private void UpdateScanlines()
-    {
-        if (scanlineOverlay == null) return;
-
+    private void UpdateScanlines() {
         scanlineY += scanlineScrollSpeed * Time.deltaTime;
-        if (scanlineY > 1f) scanlineY -= 1f;
+        if (scanlineY > 1f)
+            scanlineY -= 1f;
 
-        // Degrade speed & opacity with signal integrity
-        float integrity = system.SignalIntegrity;
+        // quanto pior o sinal, mais visíveis ficam as scanlines
+        float integrity = system.signalIntegrity;
         scanlineOverlay.uvRect = new Rect(0f, scanlineY, 1f, 1f);
+
         Color c = scanlineOverlay.color;
-        c.a = Mathf.Lerp(0.55f, 0.85f, 1f - integrity);  // more visible when degraded
+        c.a = Mathf.Lerp(0.55f, 0.85f, 1f - integrity); // varia entre 55% e 85% de opacidade (nunca desaparece completamente)
         scanlineOverlay.color = c;
     }
 
-    private void UpdateNoise()
-    {
+    private void UpdateNoise() {
         frameCount++;
-        // Noise flickers faster as signal degrades
-        float integrity = system.SignalIntegrity;
+
+        // a textura de noise fica mais rápida e intensa à medida que o sinal piora
+        float integrity = system.signalIntegrity;
         int interval = Mathf.Max(1, Mathf.RoundToInt(noiseFrameInterval * integrity));
 
-        if (frameCount >= interval)
-        {
+        if (frameCount >= interval) {
             frameCount = 0;
             noiseIndex = (noiseIndex + 1) % noiseFrames.Length;
             staticNoiseImage.texture = noiseFrames[noiseIndex];
 
-            // Offset UV randomly for chaos
-            staticNoiseImage.uvRect = new Rect(
-                Random.Range(0f, 1f), Random.Range(0f, 1f), 1f, 1f);
+            // muda a UV para ficar mais caótico
+            float randomX = Random.Range(0f, 1f);
+            float randomY = Random.Range(0f, 1f);
+            staticNoiseImage.uvRect = new Rect(randomX, randomY, 1f, 1f);
         }
 
         Color nc = staticNoiseImage.color;
-        nc.a = Mathf.Lerp(0f, 0.45f, 1f - integrity);
+        nc.a = Mathf.Lerp(0f, 0.45f, 1f - integrity); // com sinal perfeito o noise é invisível, com sinal mau chega a 45% de opacidade
         staticNoiseImage.color = nc;
     }
 
-    private void UpdateChroma()
-    {
-
-        float integrity = system.SignalIntegrity;
-        float heat      = system.ResidualHeat;
+    private void UpdateChroma() {
+        float integrity = system.signalIntegrity;
+        float heat = system.residualHeat;
+        // o calor residual contribui com 30% para a distorção, menos que o sinal para não ser demasiado agressivo
         float distortion = Mathf.Lerp(0f, chromaMaxOffset, (1f - integrity) + heat * 0.3f);
 
-        // Subtle sinusoidal drift for the "analog" feel
+        // este efeito faz com que dê um sentimento de analógico
         float t = Time.time;
-        float rx = Mathf.Sin(t * 1.3f) * distortion;
-        float ry = Mathf.Cos(t * 0.9f) * distortion * 0.5f;
-        float bx = Mathf.Sin(t * 1.1f + 1.5f) * -distortion;
+        float rx = Mathf.Sin(t * 1.3f) * distortion; // canal vermelho oscila a 1.3 rad/s
+        float ry = Mathf.Cos(t * 0.9f) * distortion * 0.5f; // componente vertical é metade para parecer mais realista
+        float bx = Mathf.Sin(t * 1.1f + 1.5f) * -distortion; // canal azul oscila na direção oposta com fase diferente (+ 1.5 rad)
 
         RectTransform rtR = chromaR.rectTransform;
         RectTransform rtB = chromaB.rectTransform;
@@ -182,69 +165,73 @@ public class CameraViewUI : MonoBehaviour
         rtR.anchoredPosition = new Vector2(rx * Screen.width, ry * Screen.height);
         rtB.anchoredPosition = new Vector2(bx * Screen.width, 0f);
 
-        // Opacity scales with distortion
-        Color cr = chromaR.color; cr.a = distortion / chromaMaxOffset * 0.35f; chromaR.color = cr;
-        Color cb = chromaB.color; cb.a = distortion / chromaMaxOffset * 0.35f; chromaB.color = cb;
+        // a opacidade avança com a distorção
+        Color cr = chromaR.color;
+        cr.a = distortion / chromaMaxOffset * 0.35f;
+        chromaR.color = cr;
+
+        Color cb = chromaB.color;
+        cb.a = distortion / chromaMaxOffset * 0.35f;
+        chromaB.color = cb;
     }
 
-    private void UpdateHUD()
-    {
-            cameraIndexText.text = $"{system.CurrentCameraIndex + 1} / {system.CameraCount}";
+    private void UpdateHUD() {
+        cameraIndexText.text = (system.currentCameraIndex + 1) + " / " + system.CameraCount();
     }
 
-    private void RefreshHUDLabels()
-    {
-        cameraLabel.text = $"{currentCam.cameraLabel}  //  F{currentCam.floor}";
+    private void RefreshHUDLabels() {
+        cameraLabel.text = currentCam.cameraLabel + "  //  F" + currentCam.floor;
     }
 
-    private void UpdateOveruseWarning()
-    {
-        float heat      = system.ResidualHeat;
-        float integrity = system.SignalIntegrity;
-        float danger    = Mathf.Clamp01((1f - integrity) * 1.5f + heat * 0.5f);
+    private void UpdateOveruseWarning() {
+        float heat = system.residualHeat;
+        float integrity = system.signalIntegrity;
+        float danger = Mathf.Clamp01((1f - integrity) * 1.5f + heat * 0.5f);
 
         bool highDanger = danger > 0.6f;
 
-            Color vc = overuseVignette.color;
-            vc.a = Mathf.Lerp(0f, 0.45f, danger);
-            overuseVignette.color = vc;
+        Color vc = overuseVignette.color;
+        vc.a = Mathf.Lerp(0f, 0.45f, danger); // vignette nunca passa de 45% para não tapar o ecrã completamente
+        overuseVignette.color = vc;
 
-            overuseText.gameObject.SetActive(highDanger);
-            if (highDanger)
-            {
-                // Blink
-                float blink = Mathf.Sin(Time.time * 4f * Mathf.PI) > 0f ? 1f : 0f;
-                Color tc = overuseText.color; tc.a = blink; overuseText.color = tc;
-                overuseText.text = "ABUSO DE CÂMARA!";
-            }
+        overuseText.gameObject.SetActive(highDanger);
+
+        if (highDanger) {
+            // faz piscar o texto de aviso
+            Color tc = overuseText.color;
+            tc.a = Mathf.Sin(Time.time * 4f * Mathf.PI) > 0f ? 1f : 0f;
+            overuseText.color = tc;
+            overuseText.text = "ABUSO DE CÂMARA!";
+        }
     }
 
-    private void TriggerSwitchFlash()
-    {
-        if (switchFlash == null) return;
-        if (flashCoroutine != null) StopCoroutine(flashCoroutine);
+    private void TriggerSwitchFlash() {
+        if (flashCoroutine != null)
+            StopCoroutine(flashCoroutine);
         flashCoroutine = StartCoroutine(FlashRoutine());
     }
 
-    private IEnumerator FlashRoutine()
-    {
+    private IEnumerator FlashRoutine() {
         switchFlash.gameObject.SetActive(true);
-        Color c = switchFlash.color; c.a = 0.7f; switchFlash.color = c;
+
         float elapsed = 0f;
-        while (elapsed < switchFlashDuration)
-        {
+        while (elapsed < switchFlashDuration) {
             elapsed += Time.deltaTime;
+
+            Color c = switchFlash.color;
             c.a = Mathf.Lerp(0.7f, 0f, elapsed / switchFlashDuration);
             switchFlash.color = c;
+
             yield return null;
         }
+
         switchFlash.gameObject.SetActive(false);
         flashCoroutine = null;
     }
 
-    private void UpdateLockState() {
+    public void UpdateLockState() {
         if (system == null) return;
-        bool locked = !system.IsUnlocked(system.CurrentCameraIndex);
+        bool locked = !system.IsUnlocked(system.currentCameraIndex);
 
         // Oculta o feed quando locked
         feedImage.enabled = !locked;
@@ -260,5 +247,4 @@ public class CameraViewUI : MonoBehaviour
     }
 
 
-    public void ShowLockedState() => UpdateLockState();
 }

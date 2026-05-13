@@ -125,4 +125,9 @@ public class DocumentManager : MonoBehaviour {
     public float GetCompanyAwareness() {
         return companyAwareness;
     }
+
+    // setter para o SaveManager restaurar o awareness
+    public void SetCompanyAwareness(float value) {
+        companyAwareness = value;
+    }
 }

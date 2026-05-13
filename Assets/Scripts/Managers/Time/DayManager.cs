@@ -9,7 +9,7 @@ public class DayManager : MonoBehaviour
     public int CurrentDay { get; private set; } = 1;
     public const int TotalDays = 5;
 
-    // bool do dia 5 — outros scripts metem isto a true quando o objetivo for cumprido
+    // bool do dia 5 - outros scripts metem isto a true quando o objetivo for cumprido
     [HideInInspector] public bool finalObjectiveCompleted = false;
 
     void Awake()
@@ -20,7 +20,7 @@ public class DayManager : MonoBehaviour
 
     void Start()
     {
-        // dispara o título do primeiro dia logo no arranque
+        // dispara o titulo do primeiro dia logo no arranque
         StartCoroutine(ShowTitleNextFrame());
     }
     private IEnumerator ShowTitleNextFrame()
@@ -40,9 +40,12 @@ public class DayManager : MonoBehaviour
         }
         else
         {
-            // último dia acabou — decide ending
+            // ultimo dia acabou - decide ending
             int ending = finalObjectiveCompleted ? 1 : 2;
             GameEvent.EndingReached(ending);
         }
     }
+
+    // setter para o SaveManager poder restaurar o dia
+    public void SetCurrentDay(int day) { CurrentDay = day; }
 }

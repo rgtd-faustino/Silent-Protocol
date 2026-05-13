@@ -101,7 +101,8 @@ public class GameMenuManager : MonoBehaviour {
         // metemos os botões ligados aos métodos pelos códigos porque são muitos botões e assim sabemos que está tudo certo
         WireButtons();
 
-        // começar no menu principal
+        continueButton.interactable = SaveManager.Instance.HasSave();
+
         GoTo(MenuState.MainMenu);
     }
 
@@ -118,7 +119,7 @@ public class GameMenuManager : MonoBehaviour {
 
         // escape pausa/retoma o jogo —> não funciona no menu principal nem na criação de personagem
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            if (CameraSystem.Instance != null && CameraSystem.Instance.IsActive) return;
+            if (CameraSystem.Instance != null && CameraSystem.Instance.isActive) return;
             if (CurrentState == MenuState.Playing)
                 GoTo(MenuState.Paused);
             else if (CurrentState == MenuState.Paused)
@@ -207,7 +208,7 @@ public class GameMenuManager : MonoBehaviour {
         switch (state) {
             case MenuState.MainMenu:
                 // "Continue" só faz sentido se existir um save
-                continueButton.interactable = false;
+                continueButton.interactable = SaveManager.Instance.HasSave();
 
                 // o typewriter começa em OnEnter, enquanto o card ainda está a fazer
                 // fade in —> as letras aparecem ao mesmo tempo que o card "materializa",
@@ -428,10 +429,13 @@ public class GameMenuManager : MonoBehaviour {
 
     // métodos para os botões, não dá para meter o GoTo diretamente porque retorna void em vez da referência do método
     private void OnNewGameClicked() {
+        SaveManager.Instance.DeleteSave();
         GoTo(MenuState.CharacterCreation);
     }
 
     private void OnContinueClicked() {
+        SaveData data = SaveManager.Instance.Load();
+        SaveManager.Instance.ApplySave(data);
         GoTo(MenuState.Playing);
     }
 
@@ -440,10 +444,14 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     private void OnSaveExitClicked() {
+        SaveManager.Instance.Save();
+        continueButton.interactable = true;
         GoTo(MenuState.MainMenu);
     }
 
     private void OnAbandonClicked() {
+        SaveManager.Instance.DeleteSave();
+        continueButton.interactable = false;
         GoTo(MenuState.MainMenu);
     }
 
