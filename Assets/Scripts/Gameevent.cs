@@ -14,6 +14,7 @@ public static class GameEvent {
     // --- Estado do jogo ---
     public static event Action OnGameOver;
     public static event Action<int> OnEndingReached; // 0=denúncia, 1=extorsão, 2=lealdade
+    public static event Action<int> OnDayStarted;
 
 
     // --- Suspeita ---
@@ -34,4 +35,5 @@ public static class GameEvent {
     public static void EndingReached(int ending) => OnEndingReached?.Invoke(ending);
     public static void SuspicionStateChanged(SuspicionManager.SuspicionState s) => OnSuspicionStateChanged?.Invoke(s);
     public static void CameraOveruseWarning(float dangerLevel) => OnCameraOveruseWarning?.Invoke(dangerLevel);
+    public static void DayStarted(int day) => OnDayStarted?.Invoke(day);
 }
