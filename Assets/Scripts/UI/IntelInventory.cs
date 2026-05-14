@@ -166,8 +166,15 @@ public class IntelInventory : MonoBehaviour
         if (labels.Length >= 1) labels[0].text = item.titulo;
         if (labels.Length >= 2) labels[1].text = item.categoria;
 
-        go.GetComponent<Button>().onClick.AddListener(() => MostrarDetalhe(item));
+        var btn = go.GetComponent<Button>();
+        Debug.Log($"[Intel] Botão criado para '{item.titulo}' — btn interactable: {btn.interactable}");
+        btn.onClick.AddListener(() => {
+            Debug.Log($"[Intel] CLICADO: {item.titulo}");
+            MostrarDetalhe(item);
+        });
     }
+
+   
 
     // ------------------------------------------------------------------ //
     // Detalhe                                                               //
@@ -175,6 +182,7 @@ public class IntelInventory : MonoBehaviour
 
     private void MostrarDetalhe(IntelItem item)
     {
+        Debug.Log($"[Intel] MostrarDetalhe chamado para '{item.titulo}'");
         itemSelecionado = item;
 
         txtTitulo.text = item.titulo;

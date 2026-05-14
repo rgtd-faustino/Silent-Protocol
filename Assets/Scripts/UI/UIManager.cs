@@ -47,7 +47,9 @@ public class UIManager : MonoBehaviour {
 
     public void ChangeCursorState(CursorLockMode mode) {
         Cursor.lockState = mode;
+        Cursor.visible = (mode == CursorLockMode.None);
         Input.ResetInputAxes(); // previne spike de rato no frame da transição
+
     }
 
     // atualiza os controlos do PC para refletir o estado atual do jogo

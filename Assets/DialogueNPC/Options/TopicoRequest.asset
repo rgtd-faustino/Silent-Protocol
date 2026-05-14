@@ -17,9 +17,12 @@ MonoBehaviour:
   topicType: 2
   requiresHighSuspicion: 0
   suspicionThreshold: 0
-  requiredCharisma: 5
+  requiredCharisma: 0
   outcomes:
-  - statCheck: 0
+  - temIntel: 0
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 0
     threshold: 7
     luckModifier: 2
     suspicionAffects: 0
@@ -28,7 +31,10 @@ MonoBehaviour:
     consequence: 0
     consequenceAmount: 0
     unlockFloorIndex: 0
-  - statCheck: 1
+  - temIntel: 0
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 1
     threshold: 5
     luckModifier: 2
     suspicionAffects: 0
@@ -37,7 +43,10 @@ MonoBehaviour:
     consequence: 0
     consequenceAmount: 0
     unlockFloorIndex: 0
-  - statCheck: 2
+  - temIntel: 0
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 2
     threshold: 0
     luckModifier: 0
     suspicionAffects: 0

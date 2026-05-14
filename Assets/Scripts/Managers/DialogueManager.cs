@@ -41,6 +41,7 @@ public class DialogueManager : MonoBehaviour
         // bloqueia o movimento do jogador enquanto o diálogo está aberto
         PlayerController.Instance.canMoveRotate = false;
         UIManager.Instance.ChangeCursorState(CursorLockMode.None);
+        Cursor.visible = true;
 
         float suspicion = SuspicionManager.Instance.GetSuspicionRatio();
 
@@ -68,6 +69,7 @@ public class DialogueManager : MonoBehaviour
 
         PlayerController.Instance.canMoveRotate = true;
         UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
+        Cursor.visible = false;
 
         DialogueUI.Instance.HideDialogue();
         OnDialogueClose?.Invoke();
@@ -99,38 +101,36 @@ public class DialogueManager : MonoBehaviour
     //  — requiresHighSuspicion: só aparece se suspeita >= threshold
     private List<DialogueTopic> FilterTopics(NPCDialogueData data)
     {
-        Debug.Log("DATA: " + data);
-        Debug.Log("TOPICS: " + data.topics);
-        Debug.Log("PlayerStats: " + PlayerStats.Instance);
-        Debug.Log("SuspicionManager: " + SuspicionManager.Instance);
         float suspicion = SuspicionManager.Instance.GetSuspicionRatio();
         int charisma = PlayerStats.Instance.GetCarisma();
 
+        Debug.Log($"[Filter] Suspicion: {suspicion}, Charisma: {charisma}, Total topics: {data.topics.Length}");
+
         List<DialogueTopic> result = new List<DialogueTopic>();
 
-        // se suspeita alta e há um tópico de confronto definido, mostra só esse
-        
-
-        // caso contrário filtra os tópicos normais
         for (int i = 0; i < data.topics.Length; i++)
         {
             DialogueTopic t = data.topics[i];
 
-            // verificação de charisma mínimo
-            if (charisma < t.requiredCharisma)
-                continue;
+            Debug.Log($"[Filter] Topic '{t.buttonLabel}' — requiredCharisma: {t.requiredCharisma}, requiresHighSuspicion: {t.requiresHighSuspicion}");
 
-            // tópicos que requerem suspeita alta só aparecem nesse contexto
-            if (t.requiresHighSuspicion && suspicion < t.suspicionThreshold)
+            if (charisma < t.requiredCharisma)
+            {
+                Debug.Log($"[Filter] REJEITADO por carisma ({charisma} < {t.requiredCharisma})");
                 continue;
+            }
+
+            if (t.requiresHighSuspicion && suspicion < t.suspicionThreshold)
+            {
+                Debug.Log($"[Filter] REJEITADO por suspeita ({suspicion} < {t.suspicionThreshold})");
+                continue;
+            }
 
             result.Add(t);
-
-            // limita a 3 tópicos no ecrã (os primeiros válidos)
-            if (result.Count >= 3)
-                break;
+            if (result.Count >= 3) break;
         }
 
+        Debug.Log($"[Filter] Tópicos aprovados: {result.Count}");
         return result;
     }
 

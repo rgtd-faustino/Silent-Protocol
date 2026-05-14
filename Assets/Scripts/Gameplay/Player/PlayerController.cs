@@ -65,8 +65,16 @@ public class PlayerController : MonoBehaviour {
     }
 
 
-    void Update() {
-        // bloqueia todo o input de movimento quando uma UI está aberta.
+    void Update()
+    {
+        // Tab funciona sempre (fora do canMoveRotate)
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (EmailUI.AlgumEmailAberto)
+                return;
+            IntelInventory.Instance.ToggleDossier();
+        }
+
         if (!canMoveRotate)
             return;
 
@@ -76,17 +84,8 @@ public class PlayerController : MonoBehaviour {
         HandleCrouch();
         HandleGravity();
 
-        // atalho de debug para testar o sistema de café sem precisar de encontrar uma chávena no jogo
         if (Input.GetKeyDown(KeyCode.B))
             TimeManager.Instance.Coffee();
-
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            if (EmailUI.AlgumEmailAberto)
-                return;
-
-            IntelInventory.Instance.ToggleDossier();
-        }
     }
 
 

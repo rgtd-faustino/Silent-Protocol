@@ -17,7 +17,7 @@ MonoBehaviour:
   topicType: 0
   requiresHighSuspicion: 0
   suspicionThreshold: 0
-  requiredCharisma: 3
+  requiredCharisma: 0
   outcomes:
   - temIntel: 1
     intelAssociado: {fileID: 11400000, guid: 1c01083260a400644a6f49b5a4ce39db, type: 2}

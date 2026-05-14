@@ -15,11 +15,11 @@ MonoBehaviour:
   packets:
   - conversationId: IP0
     messageIndex: 0
-    srcIP: 10:10:10:10
-    dstIP: 2:12:12:1
+    srcIP: 1:1:1:1
+    dstIP: 2:2:2:1
     protocol: TCP
-    isEncrypted: 0
-    encryptionType: 1
-    plainText: Hj tem ...
+    isEncrypted: 1
+    encryptionType: 0
+    plainText: "Est\xE1 quase pronto..."
     isImportant: 1
-    spawnHour: 10
+    spawnHour: 12
