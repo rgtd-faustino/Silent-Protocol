@@ -22,19 +22,17 @@ public class DocumentPickup : InteractableObject
     public override void Interact()
     {
         if (isPickedUp) return;
-
         if (PlayerController.Instance.heldDocument != null)
         {
-            // jogador já tem um documento na mão —> aviso
             Debug.Log("[DocumentPickup] Já tens um documento na mão.");
             return;
         }
 
         isPickedUp = true;
         PlayerController.Instance.PickupDocument(data);
+        TaskManager.Instance.CompleteTask("Imprimir documento", true);
         gameObject.SetActive(false);
-
-        Debug.Log($"[PlayerController] Apanhei: '{data.documentTitle}' -> deptartamento {data.correctDepartment}");
+        Debug.Log($"[PlayerController] Apanhei: '{data.documentTitle}' -> departamento {data.correctDepartment}");
     }
 
     protected override bool CheckShouldGlowByDefault()

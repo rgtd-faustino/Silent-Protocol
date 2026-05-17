@@ -48,6 +48,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1923199027960091802, guid: 409a59359549aef418ba80e0b2e0056a, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1923199027960091802, guid: 409a59359549aef418ba80e0b2e0056a, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 38de246067848514c92003a0c3a5c797, type: 2}
     - target: {fileID: 1979754041115158199, guid: 409a59359549aef418ba80e0b2e0056a, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -67,9 +75,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3689213640607575970, guid: 409a59359549aef418ba80e0b2e0056a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8008227811067651703}
-    - targetCorrespondingSourceObject: {fileID: 3689213640607575970, guid: 409a59359549aef418ba80e0b2e0056a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -6553318303152976970}
   m_SourcePrefab: {fileID: 100100000, guid: 409a59359549aef418ba80e0b2e0056a, type: 3}
 --- !u!1 &5360611658850818637 stripped
 GameObject:
@@ -89,16 +94,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DocumentPickup
   objectName: objeto
---- !u!114 &-6553318303152976970
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5360611658850818637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b2f02b69820fdb4f95f3f43584ca740, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractableObject
-  objectName: objeto
+  glitchMaterial: {fileID: 2100000, guid: 38de246067848514c92003a0c3a5c797, type: 2}

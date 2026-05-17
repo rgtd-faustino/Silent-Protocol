@@ -15,9 +15,9 @@ MonoBehaviour:
   tasks:
   - taskName: Escrever documento
     spawnHour: 9.5
-    deadlineHour: 14
+    deadlineHour: 11
     difficulty: 0
   - taskName: Imprimir documento
-    spawnHour: 14
+    spawnHour: 11
     deadlineHour: 18
     difficulty: 0

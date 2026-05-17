@@ -2,14 +2,17 @@ using UnityEngine;
 
 public class ImpressoraScript : InteractableObject
 {
-    public bool documentReady = false;
-    public  bool taskActive = false;  // <-- nova flag
+    private bool documentReady = false;
+    private bool taskActive = false;
     public GameObject documentPickupPrefab;
+    public GameObject placeholder;
 
     protected override void Awake()
     {
         base.Awake();
         objectName = "Impressora";
+        
+        placeholder = transform.Find("Cube").gameObject;
     }
 
     protected override bool CheckShouldGlowByDefault()
@@ -35,12 +38,11 @@ public class ImpressoraScript : InteractableObject
         {
             DocumentPickup pickup = Instantiate(
                 documentPickupPrefab,
-                transform.position + transform.up * 0.5f,
-                Quaternion.identity
+                placeholder.transform.position,Quaternion.identity
             ).GetComponent<DocumentPickup>();
             pickup.Initialize(DocumentManager.Instance.GetDocumentForToday());
             documentReady = true;
-            Debug.Log("[ImpressoraScript] Documento impresso. Vai apanhá-lo.");
+            Debug.Log("[ImpressoraScript] Documento impresso e ejetado.");
             return;
         }
 
