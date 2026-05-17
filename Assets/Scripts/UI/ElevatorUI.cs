@@ -124,6 +124,19 @@ public class ElevatorUI : MonoBehaviour
     public void Open()
     {
         gameObject.SetActive(true);
+
+        // resincroniza os estados de bloqueio sempre que o elevador abre,
+        // para refletir desbloqueios que possam ter ocorrido durante o jogo
+        SyncLockedStates();
+
+        // garante que o display de posição mostra o piso atual correto
+        // e que o destino está limpo, independentemente do estado anterior
+        FloorData currentData = System.Array.Find(floors, f => f.floorNumber == currentFloor);
+        string currentLabel = currentData != null ? currentData.label : "---";
+        txtStatusPos.text = $"POSIÇÃO ATUAL: F{currentFloor} — {currentLabel}";
+        txtStatusDest.text = "DESTINO: --";
+        txtStatusDest.color = ElevatorColors.Muted;
+
         StartCoroutine(TypewriterTitle());
         PlayerController.Instance.canMoveRotate = false;
         Cursor.lockState = CursorLockMode.None;

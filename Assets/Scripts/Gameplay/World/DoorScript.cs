@@ -1,7 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
-public class DoorScript : InteractableObject {
+public class DoorScript : InteractableObject
+{
 
     [SerializeField] private float anguloAberta = 90f;
     [SerializeField] private float velocidade = 3f;
@@ -9,13 +10,19 @@ public class DoorScript : InteractableObject {
     private bool isOpen = false;
     private LockScript lockScript;
 
-    private void Awake() {
+    // override em vez de private void — garante que o InteractableObject.Awake() inicializa
+    // o glitch material, o MeshRenderer e as coordenadas baricêntricas corretamente
+    protected override void Awake()
+    {
+        base.Awake();
         objectName = "Porta";
         lockScript = GetComponentInChildren<LockScript>();
     }
 
-    public override void Interact() {
-        if (lockScript != null && lockScript.isLocked) {
+    public override void Interact()
+    {
+        if (lockScript != null && lockScript.isLocked)
+        {
             Debug.Log("Será que consigo destrancá-la?");
             return;
         }
@@ -26,8 +33,10 @@ public class DoorScript : InteractableObject {
         StartCoroutine(AnimarPorta(destino));
     }
 
-    private IEnumerator AnimarPorta(Quaternion destino) {
-        while (Quaternion.Angle(transform.localRotation, destino) > 0.1f) {
+    private IEnumerator AnimarPorta(Quaternion destino)
+    {
+        while (Quaternion.Angle(transform.localRotation, destino) > 0.1f)
+        {
             transform.localRotation = Quaternion.Lerp(transform.localRotation, destino, Time.deltaTime * velocidade);
             yield return null;
         }

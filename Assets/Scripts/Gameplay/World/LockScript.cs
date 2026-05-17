@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class LockScript : InteractableObject {
+public class LockScript : InteractableObject
+{
 
     // estado de visibilidade da view do keypad
     // se o jogador fechar a view pelo botão de sair, o UIManager chama SyncViewClosed() para repor esta flag a false sem chamar Interact()
@@ -15,21 +16,34 @@ public class LockScript : InteractableObject {
     public bool isLocked;
 
 
-    private void Start() {
+    private void Start()
+    {
         rb = GetComponent<Rigidbody>();
+
+        // se a fechadura começa destrancada, retira-a da layer Interactable e desativa o script —
+        // caso contrário o raycast do jogador deteta a fechadura antes da porta, forçando sempre dois cliques
+        if (!isLocked)
+        {
+            gameObject.layer = LayerMask.NameToLayer("Default");
+            enabled = false;
+        }
     }
 
 
     // a view e os bloqueios de input são geridos no UIManager
-    public override void Interact() {
+    public override void Interact()
+    {
         isViewOpen = !isViewOpen;
 
-        if (isViewOpen) {
+        if (isViewOpen)
+        {
             UIManager.Instance.OpenLockView(this); // passa-se a si próprio para o UIManager poder chamar TryCode()
             UIManager.Instance.ChangeCursorState(CursorLockMode.Confined); // cursor visível mas preso ao ecrã
             PlayerController.Instance.canMoveRotate = false;
 
-        } else {
+        }
+        else
+        {
             UIManager.Instance.CloseLockView();
             UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
             PlayerController.Instance.canMoveRotate = true;
@@ -37,16 +51,20 @@ public class LockScript : InteractableObject {
     }
 
     // chamado pelo UIManager quando o jogador carrega no botão de sair da view em vez de adivinhar o código
-    public void SyncViewClosed() {
+    public void SyncViewClosed()
+    {
         isViewOpen = false;
     }
 
 
     // chamado pelo UIManager com o array de 5 dígitos introduzidos
     // quando correto: destrancar, remover da layer Interactable e desativar o script (a fechadura já não é interatável)
-    public bool TryCode(int[] attempt) {
-        for (int i = 0; i < code.Length; i++) {
-            if (attempt[i] != code[i]) {
+    public bool TryCode(int[] attempt)
+    {
+        for (int i = 0; i < code.Length; i++)
+        {
+            if (attempt[i] != code[i])
+            {
                 Debug.Log("Código errado!");
                 return false;
             }
@@ -66,7 +84,8 @@ public class LockScript : InteractableObject {
     }
 
     // ativa a gravidade após o delay visual do LED verde (gerido no UIManager), a fechadura cai fisicamente do sítio como feedback ao jogador.
-    public void DropLock() {
+    public void DropLock()
+    {
         rb.useGravity = true;
     }
 }

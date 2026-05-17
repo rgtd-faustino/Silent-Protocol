@@ -20,9 +20,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // rece��o e andar executivo acess�veis desde o in�cio
+        // receção, andar executivo e suítes acessíveis desde o início
         UnlockFloor(0);
         UnlockFloor(1);
+        UnlockFloor(3); // suítes (floorNumber 4 → índice 3)
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
@@ -37,7 +38,10 @@ public class GameManager : MonoBehaviour
     public void SetCurrentFloor(int floorNumber)
     {
         currentFloor = floorNumber;
-        NPCManager.Instance.SetActiveFloor(floorNumber);
+        // guarda nula: se o NPCManager ainda não existir (ou não suportar este índice)
+        // a coroutine DoTravel não morre a meio e o teleporte/fecho do UI acontece na mesma
+        if (NPCManager.Instance != null)
+            NPCManager.Instance.SetActiveFloor(floorNumber);
         Debug.Log($"[GameManager] Jogador moveu-se para F{floorNumber}.");
     }
 
@@ -47,15 +51,15 @@ public class GameManager : MonoBehaviour
 
         if (currentDay >= TotalDays)
         {
-            // o jogador chegou ao fim � vai para o ecr� de escolha de final
-            // (l�gica de final a implementar quando o sistema de intel estiver pronto)
-            Debug.Log("[GameManager] �ltimo dia conclu�do.");
+            // o jogador chegou ao fim — vai para o ecrã de escolha de final
+            // (lógica de final a implementar quando o sistema de intel estiver pronto)
+            Debug.Log("[GameManager] Último dia concluído.");
             return;
         }
 
         currentDay++;
         GameEvent.DayChanged(currentDay);
-        Debug.Log($"[GameManager] Dia {currentDay} come�a.");
+        Debug.Log($"[GameManager] Dia {currentDay} começa.");
     }
 
     private void HandleGameOver()
@@ -79,7 +83,7 @@ public class GameManager : MonoBehaviour
 
     private void SaveProgress()
     {
-        // integrar com Unity SaveSystem ou PlayerPrefs quando necess�rio
+        // integrar com Unity SaveSystem ou PlayerPrefs quando necessário
         Debug.Log($"[GameManager] Progresso guardado (dia {currentDay}).");
     }
 

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DaySchedule
   tasks:
   - taskName: Escrever documento
-    spawnHour: 9
-    deadlineHour: 12
+    spawnHour: 9.5
+    deadlineHour: 14
     difficulty: 0
   - taskName: Imprimir documento
-    spawnHour: 13
-    deadlineHour: 16
+    spawnHour: 14
+    deadlineHour: 18
     difficulty: 0
