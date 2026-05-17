@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class DocumentPickup : InteractableObject {
+public class DocumentPickup : InteractableObject
+{
 
     // referência ao ScriptableObject do documento —> passada pelo ImpressoraScript no Instantiate
     // é o que nos diz para que departamento deve ir e quais os pesos narrativos
@@ -11,16 +12,19 @@ public class DocumentPickup : InteractableObject {
 
 
     // chamado pela ImpressoraScript imediatamente após o Instantiate
-    public void Initialize(DocumentTaskData documentData) {
+    public void Initialize(DocumentTaskData documentData)
+    {
         data = documentData;
         objectName = $"Documento — {data.documentTitle}";
     }
 
 
-    public override void Interact() {
+    public override void Interact()
+    {
         if (isPickedUp) return;
 
-        if (PlayerController.Instance.heldDocument != null) {
+        if (PlayerController.Instance.heldDocument != null)
+        {
             // jogador já tem um documento na mão —> aviso
             Debug.Log("[DocumentPickup] Já tens um documento na mão.");
             return;
@@ -31,5 +35,10 @@ public class DocumentPickup : InteractableObject {
         gameObject.SetActive(false);
 
         Debug.Log($"[PlayerController] Apanhei: '{data.documentTitle}' -> deptartamento {data.correctDepartment}");
+    }
+
+    protected override bool CheckShouldGlowByDefault()
+    {
+        return !isPickedUp;
     }
 }

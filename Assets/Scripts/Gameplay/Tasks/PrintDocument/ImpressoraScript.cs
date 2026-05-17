@@ -6,9 +6,15 @@ public class ImpressoraScript : InteractableObject
     private bool documentReady = false;
     public GameObject documentPickupPrefab;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         objectName = "Impressora";
+    }
+
+    protected override bool CheckShouldGlowByDefault()
+    {
+        return documentReady;
     }
 
     // chamado pelo TaskManager quando esta impressora é a selecionada
@@ -34,12 +40,19 @@ public class ImpressoraScript : InteractableObject
     {
         if (!documentReady)
         {
-            Debug.Log("[ImpressoraScript] Não há nenhum documento para apanhar.");
+            // Ainda não há documento — spawna agora
+            DocumentPickup pickup = Instantiate(
+                documentPickupPrefab,
+                transform.position + transform.forward * 1.5f + Vector3.up * 0.1f,
+                Quaternion.identity
+            ).GetComponent<DocumentPickup>();
+            pickup.Initialize(DocumentManager.Instance.GetDocumentForToday());
+            documentReady = true;
+            Debug.Log("[ImpressoraScript] Documento impresso. Vai apanhá-lo.");
             return;
         }
 
-        TaskManager.Instance.CompleteTask("Imprimir documento", true);
-        documentReady = false;
-        Debug.Log("[ImpressoraScript] Documento apanhado. Task completa.");
+        // Já foi spawnado anteriormente (edge case)
+        Debug.Log("[ImpressoraScript] O documento já foi impresso.");
     }
 }

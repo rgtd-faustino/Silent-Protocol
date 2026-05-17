@@ -1,7 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
-public class CameraScript : MonoBehaviour {
+public class CameraScript : MonoBehaviour
+{
+    public static CameraScript Instance;
+
     [Header("Mouse")]
     public float mouseSensitivity = 250f;
     private float xRotation = 0f;
@@ -14,15 +17,29 @@ public class CameraScript : MonoBehaviour {
     public float interactionDistance = 6f;
     public LayerMask interactableLayer;
     private KeyCode interactKey = KeyCode.E;
-    private InteractableObject currentTarget;
+    [HideInInspector] public InteractableObject currentTarget;
     private LockScript currentLock;
 
-    void Start() {
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+    }
+
+    void Start()
+    {
         StartCoroutine(DetectInteractableRoutine());
     }
 
-    void Update() {
-        if (UIManager.Instance.IsLockViewOpen() && Input.GetKeyDown(interactKey)) {
+    void Update()
+    {
+        if (UIManager.Instance.IsLockViewOpen() && Input.GetKeyDown(interactKey))
+        {
             if (currentLock != null)
                 currentLock.SyncViewClosed();
 
@@ -40,16 +57,18 @@ public class CameraScript : MonoBehaviour {
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        if (currentTarget != null && Input.GetKeyDown(interactKey)) {
+        if (currentTarget != null && Input.GetKeyDown(interactKey))
+        {
             currentTarget.Interact();
             UIManager.Instance.HideTooltip();
-            currentTarget.HideGlitch(); // esconde antes de limpar a referência
+            currentTarget.HideGlitch(); // esconde antes de limpar a referÃªncia
             currentTarget = null;
             currentLock = null;
         }
     }
 
-    void LateUpdate() {
+    void LateUpdate()
+    {
         if (headBone == null) return;
         transform.position = Vector3.Lerp(
             transform.position,
@@ -58,21 +77,27 @@ public class CameraScript : MonoBehaviour {
         );
     }
 
-    private IEnumerator DetectInteractableRoutine() {
+    private IEnumerator DetectInteractableRoutine()
+    {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
-        while (true) {
+        while (true)
+        {
             DetectInteractable();
             yield return wait;
         }
     }
 
-    void DetectInteractable() {
+    void DetectInteractable()
+    {
         Ray ray = new Ray(transform.position, transform.forward);
 
-        if (Physics.SphereCast(ray, 0.25f, out RaycastHit hit, interactionDistance, interactableLayer)) {
+        if (Physics.SphereCast(ray, 0.25f, out RaycastHit hit, interactionDistance, interactableLayer))
+        {
             InteractableObject target = hit.collider.GetComponent<InteractableObject>();
-            if (target != null) {
-                if (target != currentTarget) {
+            if (target != null)
+            {
+                if (target != currentTarget)
+                {
                     // esconde o anterior antes de mudar
                     if (currentTarget != null)
                         currentTarget.HideGlitch();
@@ -91,7 +116,8 @@ public class CameraScript : MonoBehaviour {
         }
 
         // perdeu o target
-        if (currentTarget != null) {
+        if (currentTarget != null)
+        {
             UIManager.Instance.HideTooltip();
             currentTarget.HideGlitch(); // primeiro
             currentTarget = null;       // depois

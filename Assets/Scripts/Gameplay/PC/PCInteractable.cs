@@ -1,12 +1,14 @@
 using UnityEngine;
 
-public class PCInteractable : InteractableObject {
+public class PCInteractable : InteractableObject
+{
 
     public GameObject pcCanvas;
 
     private bool isOpen = false;
 
-    public override void Interact() {
+    public override void Interact()
+    {
         if (!isOpen)
             OpenPC();
         else
@@ -34,7 +36,8 @@ public class PCInteractable : InteractableObject {
         if (srv2 != null) srv2.OnOpen();
     }
 
-    private void Update() {
+    private void Update()
+    {
         // só tenta apanahr o Escape se o PC estiver aberto
         if (isOpen && Input.GetKeyDown(KeyCode.P))
             ClosePC();
@@ -50,5 +53,12 @@ public class PCInteractable : InteractableObject {
         Cursor.visible = false;
 
         isOpen = false;
+    }
+
+    protected override bool CheckShouldGlowByDefault()
+    {
+        if (TaskManager.Instance == null) return false;
+        return TaskManager.Instance.HasActiveTask("Escrever documento") ||
+               TaskManager.Instance.HasActiveTask("Imprimir documento");
     }
 }

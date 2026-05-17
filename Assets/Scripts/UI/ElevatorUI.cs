@@ -3,7 +3,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ElevatorUI : MonoBehaviour {
+public class ElevatorUI : MonoBehaviour
+{
     [Header("References")]
     public RectTransform elevatorCar;
     public TextMeshProUGUI txtSysStatus;
@@ -47,7 +48,8 @@ public class ElevatorUI : MonoBehaviour {
     // Dados dos pisos
     private FloorData[] floors;
 
-    public static class ElevatorColors {
+    public static class ElevatorColors
+    {
         public static readonly Color32 Green = new Color32(0, 200, 100, 255);
         public static readonly Color32 Amber = new Color32(255, 176, 0, 255);
         public static readonly Color32 Red = new Color32(255, 51, 51, 255);
@@ -59,7 +61,8 @@ public class ElevatorUI : MonoBehaviour {
     }
 
     [System.Serializable]
-    public class FloorData {
+    public class FloorData
+    {
         public int floorNumber;
         public string label;
         public string fullName;
@@ -69,7 +72,8 @@ public class ElevatorUI : MonoBehaviour {
         public string[] features;
         public bool locked;
 
-        public FloorData(int num, string lbl, string full, string desc, string acc, string clr, string[] feats, bool locked) {
+        public FloorData(int num, string lbl, string full, string desc, string acc, string clr, string[] feats, bool locked)
+        {
             floorNumber = num;
             label = lbl;
             fullName = full;
@@ -81,7 +85,8 @@ public class ElevatorUI : MonoBehaviour {
         }
     }
 
-    void Awake() {
+    void Awake()
+    {
         floors = new FloorData[]
         {
             new FloorData(5, "CEO", "PISO DO CEO", "Acesso reservado ao CEO. Credencial biométrica obrigatória.",
@@ -110,12 +115,14 @@ public class ElevatorUI : MonoBehaviour {
         SyncLockedStates();
     }
 
-    void Update() {
+    void Update()
+    {
         if (gameObject.activeSelf && Input.GetKeyDown(KeyCode.Escape))
             Close();
     }
 
-    public void Open() {
+    public void Open()
+    {
         gameObject.SetActive(true);
         StartCoroutine(TypewriterTitle());
         PlayerController.Instance.canMoveRotate = false;
@@ -123,7 +130,8 @@ public class ElevatorUI : MonoBehaviour {
         Cursor.visible = true;
     }
 
-    public void Close() {
+    public void Close()
+    {
         gameObject.SetActive(false);
         selectedFloor = -1;
         ClearDetails();
@@ -133,13 +141,14 @@ public class ElevatorUI : MonoBehaviour {
         Cursor.visible = false;
     }
 
-    public void OnFloorClicked(int index) {
-        if (isMoving) 
+    public void OnFloorClicked(int index)
+    {
+        if (isMoving)
             return;
 
         FloorData data = floors[index];
 
-        if (data.floorNumber == currentFloor) 
+        if (data.floorNumber == currentFloor)
             return;
 
         selectedFloor = index;
@@ -159,14 +168,16 @@ public class ElevatorUI : MonoBehaviour {
         confirmButton.interactable = !data.locked;
     }
 
-    public void OnConfirm() {
-        if (selectedFloor < 0 || floors[selectedFloor].locked || isMoving) 
+    public void OnConfirm()
+    {
+        if (selectedFloor < 0 || floors[selectedFloor].locked || isMoving)
             return;
 
         StartCoroutine(DoTravel());
     }
 
-    IEnumerator DoTravel() {
+    IEnumerator DoTravel()
+    {
         isMoving = true;
         FloorData dest = floors[selectedFloor];
 
@@ -191,20 +202,22 @@ public class ElevatorUI : MonoBehaviour {
         ShowArrived(dest);
 
         // Aqui chamas o teu GameManager para mudar de piso
-        GameManager.Instance.SetCurrentFloor(currentFloor);
+        GameManager.Instance.SetCurrentFloor(currentFloor - 1);
         // Podes fechar o UI depois de X segundos ou esperar input
         yield return new WaitForSecondsRealtime(0.8f);
         TeleportToFloor(currentFloor);
         Close();
     }
 
-    IEnumerator MoveCarTo(int targetFloor, bool instant) {
+    IEnumerator MoveCarTo(int targetFloor, bool instant)
+    {
         float startY = elevatorCar.anchoredPosition.y;
         float targetY = FloorToY(targetFloor);
         float elapsed = 0f;
         float duration = instant ? 0f : carMoveSpeed;
 
-        while (elapsed < duration) {
+        while (elapsed < duration)
+        {
             elapsed += Time.unscaledDeltaTime;
             float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
             Vector2 pos = elevatorCar.anchoredPosition;
@@ -218,41 +231,48 @@ public class ElevatorUI : MonoBehaviour {
         elevatorCar.anchoredPosition = final;
     }
 
-    float FloorToY(int floorNumber) {
-        switch (floorNumber) {
-            case 5: 
+    float FloorToY(int floorNumber)
+    {
+        switch (floorNumber)
+        {
+            case 5:
                 return -33.3f;
 
-            case 4: 
+            case 4:
                 return -98.3f;
 
-            case 3: 
+            case 3:
                 return -162.3f;
 
-            case 2: 
+            case 2:
                 return -226.3f;
 
-            case 1: 
+            case 1:
                 return -290.3f;
 
-            default: 
+            default:
                 return -226.3f;
         }
     }
 
-    void SetCarPosition(int floorNumber, bool instant) {
-        if (instant) {
+    void SetCarPosition(int floorNumber, bool instant)
+    {
+        if (instant)
+        {
             Vector2 pos = elevatorCar.anchoredPosition;
             pos.y = FloorToY(floorNumber);
             elevatorCar.anchoredPosition = pos;
 
-        } else {
+        }
+        else
+        {
             StopAllCoroutines();
             StartCoroutine(MoveCarTo(floorNumber, instant: false));
         }
     }
 
-    void ShowDetails(FloorData d) {
+    void ShowDetails(FloorData d)
+    {
         Color color = d.locked ? ElevatorColors.Red : d.access == "RESTRITO" ? ElevatorColors.Amber : ElevatorColors.Green;
 
         detTitle.text = $"F{d.floorNumber} — {d.fullName}";
@@ -267,7 +287,8 @@ public class ElevatorUI : MonoBehaviour {
         detLocked.SetActive(d.locked);
     }
 
-    void ShowTransit(int from, int to) {
+    void ShowTransit(int from, int to)
+    {
         detTitle.text = "EM TRÂNSITO";
         detTitle.color = ElevatorColors.Green;
         detSubtitle.text = $"F{from} → F{to}";
@@ -278,7 +299,8 @@ public class ElevatorUI : MonoBehaviour {
         detLocked.SetActive(false);
     }
 
-    void ShowArrived(FloorData d) {
+    void ShowArrived(FloorData d)
+    {
         detTitle.text = $"CHEGASTE AO F{d.floorNumber}";
         detTitle.color = ElevatorColors.Green;
         detSubtitle.text = d.label;
@@ -288,10 +310,12 @@ public class ElevatorUI : MonoBehaviour {
         detLocked.SetActive(false);
     }
 
-    void TeleportToFloor(int floorNumber) {
+    void TeleportToFloor(int floorNumber)
+    {
         Transform target;
 
-        switch (floorNumber) {
+        switch (floorNumber)
+        {
             case 1:
                 target = spawnFloor1;
                 break;
@@ -325,27 +349,32 @@ public class ElevatorUI : MonoBehaviour {
         cc.enabled = true;
     }
 
-    IEnumerator TypewriterTitle() {
+    IEnumerator TypewriterTitle()
+    {
         string textWithoutCursor = "// SELEÇÃO DE DESTINO";
         txtTitle.text = "";
-        foreach (char c in textWithoutCursor) {
+        foreach (char c in textWithoutCursor)
+        {
             txtTitle.text += c;
             yield return new WaitForSecondsRealtime(CharDelay);
         }
         StartCoroutine(BlinkCursor());
     }
 
-    IEnumerator BlinkCursor() {
+    IEnumerator BlinkCursor()
+    {
         string textWithoutCursor = "// SELEÇÃO DE DESTINO";
         bool cursorVisible = true;
-        while (gameObject.activeSelf) {
+        while (gameObject.activeSelf)
+        {
             txtTitle.text = cursorVisible ? textWithoutCursor + "_" : textWithoutCursor;
             cursorVisible = !cursorVisible;
             yield return new WaitForSecondsRealtime(0.52f);
         }
     }
 
-    void ClearDetails() {
+    void ClearDetails()
+    {
         detTitle.text = detSubtitle.text = detDesc.text = "";
         detFeatLabel.text = "";
         detFeat1.text = detFeat2.text = detFeat3.text = "";
@@ -353,17 +382,19 @@ public class ElevatorUI : MonoBehaviour {
     }
 
     // Método público para o GameManager desbloquear pisos
-    public void UnlockFloor(int floorNumber) {
+    public void UnlockFloor(int floorNumber)
+    {
         int index = 5 - floorNumber;
         if (index >= 0 && index < floors.Length)
             floors[index].locked = false;
     }
 
-    public void SyncLockedStates() {
-        foreach (var floor in floors) {
+    public void SyncLockedStates()
+    {
+        foreach (var floor in floors)
+        {
             int gmIndex = floor.floorNumber - 1;
             floor.locked = !GameManager.Instance.IsFloorUnlocked(gmIndex);
         }
     }
 }
-

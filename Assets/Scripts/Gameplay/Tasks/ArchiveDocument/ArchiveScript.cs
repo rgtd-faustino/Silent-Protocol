@@ -1,10 +1,12 @@
 using UnityEngine;
 
-public class ArchiveScript : InteractableObject {
+public class ArchiveScript : InteractableObject
+{
 
     // os três arquivos físicos do escritório
     // o jogador vai descobrir qual é qual ao explorar (etiquetas nos armários, conversas com NPCs, etc.)
-    public enum DepartmentType {
+    public enum DepartmentType
+    {
         RecursosHumanos,
         Financeiro,
         Operacoes
@@ -14,15 +16,24 @@ public class ArchiveScript : InteractableObject {
 
 
 
-    private void Awake() {
+    protected override void Awake()
+    {
+        base.Awake();
         objectName = $"Arquivo — {department}";
     }
 
+    protected override bool CheckShouldGlowByDefault()
+    {
+        return PlayerController.Instance.heldDocument != null;
+    }
 
-    public override void Interact() {
+
+    public override void Interact()
+    {
 
         // sem documento na mão —> feedback e sai
-        if (PlayerController.Instance.heldDocument == null) {
+        if (PlayerController.Instance.heldDocument == null)
+        {
             Debug.Log($"[ArchiveScript] Não tens nenhum documento para arquivar.");
             return;
         }
@@ -39,10 +50,13 @@ public class ArchiveScript : InteractableObject {
         // remove o documento da mão do jogador
         PlayerController.Instance.heldDocument = null;
 
-        if (correct) {
+        if (correct)
+        {
             Debug.Log($"[ArchiveScript] Documento arquivado corretamente em '{department}'.");
 
-        } else {
+        }
+        else
+        {
             Debug.Log($"[ArchiveScript] Departamento errado! Documento de '{doc.correctDepartment}' arquivado em '{department}'.");
 
             // engano de departamento levanta suspeita imediata —> parece incompetência ou sabotagem
