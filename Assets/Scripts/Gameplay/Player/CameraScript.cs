@@ -19,6 +19,7 @@ public class CameraScript : MonoBehaviour
     private KeyCode interactKey = KeyCode.E;
     [HideInInspector] public InteractableObject currentTarget;
     private LockScript currentLock;
+    [HideInInspector] public bool blockDetection = false;
 
     void Awake()
     {
@@ -88,7 +89,9 @@ public class CameraScript : MonoBehaviour
     }
 
     void DetectInteractable()
+
     {
+        if (blockDetection) return;
         Ray ray = new Ray(transform.position, transform.forward);
 
         if (Physics.SphereCast(ray, 0.25f, out RaycastHit hit, interactionDistance, interactableLayer))
@@ -106,10 +109,8 @@ public class CameraScript : MonoBehaviour
                     currentTarget.ShowGlitch();
                     currentLock = target as LockScript;
 
-                    if (target is IntelPickup)
-                        UIManager.Instance.ShowTooltip("E para ler  |  G para guardar");
-                    else
-                        UIManager.Instance.ShowTooltip("E para interagir");
+                   
+                   UIManager.Instance.ShowTooltip("E para interagir");
                 }
                 return;
             }
