@@ -13,7 +13,7 @@ public class EndingUI : MonoBehaviour
 
     // textos para cada ending
     private static readonly string[] EndingTitles = {
-        "",              // índice 0 não usado
+        "",              // ndice 0 no usado
         "Game Over",     // ending 1
         "Game Over"      // ending 2
     };

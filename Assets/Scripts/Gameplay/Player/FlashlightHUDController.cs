@@ -20,7 +20,7 @@ public class FlashlightHUDController : MonoBehaviour {
 
     [Header("Colors")]
     [SerializeField] private Color colorFull = new Color(1.00f, 0.96f, 0.75f); // branco quente
-    [SerializeField] private Color colorMid = new Color(0.96f, 0.78f, 0.26f); // âmbar
+    [SerializeField] private Color colorMid = new Color(0.96f, 0.78f, 0.26f); // mbar
     [SerializeField] private Color colorLow = new Color(0.83f, 0.38f, 0.10f); // laranja-vermelho
     [SerializeField] private Color colorCritical = new Color(0.55f, 0.10f, 0.04f); // vermelho escuro
 
@@ -59,7 +59,7 @@ public class FlashlightHUDController : MonoBehaviour {
         // filamento lit
         filamentLit.color = color;
 
-        // bloom —> mais intenso quando cheio
+        // bloom > mais intenso quando cheio
         bulbBloom.color = new Color(color.r, color.g, color.b, ratio > 0 ? Mathf.Lerp(0.08f, 0.55f, ratio) : 0f);
 
         // fill interior suave
@@ -70,7 +70,7 @@ public class FlashlightHUDController : MonoBehaviour {
         pctText.color = new Color(color.r, color.g, color.b, ratio > 0 ? 0.85f : 0.15f);
         //labelText.color = new Color(color.r, color.g, color.b, 0.35f);
 
-        // animação de ligar e desligar para parecer que fundiu
+        // animao de ligar e desligar para parecer que fundiu
         if (ratio <= 0f && !isDead) {
             isDead = true;
             StopFlicker();
@@ -80,9 +80,9 @@ public class FlashlightHUDController : MonoBehaviour {
             isDead = false;
 
             if (ratio <= 0.10f) 
-                EnsureFlicker(0.07f, 0.25f); // animação agressiva
+                EnsureFlicker(0.07f, 0.25f); // animao agressiva
             else if (ratio <= 0.25f) 
-                EnsureFlicker(0.25f, 0.70f); // animação suave
+                EnsureFlicker(0.25f, 0.70f); // animao suave
             else 
                 StopFlicker();
         }
@@ -106,7 +106,7 @@ public class FlashlightHUDController : MonoBehaviour {
 
     private IEnumerator FlickerRoutine(float interval, float minAlpha) {
         while (true) {
-            // 40% de chance de piscar em cada tick para parecer que está a morrer
+            // 40% de chance de piscar em cada tick para parecer que est a morrer
             if (Random.value < 0.4f)
                 canvasGroup.alpha = Random.Range(minAlpha, 1f);
             else
@@ -125,13 +125,13 @@ public class FlashlightHUDController : MonoBehaviour {
     }
 
     private IEnumerator DeathSequence() {
-        // animação final rápida
+        // animao final rpida
         for (int i = 0; i < 10; i++) {
             canvasGroup.alpha = Random.Range(0.05f, 0.95f);
             yield return new WaitForSeconds(0.05f);
         }
 
-        // faísca branca
+        // fasca branca
         filamentLit.color = Color.white;
         bulbBloom.color = new Color(1f, 1f, 1f, 0.9f);
         canvasGroup.alpha = 1f;

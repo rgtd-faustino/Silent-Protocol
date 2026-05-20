@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
@@ -12,6 +12,20 @@ public class PlayerController : MonoBehaviour {
     // documento físico que o jogador está a segurar (apanhado na impressora, para arquivar)
     [HideInInspector] public DocumentTaskData heldDocument = null;
     [HideInInspector] public bool hasFlashlight = false;
+
+    // lista de cartões que o jogador já coletou
+    [HideInInspector] public List<string> unlockedCardIDs = new List<string>();
+
+    public void AddCardCredential(string cardID) {
+        // só adiciona se não tiver o cartão
+        if (!unlockedCardIDs.Contains(cardID)) {
+            unlockedCardIDs.Add(cardID);
+        }
+    }
+
+    public bool HasCardCredential(string cardID) {
+        return unlockedCardIDs.Contains(cardID);
+    }
 
     // para poder rodar o jogador com o rato
     public Transform cameraTransform;

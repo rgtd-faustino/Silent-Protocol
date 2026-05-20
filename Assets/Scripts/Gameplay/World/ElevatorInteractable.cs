@@ -4,8 +4,10 @@ public class ElevatorInteractable : InteractableObject {
 
     public ElevatorUI elevatorUI;
 
-    void Start() {
+    protected override void Awake() {
+        base.Awake();
         objectName = "painel do elevador";
+        tooltipMessage = "E para usar painel do elevador";
     }
 
     public override void Interact() {

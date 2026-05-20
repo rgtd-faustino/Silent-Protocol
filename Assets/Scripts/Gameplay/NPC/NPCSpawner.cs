@@ -9,12 +9,12 @@ public class NPCSpawner : MonoBehaviour {
     [SerializeField] private GameObject npcPrefab1;
     [SerializeField] private GameObject npcPrefab2;
     [SerializeField] private GameObject npcPrefab3;
-    // ponto de spawn na cena (porta de entrada, receção, etc.)
+    // ponto de spawn na cena (porta de entrada, receo, etc.)
     private Transform spawnPoint;
 
-    // rota fixa atribuída a cada NPC spawnado por este spawner
+    // rota fixa atribuda a cada NPC spawnado por este spawner
     // ex: CAMINHO1 para colegas, DEAMBULAR para visitantes
-    // se null, o NPC usa o sistema aleatório normal do NPCManager
+    // se null, o NPC usa o sistema aleatrio normal do NPCManager
     [SerializeField] private PatrolRoute assignedRoute;
 
     [SerializeField] private PatrolRoute startRoute;
@@ -25,7 +25,7 @@ public class NPCSpawner : MonoBehaviour {
     // segundos entre cada tentativa de spawn
     [SerializeField] private float spawnInterval = 30f;
 
-    // contador interno — sobe no spawn, desce quando um NPC é destruído via OnNPCDestroyed
+    // contador interno  sobe no spawn, desce quando um NPC  destrudo via OnNPCDestroyed
     private int currentActive = 0;
 
 
@@ -45,15 +45,15 @@ public class NPCSpawner : MonoBehaviour {
                 npc.assignedRoute = assignedRoute;
                 npc.startRoute = startRoute;
                 npc.spawner = this;
-                // atribuímos a homeBase pelo código porque os colegas spawnados nos elevadores precisam de voltar a casa
-                // e como há sempre mais do que um elevador ele é atribuído quando é spawnado
-                // para as rececnionistas como elas já existem não há problema porque não passam por este código
+                // atribumos a homeBase pelo cdigo porque os colegas spawnados nos elevadores precisam de voltar a casa
+                // e como h sempre mais do que um elevador ele  atribudo quando  spawnado
+                // para as rececnionistas como elas j existem no h problema porque no passam por este cdigo
                 npc.homeBase = spawnPoint;
             }
         }
     }
 
-    // chamado pelo NPCScript.OnDestroy quando o NPC é destruído
+    // chamado pelo NPCScript.OnDestroy quando o NPC  destrudo
     // permite ao spawner saber que pode spawnar mais um
     public void OnNPCDestroyed() {
         currentActive--;

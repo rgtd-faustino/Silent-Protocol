@@ -7,7 +7,7 @@ public class StatusEffect
 
     // realStage = sono real
     // currentStage = sono atual com efeitos
-    // time = tempo desde que começou o efeito
+    // time = tempo desde que comeou o efeito
     public System.Func<int, int, float, int> modifySleepStage;
 
     public StatusEffect(float duration, System.Func<int, int, float, int> modify)

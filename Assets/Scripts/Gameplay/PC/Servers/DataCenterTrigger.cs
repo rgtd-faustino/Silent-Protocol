@@ -6,7 +6,7 @@ public class DataCenterTrigger : InteractableObject
 
     [SerializeField] private TriggerType triggerType;
     [SerializeField] private DialogueCutscene cutscene;
-    [SerializeField] private IntelItem intelToGive; // só para o Server2
+    [SerializeField] private IntelItem intelToGive; // s para o Server2
 
     private bool triggered = false;
 
@@ -30,7 +30,7 @@ public class DataCenterTrigger : InteractableObject
             case TriggerType.Server2:
                 CutsceneDialogueUI.Instance.Play(cutscene, () =>
                 {
-                    // ao terminar o diálogo dá a intel automaticamente
+                    // ao terminar o dilogo d a intel automaticamente
                     if (intelToGive != null)
                         IntelInventory.Instance.AdicionarIntel(intelToGive);
                 });

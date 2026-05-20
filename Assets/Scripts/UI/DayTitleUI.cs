@@ -44,7 +44,7 @@ public class DayTitleUI : MonoBehaviour
         // fade in
         yield return StartCoroutine(Fade(0f, 1f, fadeInDuration));
 
-        // espera visível
+        // espera visvel
         yield return new WaitForSeconds(holdDuration);
 
         // fade out

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gere a lógica do TrashBin de UM PC específico.
+/// Gere a lgica do TrashBin de UM PC especfico.
 /// Coloca este script no mesmo GameObject que o TrashBinUI.
 /// Arrasta os TrashItem assets para a lista 'itensDestePc' no Inspector.
 /// </summary>
@@ -48,7 +48,7 @@ public class PCTrashManager : MonoBehaviour
     }
 
     // ------------------------------------------------------------------ //
-    // Lógica interna                                                        //
+    // Lgica interna                                                        //
     // ------------------------------------------------------------------ //
 
     private void EntregarItem(TrashItem item)
@@ -60,10 +60,10 @@ public class PCTrashManager : MonoBehaviour
     }
 
     // ------------------------------------------------------------------ //
-    // API pública                                                           //
+    // API pblica                                                           //
     // ------------------------------------------------------------------ //
 
-    /// <summary>Injeta um item em runtime (triggers, eventos de missão, etc.)</summary>
+    /// <summary>Injeta um item em runtime (triggers, eventos de misso, etc.)</summary>
     public void ReceberItem(TrashItem item)
     {
         if (itens.Contains(item)) return;

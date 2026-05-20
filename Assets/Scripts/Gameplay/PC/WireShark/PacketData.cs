@@ -1,5 +1,5 @@
 // PacketData.cs
-// Representa um único pacote de rede no jogo
+// Representa um nico pacote de rede no jogo
 
 using System;
 
@@ -13,9 +13,9 @@ public class PacketData
     public string Protocol;         // "TCP" ou "UDP"
     public string EncryptionType;   // "AES" ou "DES"
     public string EncryptedPayload; // o texto encriptado (hex string)
-    public string PlainText;        // o texto original — só usado internamente para ScriptableObject
-    public string Hash;             // hash fictício gerado
-    public int MessageIndex;     // índice na conversa (1, 2, 3...)
+    public string PlainText;        // o texto original  s usado internamente para ScriptableObject
+    public string Hash;             // hash fictcio gerado
+    public int MessageIndex;     // ndice na conversa (1, 2, 3...)
     public bool IsImportant;      // marca os pacotes com intel relevante
     public float Timestamp;        // tempo de jogo em que apareceu
 }

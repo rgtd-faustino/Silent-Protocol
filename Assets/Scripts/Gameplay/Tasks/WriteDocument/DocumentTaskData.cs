@@ -8,12 +8,12 @@ public class DocumentTaskData : ScriptableObject {
     [TextArea(4, 10)]
     public string bodyText;
     // usa {0}, {1}, {2} para marcar lacunas
-    // ex: "A reunião foi presidida por {0} e durou {1} minutos."
+    // ex: "A reunio foi presidida por {0} e durou {1} minutos."
 
     public BlankSlot[] blanks;
 
-    // departamento correto para este documento —> o jogador tem de deduzir com base no conteúdo
-    // não é mostrado diretamente na UI para manter a tensão de "será que estou a arquivar no sítio certo?"
+    // departamento correto para este documento > o jogador tem de deduzir com base no contedo
+    // no  mostrado diretamente na UI para manter a tenso de "ser que estou a arquivar no stio certo?"
     public ArchiveScript.DepartmentType correctDepartment;
 
     [System.Serializable]

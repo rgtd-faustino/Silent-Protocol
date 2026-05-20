@@ -1,16 +1,18 @@
 using UnityEngine;
 
 public class CameraHackInteractable : InteractableObject {
-    [SerializeField] private int cameraIndex = 0; // indice desta c‚mara no array allCameras do CameraSystem
+    [SerializeField] private int cameraIndex = 0; // indice desta cmara no array allCameras do CameraSystem
 
-    void Start() {
-        objectName = "C‚mara de Vigil‚ncia";
+    protected override void Awake() {
+        base.Awake();
+        objectName = "C√¢mara de Vigil√¢ncia";
+        tooltipMessage = "E para hackear C√¢mara de Vigil√¢ncia";
     }
 
     public override void Interact() {
-        // se j· estiver desbloqueada, n„o h· puzzle
+        // se j estiver desbloqueada, no h puzzle
         if (CameraSystem.Instance.IsUnlocked(cameraIndex)) {
-            UIManager.Instance.ShowTooltip("C‚mara j· desbloqueada.");
+            UIManager.Instance.ShowTooltip("Cmara j desbloqueada.");
             return;
         }
 

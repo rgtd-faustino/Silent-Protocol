@@ -1,11 +1,11 @@
 using UnityEngine;
 
-// guarda os 7 atributos da personagem definidos na criação
+// guarda os 7 atributos da personagem definidos na criao
 public class PlayerStats : MonoBehaviour {
     public static PlayerStats Instance;
 
 
-    // Ordem: Força, Perceção, Resistência, Carisma, Intelecto, Agilidade, Sorte
+    // Ordem: Fora, Perceo, Resistncia, Carisma, Intelecto, Agilidade, Sorte
     public int[] Stats = new int[7] { 1, 1, 1, 1, 1, 1, 1 };
 
     public int GetForca() {

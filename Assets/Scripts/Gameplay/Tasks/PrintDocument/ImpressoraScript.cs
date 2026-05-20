@@ -11,6 +11,7 @@ public class ImpressoraScript : InteractableObject
     {
         base.Awake();
         objectName = "Impressora";
+        tooltipMessage = "E para usar impressora";
         
         placeholder = transform.Find("Cube").gameObject;
     }
@@ -30,7 +31,7 @@ public class ImpressoraScript : InteractableObject
     {
         if (!taskActive)
         {
-            Debug.Log("[ImpressoraScript] Esta impressora não tem nenhuma tarefa ativa.");
+            Debug.Log("[ImpressoraScript] Esta impressora no tem nenhuma tarefa ativa.");
             return;
         }
 
@@ -46,6 +47,6 @@ public class ImpressoraScript : InteractableObject
             return;
         }
 
-        Debug.Log("[ImpressoraScript] O documento já foi impresso.");
+        Debug.Log("[ImpressoraScript] O documento j foi impresso.");
     }
 }

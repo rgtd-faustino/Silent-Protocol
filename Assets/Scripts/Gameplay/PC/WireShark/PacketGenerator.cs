@@ -1,7 +1,7 @@
 // PacketGenerator.cs
-// Lê o NetworkSchedule do dia e envia os pacotes nas horas certas.
+// L o NetworkSchedule do dia e envia os pacotes nas horas certas.
 // Se a app Wireshark estiver aberta quando o pacote chega -> aparece no stream ao vivo.
-// Se estiver fechada -> vai direto para o histórico.
+// Se estiver fechada -> vai direto para o histrico.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -10,26 +10,26 @@ using UnityEngine;
 public class PacketGenerator : MonoBehaviour
 {
     // ---------------------------------------------------------------
-    // Horários por dia — daySchedules[0] = Dia 1, etc.
+    // Horrios por dia  daySchedules[0] = Dia 1, etc.
     // ---------------------------------------------------------------
-    [Header("Horários de pacotes (um NetworkSchedule asset por dia, por ordem)")]
+    [Header("Horrios de pacotes (um NetworkSchedule asset por dia, por ordem)")]
     [SerializeField] private NetworkSchedule[] daySchedules;
 
     // ---------------------------------------------------------------
-    // Referência ao canvas/GameObject da app Wireshark
-    // Arrasta aqui o GameObject que é ativado/desativado quando o jogador abre a app
-    // O PacketGenerator usa isto para saber se a app está aberta ou fechada
+    // Referncia ao canvas/GameObject da app Wireshark
+    // Arrasta aqui o GameObject que  ativado/desativado quando o jogador abre a app
+    // O PacketGenerator usa isto para saber se a app est aberta ou fechada
     // ---------------------------------------------------------------
-    [Header("App Wireshark (para detetar se está aberta)")]
+    [Header("App Wireshark (para detetar se est aberta)")]
     [SerializeField] private GameObject wiresharkAppObject;
 
-    [Header("Pacotes de ruído (fundo)")]
+    [Header("Pacotes de rudo (fundo)")]
     [SerializeField] private float minNoiseInterval = 1.5f;
     [SerializeField] private float maxNoiseInterval = 4f;
-    [Tooltip("Quantos pacotes de ruído aparecem por minuto de jogo (aproximado)")]
+    [Tooltip("Quantos pacotes de rudo aparecem por minuto de jogo (aproximado)")]
     [SerializeField] private bool generateNoise = true;
 
-    // IPs e protocolos para pacotes de ruído
+    // IPs e protocolos para pacotes de rudo
     private static readonly string[] NoiseIPs = {
         "192.168.1.10", "192.168.1.22", "10.0.0.5", "10.0.0.44",
         "172.16.0.8", "172.16.0.15", "8.8.8.8", "1.1.1.1"
@@ -45,10 +45,10 @@ public class PacketGenerator : MonoBehaviour
     private WiresharkManager manager;
     private int packetCounter = 0;
 
-    // histórico acumulado: conversationId -> lista de pacotes
+    // histrico acumulado: conversationId -> lista de pacotes
     private Dictionary<string, List<PacketData>> historyConversations = new Dictionary<string, List<PacketData>>();
 
-    // pacotes agendados que ainda não foram enviados
+    // pacotes agendados que ainda no foram enviados
     private List<ScheduledPacket> pendingPackets = new List<ScheduledPacket>();
 
     void Awake()
@@ -68,8 +68,8 @@ public class PacketGenerator : MonoBehaviour
 
     // ---------------------------------------------------------------
     // Carrega o schedule do dia atual e separa:
-    //   - pacotes cuja hora já passou -> histórico imediato
-    //   - pacotes cuja hora ainda não chegou -> fila pendente
+    //   - pacotes cuja hora j passou -> histrico imediato
+    //   - pacotes cuja hora ainda no chegou -> fila pendente
     // ---------------------------------------------------------------
     private void LoadDaySchedule()
     {
@@ -90,21 +90,21 @@ public class PacketGenerator : MonoBehaviour
 
             if (spawnMinutes <= nowMinutes)
             {
-                // hora já passou — vai direto para o histórico
+                // hora j passou  vai direto para o histrico
                 AddToHistory(sp);
             }
             else
             {
-                // ainda não chegou a hora — coloca na fila
+                // ainda no chegou a hora  coloca na fila
                 pendingPackets.Add(sp);
             }
         }
 
-        // envia o histórico inicial para o manager
+        // envia o histrico inicial para o manager
         manager.SetHistory(historyConversations);
 
         Debug.Log($"[PacketGenerator] Dia {GameManager.Instance.currentDay}: " +
-                  $"{historyConversations.Count} conversa(s) no histórico, " +
+                  $"{historyConversations.Count} conversa(s) no histrico, " +
                   $"{pendingPackets.Count} pacote(s) agendado(s).");
     }
 
@@ -121,7 +121,7 @@ public class PacketGenerator : MonoBehaviour
 
             float nowMinutes = TimeManager.Instance.GetCurrentTimeInHours() * 60f;
 
-            // usa índice inverso para poder remover durante a iteração
+            // usa ndice inverso para poder remover durante a iterao
             for (int i = pendingPackets.Count - 1; i >= 0; i--)
             {
                 ScheduledPacket sp = pendingPackets[i];
@@ -134,24 +134,24 @@ public class PacketGenerator : MonoBehaviour
 
                 if (appOpen)
                 {
-                    // app está aberta -> aparece no stream ao vivo
+                    // app est aberta -> aparece no stream ao vivo
                     PacketData pkt = BuildPacket(sp);
                     manager.ReceivePacket(pkt);
                     Debug.Log($"[PacketGenerator] Pacote '{sp.conversationId}' enviado ao vivo.");
                 }
                 else
                 {
-                    // app está fechada -> vai para o histórico
+                    // app est fechada -> vai para o histrico
                     AddToHistory(sp);
-                    manager.SetHistory(historyConversations); // atualiza o histórico no manager
-                    Debug.Log($"[PacketGenerator] Pacote '{sp.conversationId}' adicionado ao histórico (app fechada).");
+                    manager.SetHistory(historyConversations); // atualiza o histrico no manager
+                    Debug.Log($"[PacketGenerator] Pacote '{sp.conversationId}' adicionado ao histrico (app fechada).");
                 }
             }
         }
     }
 
     // ---------------------------------------------------------------
-    // Loop de ruído de fundo — pacotes aleatórios para dar vida ao stream
+    // Loop de rudo de fundo  pacotes aleatrios para dar vida ao stream
     // ---------------------------------------------------------------
     private IEnumerator NoiseLoop()
     {
@@ -160,7 +160,7 @@ public class PacketGenerator : MonoBehaviour
             float wait = Random.Range(minNoiseInterval, maxNoiseInterval);
             yield return new WaitForSeconds(wait);
 
-            // ruído só aparece no stream ao vivo se a app estiver aberta
+            // rudo s aparece no stream ao vivo se a app estiver aberta
             bool appOpen = wiresharkAppObject != null && wiresharkAppObject.activeInHierarchy;
             if (!appOpen) continue;
 
@@ -169,7 +169,7 @@ public class PacketGenerator : MonoBehaviour
     }
 
     // ---------------------------------------------------------------
-    // Constrói um PacketData a partir de um ScheduledPacket
+    // Constri um PacketData a partir de um ScheduledPacket
     // ---------------------------------------------------------------
     private PacketData BuildPacket(ScheduledPacket sp)
     {
@@ -177,12 +177,12 @@ public class PacketGenerator : MonoBehaviour
 
         string encTypeName = sp.encryptionType.ToString(); // "AES" ou "DES"
 
-        // se não for encriptado, o payload mostra o texto em claro
+        // se no for encriptado, o payload mostra o texto em claro
         string payload = sp.isEncrypted
             ? CryptoHelper.Encrypt(sp.plainText, encTypeName)
             : sp.plainText;
 
-        // se não for encriptado, o encryptionType mostra "NONE" na UI
+        // se no for encriptado, o encryptionType mostra "NONE" na UI
         string displayEncType = sp.isEncrypted ? encTypeName : "NONE";
 
         return new PacketData
@@ -203,7 +203,7 @@ public class PacketGenerator : MonoBehaviour
     }
 
     // ---------------------------------------------------------------
-    // Adiciona um pacote ao dicionário de histórico
+    // Adiciona um pacote ao dicionrio de histrico
     // ---------------------------------------------------------------
     private void AddToHistory(ScheduledPacket sp)
     {
@@ -216,7 +216,7 @@ public class PacketGenerator : MonoBehaviour
     }
 
     // ---------------------------------------------------------------
-    // Ruído aleatório de fundo
+    // Rudo aleatrio de fundo
     // ---------------------------------------------------------------
     private PacketData GenerateNoisePacket()
     {

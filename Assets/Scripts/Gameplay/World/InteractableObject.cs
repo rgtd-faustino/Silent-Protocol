@@ -4,9 +4,11 @@ using UnityEngine;
 public class InteractableObject : MonoBehaviour
 {
     [HideInInspector] public string objectName = "objeto";
+    [Header("Interaction Info")]
+    public string tooltipMessage = "E para interagir";
 
     // Arrasta aqui o GlitchMaterial criado no Unity (Create > Material, shader SilentProtocol/GlitchHighlight)
-    // Adiciona também esse material ao MeshRenderer do objeto (slot extra, a seguir ao material base)
+    // Adiciona tambm esse material ao MeshRenderer do objeto (slot extra, a seguir ao material base)
     [SerializeField] private Material glitchMaterial;
 
     private MeshRenderer meshRenderer;
@@ -24,7 +26,7 @@ public class InteractableObject : MonoBehaviour
         if (meshRenderer == null || glitchMaterial == null)
             return;
 
-        // descobre em que index está o glitchMaterial no MeshRenderer
+        // descobre em que index est o glitchMaterial no MeshRenderer
         Material[] mats = meshRenderer.sharedMaterials;
         for (int i = 0; i < mats.Length; i++)
         {
@@ -37,7 +39,7 @@ public class InteractableObject : MonoBehaviour
 
         if (glitchMatIndex == -1)
         {
-            Debug.LogWarning($"[{gameObject.name}] GlitchMaterial não está na lista de materiais do MeshRenderer. " +
+            Debug.LogWarning($"[{gameObject.name}] GlitchMaterial no est na lista de materiais do MeshRenderer. " +
                              "Adiciona-o no Inspector (MeshRenderer > Materials > +).");
             return;
         }
@@ -54,7 +56,7 @@ public class InteractableObject : MonoBehaviour
 
     public virtual void Interact()
     {
-        Debug.Log($"{objectName} sofreu interação");
+        Debug.Log($"{objectName} sofreu interao");
     }
 
     public void ShowGlitch()
@@ -135,7 +137,7 @@ public class InteractableObject : MonoBehaviour
 
         Mesh src = mf.sharedMesh;
         int[] srcTris = src.triangles;
-        int triCount = srcTris.Length;          // 1 vértice por índice de triângulo
+        int triCount = srcTris.Length;          // 1 vrtice por ndice de tringulo
 
         Vector3[] srcVerts = src.vertices;
         Vector3[] srcNorms = src.normals;

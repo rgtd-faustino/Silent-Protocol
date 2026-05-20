@@ -65,7 +65,7 @@ public class Server1UI : MonoBehaviour
         }
         else
         {
-            // login errado — mostra erro e esconde após 2 segundos
+            // login errado  mostra erro e esconde aps 2 segundos
             StartCoroutine(ShowError());
         }
     }

@@ -3,18 +3,18 @@ using UnityEngine.UI;
 using TMPro;
 
 // Coloca este script no GameObject do canvas da impressora
-// Ligações necessárias no Inspector:
-//   - noTaskPanel      -> painel com o texto "Não há impressões a fazer"
-//   - printPanel       -> painel com o nome do documento e o botão Imprimir
+// Ligaes necessrias no Inspector:
+//   - noTaskPanel      -> painel com o texto "No h impresses a fazer"
+//   - printPanel       -> painel com o nome do documento e o boto Imprimir
 //   - confirmedPanel   -> painel que aparece depois de imprimir
 //   - documentNameText -> TextMeshPro dentro do printPanel
 //   - printerNameText  -> TextMeshPro dentro do confirmedPanel
-//   - printButton      -> botão Imprimir dentro do printPanel
+//   - printButton      -> boto Imprimir dentro do printPanel
 
 public class PrinterAppUI : MonoBehaviour
 {
 
-    [Header("Painéis")]
+    [Header("Painis")]
     [SerializeField] private GameObject noTaskPanel;
     [SerializeField] private GameObject printPanel;
     [SerializeField] private GameObject confirmedPanel;
@@ -23,7 +23,7 @@ public class PrinterAppUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI documentNameText;
     [SerializeField] private TextMeshProUGUI printerNameText;
 
-    [Header("Botão")]
+    [Header("Boto")]
     [SerializeField] private Button printButton;
 
     void OnEnable()

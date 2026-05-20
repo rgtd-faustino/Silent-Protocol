@@ -110,7 +110,7 @@ public class CameraScript : MonoBehaviour
                     currentLock = target as LockScript;
 
                    
-                   UIManager.Instance.ShowTooltip("E para interagir");
+                    UIManager.Instance.ShowTooltip(currentTarget.tooltipMessage);
                 }
                 return;
             }

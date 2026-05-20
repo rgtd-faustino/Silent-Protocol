@@ -9,17 +9,17 @@ public class EmailItem : ScriptableObject
     public string remetenteNome;   // ex: "Admin Corporatech"
     public string dataHora;        // ex: "2047-03-12  09:41"
 
-    [Header("Conteúdo")]
+    [Header("Contedo")]
     [TextArea(5, 20)]
     public string corpo;
 
     [Header("Intel")]
     public bool temIntel = false;
-    [Tooltip("Se temIntel = true, este IntelItem será guardado no inventário ao clicar 'Guardar Intel'")]
+    [Tooltip("Se temIntel = true, este IntelItem ser guardado no inventrio ao clicar 'Guardar Intel'")]
     public IntelItem intelAssociado;
 
     [Header("Entrega")]
-    [Tooltip("Hora do jogo em que este email chega à app.")]
+    [Tooltip("Hora do jogo em que este email chega  app.")]
     [Range(0f, 23.99f)]
     public float spawnHour = 9f;
 
@@ -27,7 +27,7 @@ public class EmailItem : ScriptableObject
     public bool irParaLixoDirectamente = false;
 
     // ------------------------------------------------------------------ //
-    // Estado em runtime (não serializado – reinicia a cada sessão)         //
+    // Estado em runtime (no serializado  reinicia a cada sesso)         //
     // ------------------------------------------------------------------ //
     [HideInInspector] public bool lido = false;
     [HideInInspector] public bool apagado = false;

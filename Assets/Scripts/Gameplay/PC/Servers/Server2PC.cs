@@ -7,6 +7,13 @@ public class Server2PC : InteractableObject
     private bool cutsceneTriggered = false;
     private bool isOpen = false;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        objectName = "Terminal do Servidor 2";
+        tooltipMessage = "E para aceder ao Servidor 2";
+    }
+
     public override void Interact()
     {
         if (!cutsceneTriggered)

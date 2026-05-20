@@ -6,34 +6,34 @@ using static DocumentTaskData;
 
 public class WriteDocumentUI : MonoBehaviour {
 
-    [Header("Painéis")]
-    // documentPanel é o estado normal —> mostra o documento a preencher
-    // emptyStatePanel é para quando o jogador abre o computador mas não tem esta task ativa
+    [Header("Painis")]
+    // documentPanel  o estado normal > mostra o documento a preencher
+    // emptyStatePanel  para quando o jogador abre o computador mas no tem esta task ativa
     [SerializeField] private GameObject documentPanel;
     [SerializeField] private GameObject emptyStatePanel;
 
     [Header("UI do documento")]
     [SerializeField] private TextMeshProUGUI documentTitleText;
     [SerializeField] private TextMeshProUGUI documentBodyText;
-    // submitButton está sempre ativo —> se o jogador submeter com lacunas por preencher, a task conta como mal feita e a suspeita sobe
+    // submitButton est sempre ativo > se o jogador submeter com lacunas por preencher, a task conta como mal feita e a suspeita sobe
     [SerializeField] private Button submitButton;
 
-    [Header("Botões de escolha (4 botões fixos)")]
+    [Header("Botes de escolha (4 botes fixos)")]
     [SerializeField] private Button[] choiceButtons;
 
-    // referência ao ScriptableObject do documento ativo
+    // referncia ao ScriptableObject do documento ativo
     private DocumentTaskData currentData;
 
-    private string[] chosenWords; // chosenWords guarda a palavra que o jogador escolheu para cada lacuna, indexado por posição no array blanks
-    private bool[] filledSlots; // filledSlots marca quais lacunas já foram respondidas
+    private string[] chosenWords; // chosenWords guarda a palavra que o jogador escolheu para cada lacuna, indexado por posio no array blanks
+    private bool[] filledSlots; // filledSlots marca quais lacunas j foram respondidas
 
-    // qual a lacuna que está ativa no momento —> determina qual conjunto de opções mostrar e qual placeholder fica destacado a amarelo
+    // qual a lacuna que est ativa no momento > determina qual conjunto de opes mostrar e qual placeholder fica destacado a amarelo
     private int currentBlankIndex;
 
 
-    // OnEnable em vez de Start porque este GameObject é ativado/desativado pelo PCInteractable cada vez que o PC é aberto ou seja
-    // o OnEnable corre de novo sempre que o painel fica visível, assim o estado das tasks é sempre verificado
-    // no momento certo e não com dados desatualizados de quando o objeto foi criado pela primeira vez
+    // OnEnable em vez de Start porque este GameObject  ativado/desativado pelo PCInteractable cada vez que o PC  aberto ou seja
+    // o OnEnable corre de novo sempre que o painel fica visvel, assim o estado das tasks  sempre verificado
+    // no momento certo e no com dados desatualizados de quando o objeto foi criado pela primeira vez
     void OnEnable() {
         bool hasMorning = TaskManager.Instance.HasActiveMorningTask("Escrever documento");
         bool hasAfternoon = TaskManager.Instance.HasActiveAfternoonTask("Escrever documento");
@@ -64,9 +64,9 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
 
-    // reconstrói o texto completo do documento de raiz a cada escolha
-    // a cor amarela na lacuna ativa serve para o jogador saber sempre onde está a escolher
-    // a cor branca nas lacunas já preenchidas (e o sublinhado) distingue-as das lacunas por preencher (traço simples sem cor)
+    // reconstri o texto completo do documento de raiz a cada escolha
+    // a cor amarela na lacuna ativa serve para o jogador saber sempre onde est a escolher
+    // a cor branca nas lacunas j preenchidas (e o sublinhado) distingue-as das lacunas por preencher (trao simples sem cor)
     private void RefreshBodyText() {
         string body = currentData.bodyText;
 
@@ -85,9 +85,9 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
 
-    // esconde todos os botões antes de mostrar os da lacuna atual
-    // as opções são baralhadas para que a resposta correta não esteja sempre na mesma posição
-    // RemoveAllListeners antes de AddListener porque o mesmo botão é reutilizado entre lacunas
+    // esconde todos os botes antes de mostrar os da lacuna atual
+    // as opes so baralhadas para que a resposta correta no esteja sempre na mesma posio
+    // RemoveAllListeners antes de AddListener porque o mesmo boto  reutilizado entre lacunas
     private void ShowOptionsForCurrentBlank() {
         foreach (Button btn in choiceButtons)
             btn.gameObject.SetActive(false);
@@ -115,10 +115,10 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
 
-    // chamado quando o jogador clica numa opção, avança o estado interno para a próxima lacuna por preencher
-    // quando todas as lacunas estão preenchidas, os botões desaparecem
-    // COMO NÃO HÁ RESPOSTAS ERRADAS PODEMOS FAZER QUE SE UM CHEFE CALHAR A VER UM DOCUMENTO COM RESPOSTAS "erradas" ENTÃO O NIVEL DE SUSPEITA/company awareness AUMENTA
-    // ASSIM O JOGADOR É CASTIGADO POR METER RESPOSTAS QUE NAO SEJAM CORRETAS
+    // chamado quando o jogador clica numa opo, avana o estado interno para a prxima lacuna por preencher
+    // quando todas as lacunas esto preenchidas, os botes desaparecem
+    // COMO NO H RESPOSTAS ERRADAS PODEMOS FAZER QUE SE UM CHEFE CALHAR A VER UM DOCUMENTO COM RESPOSTAS "erradas" ENTO O NIVEL DE SUSPEITA/company awareness AUMENTA
+    // ASSIM O JOGADOR  CASTIGADO POR METER RESPOSTAS QUE NAO SEJAM CORRETAS
     private void OnWordChosen(string word, bool isCorrect) {
         chosenWords[currentBlankIndex] = word;
         filledSlots[currentBlankIndex] = true;
@@ -143,10 +143,10 @@ public class WriteDocumentUI : MonoBehaviour {
 
     // ao submeter, percorre todas as lacunas para determinar se a tarefa foi bem feita
     // todas as lacunas preenchidas = tarefa correta, lacunas por preencher = tarefa mal feita, suspeita sobe
-    // as escolhas são guardadas no DocumentManager para os pesos narrativos (weightDenuncia, etc.) que calculam para que final o jogador está a caminhar
+    // as escolhas so guardadas no DocumentManager para os pesos narrativos (weightDenuncia, etc.) que calculam para que final o jogador est a caminhar
     public void OnSubmit() {
         // correto = todas as lacunas preenchidas (o jogador fez o trabalho)
-        // as escolhas afetam pesos narrativos, não a avaliação da task
+        // as escolhas afetam pesos narrativos, no a avaliao da task
         bool allFilled = true;
 
         for (int i = 0; i < currentData.blanks.Length; i++) {
@@ -162,7 +162,7 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
 
-    // algoritmo simples para baralhar as opções para que a resposta correta não esteja sempre na mesma posição
+    // algoritmo simples para baralhar as opes para que a resposta correta no esteja sempre na mesma posio
     private void Shuffle(List<string> list) {
         for (int i = 0; i < list.Count * 2; i++) {
             int a = Random.Range(0, list.Count);

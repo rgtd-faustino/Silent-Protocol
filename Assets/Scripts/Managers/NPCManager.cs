@@ -8,19 +8,19 @@ public class NPCManager : MonoBehaviour {
 
     public Transform player;
 
-    // usada para broadcasts de suspeita e para verificar condições (CanReceptionistLeave, CanGuardRest)
+    // usada para broadcasts de suspeita e para verificar condies (CanReceptionistLeave, CanGuardRest)
     private List<NPCScript> activeNPCs = new List<NPCScript>();
 
-    // rotas organizadas por piso — cada elemento tem um floor e um array de PatrolRoutes
-    // o GetRandomRoute filtra por piso, tipo de NPC e outras condições
+    // rotas organizadas por piso  cada elemento tem um floor e um array de PatrolRoutes
+    // o GetRandomRoute filtra por piso, tipo de NPC e outras condies
     [SerializeField] private FloorRoutes[] floorRoutes;
 
-    // os NPCs que vao para a reunião
+    // os NPCs que vao para a reunio
     [SerializeField] private NPCScript bossD1, colega1D1, colega2D1;
     [SerializeField] private NPCScript bossD2, colega1D2, colega2D2;
     [SerializeField] private NPCScript bossD3, colega1D3, colega2D3;
 
-    // rota para a sala de reuniões de cada NPC
+    // rota para a sala de reunies de cada NPC
     [SerializeField] private PatrolRoute meetingRouteBossD1, meetingRouteColega1D1, meetingRouteColega2D1;
     [SerializeField] private PatrolRoute meetingRouteBossD2, meetingRouteColega1D2, meetingRouteColega2D2;
     [SerializeField] private PatrolRoute meetingRouteBossD3, meetingRouteColega1D3, meetingRouteColega2D3;
@@ -56,9 +56,9 @@ public class NPCManager : MonoBehaviour {
         Instance = this;
     }
 
-    // devolve uma rota aleatória compatível com o tipo e piso do NPC
+    // devolve uma rota aleatria compatvel com o tipo e piso do NPC
     // excludeRoute: evita repetir a rota anterior
-    // excludeRest: ignora rotas de descanso (usado quando já há um guarda a descansar)
+    // excludeRest: ignora rotas de descanso (usado quando j h um guarda a descansar)
     public PatrolRoute GetRandomRoute(NPCType type, int floor, int departmentID, PatrolRoute excludeRoute = null, bool excludeRest = false) {
         List<PatrolRoute> compatible = new List<PatrolRoute>();
 
@@ -87,9 +87,9 @@ public class NPCManager : MonoBehaviour {
             }
         }
 
-        // se não encontrou nenhuma rota compatível após excluir a rota anterior, tenta novamente sem exclusão
-        // isto acontece quando o pool do NPC só tem uma rota, excluir a única opção devolvia null e dava erro
-        // ao repetir sem exclusão o NPC fica na mesma rota em vez de ficar parado
+        // se no encontrou nenhuma rota compatvel aps excluir a rota anterior, tenta novamente sem excluso
+        // isto acontece quando o pool do NPC s tem uma rota, excluir a nica opo devolvia null e dava erro
+        // ao repetir sem excluso o NPC fica na mesma rota em vez de ficar parado
         if (compatible.Count == 0 && excludeRoute != null)
             return GetRandomRoute(type, floor, departmentID, null, excludeRest);
 
@@ -109,7 +109,7 @@ public class NPCManager : MonoBehaviour {
         return compatible[compatible.Count - 1];
     }
 
-    // garante que pelo menos uma rececionista fica sempre na secretária
+    // garante que pelo menos uma rececionista fica sempre na secretria
     // chamado no EnterPatrol de cada rececionista antes de sair
     public bool CanReceptionistLeave() {
         int atHome = 0;
@@ -120,8 +120,8 @@ public class NPCManager : MonoBehaviour {
         return atHome > 1;
     }
 
-    // garante que só um guarda descansa de cada vez
-    // chamado no EnterPatrol do guarda quando a rota escolhida é isRestRoute
+    // garante que s um guarda descansa de cada vez
+    // chamado no EnterPatrol do guarda quando a rota escolhida  isRestRoute
     public bool CanGuardRest() {
         for (int i = 0; i < activeNPCs.Count; i++) {
             if (activeNPCs[i].npcType == NPCType.Guard && activeNPCs[i].isResting)
@@ -146,7 +146,7 @@ public class NPCManager : MonoBehaviour {
     }
 
     // recebido via GameEvent quando a SuspicionManager muda de estado
-    // propaga a mudança a todos os NPCs ativos
+    // propaga a mudana a todos os NPCs ativos
     private void OnSuspicionStateChanged(SuspicionManager.SuspicionState state) {
         foreach (NPCScript npc in activeNPCs)
             npc.OnGlobalSuspicionChanged(state);

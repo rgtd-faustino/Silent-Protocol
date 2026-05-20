@@ -3,19 +3,20 @@ using UnityEngine;
 public class DocumentPickup : InteractableObject
 {
 
-    // referência ao ScriptableObject do documento —> passada pelo ImpressoraScript no Instantiate
-    // é o que nos diz para que departamento deve ir e quais os pesos narrativos
+    // referncia ao ScriptableObject do documento > passada pelo ImpressoraScript no Instantiate
+    //  o que nos diz para que departamento deve ir e quais os pesos narrativos
     private DocumentTaskData data;
 
-    // flag que impede que o jogador apanhe o documento se já tiver um na mão (cada dia só há um documento para arquivar)
+    // flag que impede que o jogador apanhe o documento se j tiver um na mo (cada dia s h um documento para arquivar)
     private bool isPickedUp = false;
 
 
-    // chamado pela ImpressoraScript imediatamente após o Instantiate
+    // chamado pela ImpressoraScript imediatamente aps o Instantiate
     public void Initialize(DocumentTaskData documentData)
     {
         data = documentData;
-        objectName = $"Documento — {data.documentTitle}";
+        objectName = $"Documento - {data.documentTitle}";
+        tooltipMessage = $"E para apanhar {data.documentTitle}";
     }
 
 
@@ -24,7 +25,7 @@ public class DocumentPickup : InteractableObject
         if (isPickedUp) return;
         if (PlayerController.Instance.heldDocument != null)
         {
-            Debug.Log("[DocumentPickup] Já tens um documento na mão.");
+            Debug.Log("[DocumentPickup] J tens um documento na mo.");
             return;
         }
 

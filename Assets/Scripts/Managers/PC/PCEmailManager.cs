@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gere a lógica de email de UM PC específico.
+/// Gere a lgica de email de UM PC especfico.
 /// Entrega os emails quando a hora do jogo (GameClock) atinge o spawnHour do asset,
 /// exactamente como o WireShark faz com os ScheduledPackets.
 /// </summary>
 public class PCEmailManager : MonoBehaviour
 {
-    [Header("Emails deste PC  (ordem não importa — entregues por hora do jogo)")]
+    [Header("Emails deste PC  (ordem no importa  entregues por hora do jogo)")]
     [SerializeField] private List<EmailItem> emailsDestePc = new List<EmailItem>();
 
     // ------------------------------------------------------------------ //
@@ -18,7 +18,7 @@ public class PCEmailManager : MonoBehaviour
     private List<EmailItem> inbox = new List<EmailItem>();
     private List<EmailItem> lixo = new List<EmailItem>();
 
-    // emails ainda à espera de ser entregues
+    // emails ainda  espera de ser entregues
     private List<EmailItem> pendentes = new List<EmailItem>();
 
     // ------------------------------------------------------------------ //
@@ -81,10 +81,10 @@ public class PCEmailManager : MonoBehaviour
     }
 
     // ------------------------------------------------------------------ //
-    // API pública                                                           //
+    // API pblica                                                           //
     // ------------------------------------------------------------------ //
 
-    /// <summary>Injeta um email em runtime (triggers, eventos de missão, etc.)</summary>
+    /// <summary>Injeta um email em runtime (triggers, eventos de misso, etc.)</summary>
     public void ReceberEmail(EmailItem email)
     {
         if (inbox.Contains(email) || lixo.Contains(email)) return;
@@ -93,7 +93,7 @@ public class PCEmailManager : MonoBehaviour
         EntregarEmail(email);
     }
 
-    /// <summary>Move o email para o Lixo (não apaga definitivamente).</summary>
+    /// <summary>Move o email para o Lixo (no apaga definitivamente).</summary>
     public void ApagarEmail(EmailItem email)
     {
         if (!inbox.Contains(email)) return;

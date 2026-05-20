@@ -5,9 +5,11 @@ public class IntelPickup : InteractableObject
     public IntelItem item;
     private bool usado = false;
 
-    void Start()
+    protected override void Awake()
     {
+        base.Awake();
         objectName = item != null ? item.titulo : "Intel";
+        tooltipMessage = item != null ? $"E para ler {item.titulo}" : "E para ler Intel";
     }
 
     public override void Interact()

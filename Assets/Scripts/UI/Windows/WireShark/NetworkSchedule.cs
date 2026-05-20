@@ -1,6 +1,6 @@
 // NetworkSchedule.cs
 // ScriptableObject onde os programadores definem os pacotes por dia
-// Botão direito no Project -> Create -> WireShark -> Network Schedule
+// Boto direito no Project -> Create -> WireShark -> Network Schedule
 // Cria um asset por dia (Day1Network, Day2Network, etc.)
 
 using System;
@@ -17,11 +17,11 @@ public class NetworkSchedule : ScriptableObject
 [Serializable]
 public class ScheduledPacket
 {
-    [Header("Identificação")]
-    [Tooltip("ID único desta conversa. Ex: CONV-CEO-01")]
+    [Header("Identificao")]
+    [Tooltip("ID nico desta conversa. Ex: CONV-CEO-01")]
     public string conversationId;
 
-    [Tooltip("Índice desta mensagem dentro da conversa (1, 2, 3...)")]
+    [Tooltip("ndice desta mensagem dentro da conversa (1, 2, 3...)")]
     public int messageIndex = 1;
 
     [Header("Rede")]
@@ -31,14 +31,14 @@ public class ScheduledPacket
     [Tooltip("TCP ou UDP")]
     public string protocol = "TCP";
 
-    [Header("Encriptação")]
+    [Header("Encriptao")]
     [Tooltip("Se false, o HexData mostra o texto em claro")]
     public bool isEncrypted = true;
 
-    [Tooltip("Só usado se isEncrypted = true")]
+    [Tooltip("S usado se isEncrypted = true")]
     public EncryptionType encryptionType = EncryptionType.AES;
 
-    [Header("Conteúdo")]
+    [Header("Contedo")]
     [TextArea(2, 4)]
     [Tooltip("Texto da mensagem. Se isEncrypted = false aparece em claro no HexData")]
     public string plainText;
@@ -47,7 +47,7 @@ public class ScheduledPacket
     public bool isImportant = false;
 
     [Header("Hora de envio")]
-    [Tooltip("Hora do jogo em que este pacote é enviado. Ex: 14.5 = 14:30")]
+    [Tooltip("Hora do jogo em que este pacote  enviado. Ex: 14.5 = 14:30")]
     [Range(0f, 23.99f)]
     public float spawnHour = 9f;
 }

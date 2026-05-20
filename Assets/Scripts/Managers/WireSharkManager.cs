@@ -1,5 +1,5 @@
 // WiresharkManager.cs
-// Lógica principal da app Wireshark
+// Lgica principal da app Wireshark
 // Adiciona ao mesmo GameObject que o WiresharkUI e o PacketGenerator
 
 using System.Collections.Generic;
@@ -12,13 +12,13 @@ public class WiresharkManager : MonoBehaviour
     // pacotes ao vivo (stream atual)
     private List<PacketData> livePackets = new List<PacketData>();
 
-    // histórico: conversaId -> lista de pacotes
+    // histrico: conversaId -> lista de pacotes
     private Dictionary<string, List<PacketData>> history = new Dictionary<string, List<PacketData>>();
 
     // pacote atualmente selecionado
     private PacketData selectedPacket = null;
 
-    // máximo de pacotes visíveis no stream ao vivo
+    // mximo de pacotes visveis no stream ao vivo
     private const int MaxLivePackets = 50;
 
     void Awake()
@@ -31,14 +31,14 @@ public class WiresharkManager : MonoBehaviour
     {
         livePackets.Insert(0, pkt);
 
-        // limita o histórico vivo
+        // limita o histrico vivo
         if (livePackets.Count > MaxLivePackets)
             livePackets.RemoveAt(livePackets.Count - 1);
 
         ui.AddPacketRow(pkt);
     }
 
-    // chamado pelo PacketGenerator no Start com o histórico pré-construído
+    // chamado pelo PacketGenerator no Start com o histrico pr-construdo
     public void SetHistory(Dictionary<string, List<PacketData>> hist)
     {
         history = hist;
@@ -52,7 +52,7 @@ public class WiresharkManager : MonoBehaviour
         ui.ShowPacketDetail(pkt);
     }
 
-    // chamado pelo botão COPIAR PACOTE
+    // chamado pelo boto COPIAR PACOTE
     public void CopySelectedPacket()
     {
         if (selectedPacket == null)
@@ -67,21 +67,21 @@ public class WiresharkManager : MonoBehaviour
         Debug.Log($"[WiresharkManager] Pacote {selectedPacket.PacketId} copiado para GameClipboard.");
     }
 
-    // chamado pelo botão PEDIR ACK numa conversa do histórico
+    // chamado pelo boto PEDIR ACK numa conversa do histrico
     // devolve todos os pacotes dessa conversa e aplica suspeita
     public List<PacketData> RequestHistoryConversation(string conversationId)
     {
         if (!history.ContainsKey(conversationId))
             return new List<PacketData>();
 
-        // aplica suspeita — usa o SuspicionManager existente
+        // aplica suspeita  usa o SuspicionManager existente
         float suspicionLevel = Random.Range(1f, 2f);
         SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel, GetInstanceID(), SuspicionManager.SuspicionSource.TerminalAccess);
 
-        // para a suspeita após um pequeno delay — o ACK é um evento pontual
+        // para a suspeita aps um pequeno delay  o ACK  um evento pontual
         StartCoroutine(StopSuspicionAfterDelay(2f));
 
-        Debug.Log($"[WiresharkManager] ACK pedido para {conversationId} — suspeita aumentada.");
+        Debug.Log($"[WiresharkManager] ACK pedido para {conversationId}  suspeita aumentada.");
 
         return history[conversationId];
     }

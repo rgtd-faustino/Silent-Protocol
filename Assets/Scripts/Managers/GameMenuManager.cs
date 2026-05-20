@@ -4,18 +4,18 @@ using UnityEngine.UI;
 using TMPro;
 
 
-public enum MenuState { None, MainMenu, CharacterCreation, Playing, Paused } // "None" é usado no arranque antes de qualquer painel estar visível
+public enum MenuState { None, MainMenu, CharacterCreation, Playing, Paused } // "None"  usado no arranque antes de qualquer painel estar visvel
 
 public class GameMenuManager : MonoBehaviour {
     public static GameMenuManager Instance;
 
-    [Header("Painéis - cada um precisa de um CanvasGroup")]
+    [Header("Painis - cada um precisa de um CanvasGroup")]
     [SerializeField] private CanvasGroup mainMenuPanel;
     [SerializeField] private CanvasGroup charCreationPanel;
     [SerializeField] private CanvasGroup pausePanel;
 
-    // os cards são os painéis centrais (LoginCard, FormCard, PauseCard)
-    // têm CanvasGroup próprio para que o BG apareça primeiro e o card depois
+    // os cards so os painis centrais (LoginCard, FormCard, PauseCard)
+    // tm CanvasGroup prprio para que o BG aparea primeiro e o card depois
     [Header("Cards centrais - CanvasGroup em LoginCard / FormCard / PauseCard")]
     [SerializeField] private CanvasGroup mainMenuCard;
     [SerializeField] private CanvasGroup charCreationCard;
@@ -27,18 +27,18 @@ public class GameMenuManager : MonoBehaviour {
     [Header("Menu Principal")]
     [SerializeField] private TextMeshProUGUI titleText; // onde o efeito typewriter escreve
     [SerializeField] private Button newGameButton;
-    [SerializeField] private Button continueButton; // desativado se não houver save
+    [SerializeField] private Button continueButton; // desativado se no houver save
     [SerializeField] private Button quitButton;
 
-    [Header("Criação de Personagem")]
+    [Header("Criao de Personagem")]
     [SerializeField] private StatRow[] statRows; // uma entrada por atributo (FOR, PER, ...)
     [SerializeField] private TextMeshProUGUI remainingPointsText;
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button resetButton;
-    [SerializeField] private int totalExtraPoints = 28; // pontos livres para distribuir (base é 1 em cada stat)
+    [SerializeField] private int totalExtraPoints = 28; // pontos livres para distribuir (base  1 em cada stat)
     [SerializeField] private Color pipOn = Color.white;
     [SerializeField] private Color pipOff = new Color(1f, 1f, 1f, 0.12f);
-    [SerializeField] private float pipAnimDelay = 0.04f; // segundos entre cada pip a acender (animação)
+    [SerializeField] private float pipAnimDelay = 0.04f; // segundos entre cada pip a acender (animao)
 
     [Header("Menu de Pausa")]
     [SerializeField] private TextMeshProUGUI pauseDayTimeText;
@@ -59,12 +59,12 @@ public class GameMenuManager : MonoBehaviour {
     [SerializeField] private RawImage menuScanlines;
     private float menuScanlineSpeed = 0.2f;
 
-    [Header("Transições")]
-    private float fadeDuration = 0.25f; // duração do fade entre painéis
-    // o card começa a 92% do tamanho e cresce para 100% enquanto o faz fade in
+    [Header("Transies")]
+    private float fadeDuration = 0.25f; // durao do fade entre painis
+    // o card comea a 92% do tamanho e cresce para 100% enquanto o faz fade in
     private float cardStartScale = 0.92f;
-    // duração da animação scale+fade do card, ligeiramente mais longa que o fadeDuration
-    // para que o BG já esteja totalmente visível quando o card começa a crescer
+    // durao da animao scale+fade do card, ligeiramente mais longa que o fadeDuration
+    // para que o BG j esteja totalmente visvel quando o card comea a crescer
     private float cardEntranceDuration = 0.35f;
 
     public MenuState CurrentState = MenuState.None;
@@ -77,8 +77,8 @@ public class GameMenuManager : MonoBehaviour {
 
     [System.Serializable]
     public struct StatRow {
-        public string id; // identificador textual (ex: "FOR"), não é usado para nada, mas convém ter um id
-        public TextMeshProUGUI valueText; // mostra o número atual (1-10)
+        public string id; // identificador textual (ex: "FOR"), no  usado para nada, mas convm ter um id
+        public TextMeshProUGUI valueText; // mostra o nmero atual (1-10)
         public Button minusButton;
         public Button plusButton;
         public Image[] pips;
@@ -93,12 +93,12 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     void Start() {
-        // escondemos todos os painéis caso não estejam já escondidos no editor
+        // escondemos todos os painis caso no estejam j escondidos no editor
         mainMenuPanel.gameObject.SetActive(false);
         charCreationPanel.gameObject.SetActive(false);
         pausePanel.gameObject.SetActive(false);
 
-        // metemos os botões ligados aos métodos pelos códigos porque são muitos botões e assim sabemos que está tudo certo
+        // metemos os botes ligados aos mtodos pelos cdigos porque so muitos botes e assim sabemos que est tudo certo
         WireButtons();
 
         continueButton.interactable = SaveManager.Instance.HasSave();
@@ -111,13 +111,13 @@ public class GameMenuManager : MonoBehaviour {
         if (y > 1f) y -= 1f;
         menuScanlines.uvRect = new Rect(0f, y, 1f, 1f);
 
-        // pulso de opacidade — seno lento para dar o efeito "vivo" igual ao terminal
+        // pulso de opacidade  seno lento para dar o efeito "vivo" igual ao terminal
         float pulse = Mathf.Sin(Time.unscaledTime * 1.2f) * 0.5f + 0.5f; // 0 a 1
         Color sc = menuScanlines.color;
         sc.a = Mathf.Lerp(0.12f, 0.28f, pulse);
         menuScanlines.color = sc;
 
-        // escape pausa/retoma o jogo —> não funciona no menu principal nem na criação de personagem
+        // escape pausa/retoma o jogo > no funciona no menu principal nem na criao de personagem
         if (Input.GetKeyDown(KeyCode.Escape)) {
             if (CameraSystem.Instance != null && CameraSystem.Instance.isActive) return;
             if (CurrentState == MenuState.Playing)
@@ -140,7 +140,7 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     private void GoTo(MenuState next) {
-        // impede que múltiplos cliques rápidos lancem várias transições em simultâneo
+        // impede que mltiplos cliques rpidos lancem vrias transies em simultneo
         if (isTransitioning)
             return;
 
@@ -150,9 +150,9 @@ public class GameMenuManager : MonoBehaviour {
     private IEnumerator Transition(MenuState next) {
         isTransitioning = true;
 
-        // fade out do painel atual e desativa o GameObject para não aparecer no editor
-        // a verificação de null é necessária porque no primeiro GoTo (arranque do jogo)
-        // o CurrentState é "None" e não há painel para fazer fade out
+        // fade out do painel atual e desativa o GameObject para no aparecer no editor
+        // a verificao de null  necessria porque no primeiro GoTo (arranque do jogo)
+        // o CurrentState  "None" e no h painel para fazer fade out
         CanvasGroup outPanel = GetPanelFor(CurrentState);
         if (outPanel != null) {
             yield return StartCoroutine(Fade(outPanel, outPanel.alpha, 0f));
@@ -165,25 +165,25 @@ public class GameMenuManager : MonoBehaviour {
         CanvasGroup inPanel = GetPanelFor(next);
         CanvasGroup inCard = GetCardFor(next);
 
-        // a verificação de null é necessária porque "Playing" não tem painel de menu associado
+        // a verificao de null  necessria porque "Playing" no tem painel de menu associado
         if (inPanel != null) {
-            // ativa o painel com o card já invisível e encolhido para o BG aparecer primeiro
+            // ativa o painel com o card j invisvel e encolhido para o BG aparecer primeiro
             inPanel.gameObject.SetActive(true);
             inPanel.alpha = 0f;
             inPanel.interactable = false;
             inPanel.blocksRaycasts = false;
 
-            // o card também pode ser null se não tiver sido ligado no inspector
+            // o card tambm pode ser null se no tiver sido ligado no inspector
             if (inCard != null) {
                 inCard.alpha = 0f;
                 inCard.interactable = false;
                 inCard.blocksRaycasts = false;
 
-                // encolhe o card para o tamanho inicial da animação e o FadeAndScale fá-lo crescer de volta para Vector3.one
+                // encolhe o card para o tamanho inicial da animao e o FadeAndScale f-lo crescer de volta para Vector3.one
                 inCard.transform.localScale = Vector3.one * cardStartScale;
             }
 
-            yield return StartCoroutine(Fade(inPanel, 0f, 1f)); // Fase 1: BG faz fade in —> o background aparece
+            yield return StartCoroutine(Fade(inPanel, 0f, 1f)); // Fase 1: BG faz fade in > o background aparece
             yield return new WaitForSecondsRealtime(cardRevealDelay); // Fase 2: pausa breve para mostrar o background
 
             if (inCard != null)
@@ -200,19 +200,19 @@ public class GameMenuManager : MonoBehaviour {
         Cursor.lockState = isPlaying ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !isPlaying;
 
-        // a verificação de null é necessária porque o PlayerController pode não existir
-        // na cena quando os menus são testados isoladamente no editor
+        // a verificao de null  necessria porque o PlayerController pode no existir
+        // na cena quando os menus so testados isoladamente no editor
         if (PlayerController.Instance != null)
             PlayerController.Instance.canMoveRotate = isPlaying;
 
         switch (state) {
             case MenuState.MainMenu:
-                // "Continue" só faz sentido se existir um save
+                // "Continue" s faz sentido se existir um save
                 continueButton.interactable = SaveManager.Instance.HasSave();
 
-                // o typewriter começa em OnEnter, enquanto o card ainda está a fazer
-                // fade in —> as letras aparecem ao mesmo tempo que o card "materializa",
-                // o que fica bem e esconde o facto de o título estar vazio no início
+                // o typewriter comea em OnEnter, enquanto o card ainda est a fazer
+                // fade in > as letras aparecem ao mesmo tempo que o card "materializa",
+                // o que fica bem e esconde o facto de o ttulo estar vazio no incio
                 PlayTypewriter();
                 break;
 
@@ -221,7 +221,7 @@ public class GameMenuManager : MonoBehaviour {
                 break;
 
             case MenuState.Paused:
-                // dá reset aos valores dos dados
+                // d reset aos valores dos dados
                 RefreshPauseUI();
                 break;
         }
@@ -256,7 +256,7 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     private void InitCharacterCreation() {
-        // inicializa todos os atributos a 1 e restaura os pontos disponíveis
+        // inicializa todos os atributos a 1 e restaura os pontos disponveis
         statValues = new int[statRows.Length];
         for (int i = 0; i < statValues.Length; i++)
             statValues[i] = 1;
@@ -325,7 +325,7 @@ public class GameMenuManager : MonoBehaviour {
     private void AdjustStat(int idx, int delta) {
         int newValue = statValues[idx] + delta;
 
-        // limites: mínimo 1, máximo 10  e não pode gastar pontos que não tem
+        // limites: mnimo 1, mximo 10  e no pode gastar pontos que no tem
         if (newValue < 1 || newValue > 10)
             return;
         if (delta > 0 && remaining <= 0)
@@ -338,26 +338,26 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     private void RefreshStats(bool animated, int changedIdx = -1) {
-        remainingPointsText.text = remaining + " PONTOS DISPONÍVEIS";
+        remainingPointsText.text = remaining + " PONTOS DISPONVEIS";
 
         for (int i = 0; i < statRows.Length; i++) {
             if (statRows[i].valueText != null)
                 statRows[i].valueText.text = statValues[i].ToString();
 
-            // desativa os botões nos limites para dar feedback visual ao jogador
+            // desativa os botes nos limites para dar feedback visual ao jogador
             statRows[i].minusButton.interactable = (statValues[i] > 1);
             statRows[i].plusButton.interactable = (statValues[i] < 10 && remaining > 0);
 
-            // quando o utilizador muda, aparece uma animação
+            // quando o utilizador muda, aparece uma animao
             if (animated && i == changedIdx)
                 StartCoroutine(AnimatePips(i));
             else
-                for (int p = 0; p < statRows[i].pips.Length; p++) // pinta os pips sem animação, quando se liga o painél
+                for (int p = 0; p < statRows[i].pips.Length; p++) // pinta os pips sem animao, quando se liga o painl
                     statRows[i].pips[p].color = (p < statValues[i]) ? pipOn : pipOff;
         }
     }
 
-    // pinta os pips sequencialmente para dar sensação de "carregar" o atributo
+    // pinta os pips sequencialmente para dar sensao de "carregar" o atributo
     private IEnumerator AnimatePips(int idx) {
         for (int p = 0; p < statRows[idx].pips.Length; p++) {
             statRows[idx].pips[p].color = (p < statValues[idx]) ? pipOn : pipOff;
@@ -374,7 +374,7 @@ public class GameMenuManager : MonoBehaviour {
         InitCharacterCreation();
     }
 
-    // atualiza os dados do ecrã de pausa com os valores reais dos sistemas do jogo
+    // atualiza os dados do ecr de pausa com os valores reais dos sistemas do jogo
     private void RefreshPauseUI() {
         // dia e hora
         int currentDay = GameManager.Instance.currentDay;
@@ -385,7 +385,7 @@ public class GameMenuManager : MonoBehaviour {
 
         pauseDayTimeText.text = $"DIA {currentDay}  //  {hours:00}:{minutes:00}";
 
-        // nível de suspeita
+        // nvel de suspeita
         string suspicionLabel = "SUSPEITA: NENHUMA";
 
         SuspicionManager.SuspicionState state = SuspicionManager.Instance.GetCurrentState();
@@ -395,13 +395,13 @@ public class GameMenuManager : MonoBehaviour {
                 suspicionLabel = "SUSPEITA: NENHUMA";
                 break;
             case SuspicionManager.SuspicionState.Attention:
-                suspicionLabel = "SUSPEITA: ATENÇÃO";
+                suspicionLabel = "SUSPEITA: ATENO";
                 break;
             case SuspicionManager.SuspicionState.Investigation:
-                suspicionLabel = "SUSPEITA: INVESTIGAÇÃO";
+                suspicionLabel = "SUSPEITA: INVESTIGAO";
                 break;
             case SuspicionManager.SuspicionState.Expulsion:
-                suspicionLabel = "SUSPEITA: EXPULSÃO";
+                suspicionLabel = "SUSPEITA: EXPULSO";
                 break;
         }
 
@@ -424,10 +424,10 @@ public class GameMenuManager : MonoBehaviour {
         saveExitButton.onClick.AddListener(OnSaveExitClicked);
         abandonButton.onClick.AddListener(OnAbandonClicked);
 
-        // settingsButton ainda não tem funcionalidade
+        // settingsButton ainda no tem funcionalidade
     }
 
-    // métodos para os botões, não dá para meter o GoTo diretamente porque retorna void em vez da referência do método
+    // mtodos para os botes, no d para meter o GoTo diretamente porque retorna void em vez da referncia do mtodo
     private void OnNewGameClicked() {
         SaveManager.Instance.DeleteSave();
         GoTo(MenuState.CharacterCreation);
@@ -456,7 +456,7 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     // devolve o CanvasGroup correspondente a cada estado
-    // "Playing" e "None" devolvem null porque não têm painel de menu associado
+    // "Playing" e "None" devolvem null porque no tm painel de menu associado
     private CanvasGroup GetPanelFor(MenuState state) {
         switch (state) {
             case MenuState.MainMenu:
@@ -506,8 +506,8 @@ public class GameMenuManager : MonoBehaviour {
         SetPanel(cg, to, to > 0f);
     }
 
-    // anima em simultâneo o alpha e o localScale do card, usa as duas animações ao mesmo tempo é o que torna a entrada gira
-    // Usa Mathf.SmoothStep para ease-in-out: começa devagar, acelera no meio e desacelera no final
+    // anima em simultneo o alpha e o localScale do card, usa as duas animaes ao mesmo tempo  o que torna a entrada gira
+    // Usa Mathf.SmoothStep para ease-in-out: comea devagar, acelera no meio e desacelera no final
     // (parece mais natural do que um Lerp linear)
     private IEnumerator FadeAndScale(CanvasGroup cg, float fromAlpha, float toAlpha,
                                      float fromScale, float toScale) {
@@ -524,12 +524,12 @@ public class GameMenuManager : MonoBehaviour {
             yield return null;
         }
 
-        // para garantir que os valores finais são exatos (sem erros de floating point)
+        // para garantir que os valores finais so exatos (sem erros de floating point)
         SetPanel(cg, toAlpha, toAlpha > 0f);
         cg.transform.localScale = Vector3.one * toScale;
     }
 
-    // aplica alpha, interactable e blocksRaycasts ao CanvasGroup de uma vez e o blocksRaycasts evita que painéis invisíveis "roubem" cliques aos painéis visíveis
+    // aplica alpha, interactable e blocksRaycasts ao CanvasGroup de uma vez e o blocksRaycasts evita que painis invisveis "roubem" cliques aos painis visveis
     private static void SetPanel(CanvasGroup cg, float alpha, bool interactive) {
         cg.alpha = alpha;
         cg.interactable = interactive;

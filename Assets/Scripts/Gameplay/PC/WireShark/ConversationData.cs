@@ -1,5 +1,5 @@
 // ConversationData.cs
-// ScriptableObject — define no Inspector as conversas importantes do jogo
+// ScriptableObject  define no Inspector as conversas importantes do jogo
 // Menu: Assets > Create > WireShark > Conversation Data
 
 using System;
@@ -16,7 +16,7 @@ public class ConversationData : ScriptableObject
 [Serializable]
 public class ConversationEntry
 {
-    [Header("Identificação")]
+    [Header("Identificao")]
     public string conversationId;   // ex: "CONV-192-10"
     public string srcIP;            // ex: "192.168.1.2"
     public string dstIP;            // ex: "10.0.0.3"
@@ -24,11 +24,11 @@ public class ConversationEntry
     public string encryptionType;   // "AES" ou "DES"
 
     [Header("Dia em que aparece")]
-    [Tooltip("Em que dia do jogo esta conversa começa a aparecer (1-5)")]
+    [Tooltip("Em que dia do jogo esta conversa comea a aparecer (1-5)")]
     public int dayToAppear = 1;
 
     [Header("Mensagens da conversa")]
-    [Tooltip("Cada entrada é uma mensagem da conversa por ordem")]
+    [Tooltip("Cada entrada  uma mensagem da conversa por ordem")]
     public List<MessageEntry> messages = new List<MessageEntry>();
 }
 
@@ -36,10 +36,10 @@ public class ConversationEntry
 public class MessageEntry
 {
     [TextArea(2, 4)]
-    [Tooltip("Texto plano — será encriptado automaticamente pelo PacketGenerator")]
+    [Tooltip("Texto plano  ser encriptado automaticamente pelo PacketGenerator")]
     public string plainText;
 
-    [Tooltip("Se true, este pacote aparece ao vivo no stream. Se false, já passou e vai para o histórico")]
+    [Tooltip("Se true, este pacote aparece ao vivo no stream. Se false, j passou e vai para o histrico")]
     public bool appearsLive = true;
 
     [Tooltip("Se true, este pacote tem intel importante para o jogador")]

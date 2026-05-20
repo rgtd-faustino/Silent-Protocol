@@ -1,30 +1,30 @@
 using UnityEngine;
 
-// Um tópico de conversa — cria via Assets > Create > Dialogue > Topic
+// Um tpico de conversa  cria via Assets > Create > Dialogue > Topic
 [CreateAssetMenu(fileName = "NewTopic", menuName = "Dialogue/Topic")]
 public class DialogueTopic : ScriptableObject
 {
 
-    [Header("Identificação")]
+    [Header("Identificao")]
     public string topicID;          //
-                                    // único, ex: "ask_decoding", "invite_coffee"
-    public string buttonLabel;       // texto que aparece no botão, ex: "Como se faz a descodificação?"
+                                    // nico, ex: "ask_decoding", "invite_coffee"
+    public string buttonLabel;       // texto que aparece no boto, ex: "Como se faz a descodificao?"
 
-    [Header("Tipo de tópico")]
+    [Header("Tipo de tpico")]
     public TopicType topicType;
 
-    // se true, este tópico só aparece quando suspeita >= suspicionThreshold
-    [Header("Condição de aparecimento")]
+    // se true, este tpico s aparece quando suspeita >= suspicionThreshold
+    [Header("Condio de aparecimento")]
     public bool requiresHighSuspicion = false;
     [Range(0f, 1f)] public float suspicionThreshold = 0.33f;
 
  
 
-    // mínimo de carisma para este tópico aparecer na lista (0 = sempre aparece)
+    // mnimo de carisma para este tpico aparecer na lista (0 = sempre aparece)
     public int requiredCharisma = 0;
 
     [Header("Resultado")]
-    public TopicOutcome[] outcomes; // avaliados por ordem — o primeiro cujo check passa é usado
+    public TopicOutcome[] outcomes; // avaliados por ordem  o primeiro cujo check passa  usado
 
 
     public enum TopicType
@@ -32,11 +32,11 @@ public class DialogueTopic : ScriptableObject
         Question,       // o jogador quer saber algo
         Statement,      // o jogador afirma/partilha algo
         Request,        // o jogador pede algo ao NPC
-        Confrontation   // aparece quando suspeita alta — mentira ou verdade
+        Confrontation   // aparece quando suspeita alta  mentira ou verdade
     }
 
     // Avalia os outcomes por ordem e devolve o primeiro que passa o check de stats
-    // Se nenhum passar devolve o último (deve ser sempre o fallback)
+    // Se nenhum passar devolve o ltimo (deve ser sempre o fallback)
     public TopicOutcome Evaluate()
     {
         int charisma = PlayerStats.Instance.GetCarisma();
@@ -57,17 +57,17 @@ public class DialogueTopic : ScriptableObject
 [System.Serializable]
 public class TopicOutcome
 {
-    //se true, então um botão irá aparecer para o jogador guardar a intel
-    [Header("Tem potêncial de Intel?")]
+    //se true, ento um boto ir aparecer para o jogador guardar a intel
+    [Header("Tem potncial de Intel?")]
     public bool temIntel = false;
     public IntelItem intelAssociado;
     public bool intelJaRecolhida = false;
     [Header("Check")]
-    // qual stat é avaliada neste outcome
+    // qual stat  avaliada neste outcome
     public StatCheck statCheck;
 
-    // o threshold base — se a stat >= threshold este outcome é escolhido.
-    // luck modifica o threshold em ±luckModifier (positivo = mais fácil com boa sorte)
+    // o threshold base  se a stat >= threshold este outcome  escolhido.
+    // luck modifica o threshold em luckModifier (positivo = mais fcil com boa sorte)
     [Range(1, 10)] public int threshold = 5;
     [Range(0, 3)] public int luckModifier = 1; // quanto a sorte pode baixar o threshold
 
@@ -78,7 +78,7 @@ public class TopicOutcome
     [Header("Resposta do NPC")]
     [TextArea(2, 5)] public string npcResponse;
 
-    [Header("Consequências")]
+    [Header("Consequncias")]
     public ConsequenceType consequence;
     public float consequenceAmount = 0f; // usado por ChangeSuspicion e UnlockFloor
     public int unlockFloorIndex = -1;    // usado por UnlockFloor
@@ -91,7 +91,7 @@ public class TopicOutcome
         DecreaseSuspicion,
         IncreaseSuspicion,
         UnlockFloor,
-        GiveIntel          // para quando o NPC dá uma pista — implementar com IntelInventory
+        GiveIntel          // para quando o NPC d uma pista  implementar com IntelInventory
     }
 
     // devolve true se este outcome deve ser usado
@@ -102,10 +102,10 @@ public class TopicOutcome
 
         int effectiveThreshold = threshold;
 
-        // sorte reduz o threshold (mais fácil passar)
+        // sorte reduz o threshold (mais fcil passar)
         effectiveThreshold -= Mathf.RoundToInt(luck * luckModifier / 10f);
 
-        // suspeita alta aumenta o threshold (mais difícil passar)
+        // suspeita alta aumenta o threshold (mais difcil passar)
         if (suspicionAffects && suspicion >= 0.66f)
             effectiveThreshold += suspicionPenalty;
 

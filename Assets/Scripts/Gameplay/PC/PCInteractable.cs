@@ -7,6 +7,13 @@ public class PCInteractable : InteractableObject
 
     private bool isOpen = false;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        objectName = "Computador";
+        tooltipMessage = "E para usar computador";
+    }
+
     public override void Interact()
     {
         if (!isOpen)
@@ -38,7 +45,7 @@ public class PCInteractable : InteractableObject
 
     private void Update()
     {
-        // só tenta apanahr o Escape se o PC estiver aberto
+        // s tenta apanahr o Escape se o PC estiver aberto
         if (isOpen && Input.GetKeyDown(KeyCode.P))
             ClosePC();
     }

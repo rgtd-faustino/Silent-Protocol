@@ -6,16 +6,16 @@ using TMPro;
 public class SuspicionHUD : MonoBehaviour
 {
     [Header("Anel radial")]
-    [SerializeField] private Image ringImage; // círculo que enche conforme a suspeita
+    [SerializeField] private Image ringImage; // crculo que enche conforme a suspeita
 
     [Header("Olho")]
-    [SerializeField] private RectTransform irisRect; // íris (parte colorida)
-    [SerializeField] private Image irisImage; // para mudar a cor da íris
+    [SerializeField] private RectTransform irisRect; // ris (parte colorida)
+    [SerializeField] private Image irisImage; // para mudar a cor da ris
     [SerializeField] private RectTransform eyeWhiteRect; // parte branca do olho
 
     [Header("Texto")]
     [SerializeField] private TextMeshProUGUI stateLabel; // texto principal (estado)
-    [SerializeField] private TextMeshProUGUI subLabel; // texto secundário
+    [SerializeField] private TextMeshProUGUI subLabel; // texto secundrio
 
     [Header("CanvasGroup")]
     [SerializeField] private CanvasGroup canvasGroup; // usado para fade in/out do HUD
@@ -31,12 +31,12 @@ public class SuspicionHUD : MonoBehaviour
     private Coroutine fadeCoroutine;
 
     private Vector3 baseEyeScale; // tamanho inicial do olho
-    private Vector3 baseIrisScale; // tamanho inicial da íris
+    private Vector3 baseIrisScale; // tamanho inicial da ris
 
     private float currentRatio; // valor suavizado da suspeita (0-1)
     private float velocity; // usado pelo SmoothDamp
 
-    // até onde o olho e a íris podem crescer
+    // at onde o olho e a ris podem crescer
     float eyeMultiplier = 2.0f;
     float irisMultiplier = 1.6f;
 
@@ -52,7 +52,7 @@ public class SuspicionHUD : MonoBehaviour
 
     void OnEnable()
     {
-        // subscreve ao evento global de mudança de estado
+        // subscreve ao evento global de mudana de estado
         GameEvent.OnSuspicionStateChanged += HandleStateChanged;
     }
 
@@ -77,7 +77,7 @@ public class SuspicionHUD : MonoBehaviour
         irisRect.localScale = baseIrisScale * irisScaleFactor;
 
         // alpha do HUD acompanha o ratio mesmo no estado None
-        // mínimo 0.25, máximo 1.0 — o jogador vê sempre algo a mexer
+        // mnimo 0.25, mximo 1.0  o jogador v sempre algo a mexer
         canvasGroup.alpha = Mathf.Max(canvasGroup.alpha, Mathf.Lerp(0.25f, 1f, currentRatio));
 
         if (currentRatio > 0.6f) {
@@ -86,7 +86,7 @@ public class SuspicionHUD : MonoBehaviour
         }
     }
 
-    // (já não está a ser usado, ficou aqui se for preciso mais tarde)
+    // (j no est a ser usado, ficou aqui se for preciso mais tarde)
     float EaseOutBack(float x)
     {
         float c1 = 1.70158f;
@@ -111,17 +111,17 @@ public class SuspicionHUD : MonoBehaviour
                 break;
 
             case SuspicionManager.SuspicionState.Attention:
-                ApplyVisuals(colorAttention, "ATENÇÃO", "NPCs observam-te", false);
+                ApplyVisuals(colorAttention, "ATENO", "NPCs observam-te", false);
                 SetFade(1f, 0.4f);
                 break;
 
             case SuspicionManager.SuspicionState.Investigation:
-                ApplyVisuals(colorInvestigation, "INVESTIGAÇÃO", "Guardas em alerta", true);
+                ApplyVisuals(colorInvestigation, "INVESTIGAO", "Guardas em alerta", true);
                 SetFade(1f, 0.3f);
                 break;
 
             case SuspicionManager.SuspicionState.Expulsion:
-                ApplyVisuals(colorExpulsion, "EXPULSÃO", "GAME OVER", true);
+                ApplyVisuals(colorExpulsion, "EXPULSO", "GAME OVER", true);
                 SetFade(1f, 0.2f);
                 break;
         }
@@ -129,7 +129,7 @@ public class SuspicionHUD : MonoBehaviour
 
     private void ApplyVisuals(Color c, string label, string sub, bool pulse)
     {
-        // muda cor do anel e da íris
+        // muda cor do anel e da ris
         ringImage.color = c;
         irisImage.color = c;
 
@@ -138,7 +138,7 @@ public class SuspicionHUD : MonoBehaviour
         stateLabel.color = c;
         subLabel.text = sub;
 
-        // começa o efeito de pulso se necessário
+        // comea o efeito de pulso se necessrio
         if (pulse)
             pulseCoroutine = StartCoroutine(PulseRoutine(c));
     }

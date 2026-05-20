@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
@@ -74,6 +74,12 @@ public class NPCScript : InteractableObject {
     private NPCState currentState;
     private bool isFloorActive = true;
 
+
+    protected override void Awake() {
+        base.Awake();
+        objectName = "Personagem";
+        tooltipMessage = "E para falar";
+    }
 
     void Start() {
         playerTransform = NPCManager.Instance.player;

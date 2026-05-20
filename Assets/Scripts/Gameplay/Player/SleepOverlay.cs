@@ -3,10 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-/// Gera os efeitos visuais de sono na câmara com base no sleep stage do TimeManager.
+/// Gera os efeitos visuais de sono na cmara com base no sleep stage do TimeManager.
 /// SETUP NO UNITY:
-/// 1. Cria um Canvas (Screen Space – Overlay, Sort Order alto tipo 100) chamado "SleepEffectCanvas"
-/// 2. Dentro do Canvas, cria um Image que cobre o ecrã todo (Anchor: stretch/stretch, Left/Right/Top/Bottom = 0)
+/// 1. Cria um Canvas (Screen Space  Overlay, Sort Order alto tipo 100) chamado "SleepEffectCanvas"
+/// 2. Dentro do Canvas, cria um Image que cobre o ecr todo (Anchor: stretch/stretch, Left/Right/Top/Bottom = 0)
 ///    Cor: preto (0,0,0,1), mas com Alpha = 0 inicialmente
 ///    Chama-lhe "SleepOverlay"
 /// 3. Arrasta esse Image para o campo "sleepOverlay" neste script
@@ -17,52 +17,52 @@ public class SleepEffectController : MonoBehaviour
     public static SleepEffectController Instance;
 
     [Header("Overlay")]
-    [Tooltip("Image preta que cobre o ecrã todo (Alpha 0 inicialmente)")]
+    [Tooltip("Image preta que cobre o ecr todo (Alpha 0 inicialmente)")]
     [SerializeField] private Image sleepOverlay;
 
     // -----------------------------------------------------------------------
-    // Stage 1 — Piscar de olhos (blink)
+    // Stage 1  Piscar de olhos (blink)
     // -----------------------------------------------------------------------
-    [Header("Stage 1 – Blink")]
-    [Tooltip("Intervalo mínimo entre piscares (segundos reais)")]
+    [Header("Stage 1  Blink")]
+    [Tooltip("Intervalo mnimo entre piscares (segundos reais)")]
     [SerializeField] private float blinkIntervalMin = 8f;
-    [Tooltip("Intervalo máximo entre piscares (segundos reais)")]
+    [Tooltip("Intervalo mximo entre piscares (segundos reais)")]
     [SerializeField] private float blinkIntervalMax = 20f;
     [Tooltip("Quanto tempo demora a 'fechar os olhos' (fade to black)")]
     [SerializeField] private float blinkCloseTime = 0.6f;
     [Tooltip("Quanto tempo os olhos ficam fechados no pico")]
     [SerializeField] private float blinkHoldTime = 0.15f;
-    [Tooltip("Quanto tempo demora a 'abrir os olhos' (fade in rápido)")]
+    [Tooltip("Quanto tempo demora a 'abrir os olhos' (fade in rpido)")]
     [SerializeField] private float blinkOpenTime = 0.12f;
 
     // -----------------------------------------------------------------------
-    // Stage 2 — Blackout com avanço de tempo
+    // Stage 2  Blackout com avano de tempo
     // -----------------------------------------------------------------------
-    [Header("Stage 2 – Blackout")]
-    [Tooltip("Intervalo mínimo entre blackouts (segundos reais)")]
+    [Header("Stage 2  Blackout")]
+    [Tooltip("Intervalo mnimo entre blackouts (segundos reais)")]
     [SerializeField] private float blackoutIntervalMin = 30f;
-    [Tooltip("Intervalo máximo entre blackouts (segundos reais)")]
+    [Tooltip("Intervalo mximo entre blackouts (segundos reais)")]
     [SerializeField] private float blackoutIntervalMax = 60f;
-    [Tooltip("Tempo de jogo mínimo que avança durante um blackout (minutos)")]
+    [Tooltip("Tempo de jogo mnimo que avana durante um blackout (minutos)")]
     [SerializeField] private float blackoutSkipMinMin = 15f;
-    [Tooltip("Tempo de jogo máximo que avança durante um blackout (minutos)")]
+    [Tooltip("Tempo de jogo mximo que avana durante um blackout (minutos)")]
     [SerializeField] private float blackoutSkipMinMax = 30f;
-    [Tooltip("Duração do fade-in e fade-out do blackout (segundos reais)")]
+    [Tooltip("Durao do fade-in e fade-out do blackout (segundos reais)")]
     [SerializeField] private float blackoutFadeTime = 1.2f;
-    [Tooltip("Quanto tempo o ecrã fica completamente preto durante o blackout")]
+    [Tooltip("Quanto tempo o ecr fica completamente preto durante o blackout")]
     [SerializeField] private float blackoutHoldTime = 1.5f;
 
     // -----------------------------------------------------------------------
-    // Stage 3 — Game over (ecrã preto permanente)
+    // Stage 3  Game over (ecr preto permanente)
     // -----------------------------------------------------------------------
-    [Header("Stage 3 – Apagar")]
+    [Header("Stage 3  Apagar")]
     [Tooltip("Velocidade do fade final para preto (segundos reais)")]
     [SerializeField] private float stageFadeOutTime = 3f;
 
     // -----------------------------------------------------------------------
     // Estado interno
     // -----------------------------------------------------------------------
-    private int lastStage = -1;         // stage anterior para detetar mudança
+    private int lastStage = -1;         // stage anterior para detetar mudana
     private bool effectRunning = false; // evita sobrepor coroutines
     private bool stage3Triggered = false;
 
@@ -80,7 +80,7 @@ public class SleepEffectController : MonoBehaviour
     {
         if (sleepOverlay == null)
         {
-            Debug.LogError("[SleepEffectController] sleepOverlay não está atribuído! Cria um Image preto no Canvas e arrasta aqui.");
+            Debug.LogError("[SleepEffectController] sleepOverlay no est atribudo! Cria um Image preto no Canvas e arrasta aqui.");
             return;
         }
 
@@ -93,7 +93,7 @@ public class SleepEffectController : MonoBehaviour
 
         int stage = TimeManager.Instance.GetEffectiveSleepStage();
 
-        // Detetar mudança de stage
+        // Detetar mudana de stage
         if (stage != lastStage)
         {
             OnStageChanged(lastStage, stage);
@@ -116,25 +116,25 @@ public class SleepEffectController : MonoBehaviour
         switch (to)
         {
             case 0:
-                // Sem fadiga — garante ecrã limpo
+                // Sem fadiga  garante ecr limpo
                 StartCoroutine(FadeOverlay(GetOverlayAlpha(), 0f, 0.3f));
                 stage3Triggered = false;
                 break;
 
             case 1:
-                // Piscar de olhos periódico
+                // Piscar de olhos peridico
                 StartCoroutine(FadeOverlay(GetOverlayAlpha(), 0f, 0.3f));
                 activeLoopCoroutine = StartCoroutine(BlinkLoop());
                 break;
 
             case 2:
-                // Blackouts com avanço de tempo
+                // Blackouts com avano de tempo
                 StartCoroutine(FadeOverlay(GetOverlayAlpha(), 0f, 0.3f));
                 activeLoopCoroutine = StartCoroutine(BlackoutLoop());
                 break;
 
             case 3:
-                // Apagar — ecrã fica preto permanentemente
+                // Apagar  ecr fica preto permanentemente
                 if (!stage3Triggered)
                 {
                     stage3Triggered = true;
@@ -145,17 +145,17 @@ public class SleepEffectController : MonoBehaviour
     }
 
     // -----------------------------------------------------------------------
-    // STAGE 1 — Loop de piscares
+    // STAGE 1  Loop de piscares
     // -----------------------------------------------------------------------
     private IEnumerator BlinkLoop()
     {
         while (true)
         {
-            // Espera intervalo aleatório antes do próximo piscar
+            // Espera intervalo aleatrio antes do prximo piscar
             float waitTime = Random.Range(blinkIntervalMin, blinkIntervalMax);
             yield return new WaitForSeconds(waitTime);
 
-            // Verifica se ainda está no stage 1 (pode ter mudado entretanto)
+            // Verifica se ainda est no stage 1 (pode ter mudado entretanto)
             if (TimeManager.Instance.GetEffectiveSleepStage() != 1) yield break;
 
             yield return StartCoroutine(DoBlinkEffect());
@@ -166,20 +166,20 @@ public class SleepEffectController : MonoBehaviour
     {
         effectRunning = true;
 
-        // Fechar olhos — lento
+        // Fechar olhos  lento
         yield return StartCoroutine(FadeOverlay(0f, 1f, blinkCloseTime, EaseInQuad));
 
         // Manter fechado brevemente
         yield return new WaitForSeconds(blinkHoldTime);
 
-        // Abrir olhos — rápido
+        // Abrir olhos  rpido
         yield return StartCoroutine(FadeOverlay(1f, 0f, blinkOpenTime, EaseOutQuad));
 
         effectRunning = false;
     }
 
     // -----------------------------------------------------------------------
-    // STAGE 2 — Loop de blackouts com avanço de tempo
+    // STAGE 2  Loop de blackouts com avano de tempo
     // -----------------------------------------------------------------------
     private IEnumerator BlackoutLoop()
     {
@@ -201,7 +201,7 @@ public class SleepEffectController : MonoBehaviour
         // Fade para preto (mais lento que o piscar)
         yield return StartCoroutine(FadeOverlay(GetOverlayAlpha(), 1f, blackoutFadeTime, EaseInQuad));
 
-        // Ecrã preto — avança tempo de jogo
+        // Ecr preto  avana tempo de jogo
         float skipMinutes = Random.Range(blackoutSkipMinMin, blackoutSkipMinMax);
         AdvanceGameTime(skipMinutes);
 
@@ -212,11 +212,11 @@ public class SleepEffectController : MonoBehaviour
 
         effectRunning = false;
 
-        Debug.Log($"[SleepEffect] Blackout: avançou {skipMinutes:F0} minutos de jogo.");
+        Debug.Log($"[SleepEffect] Blackout: avanou {skipMinutes:F0} minutos de jogo.");
     }
 
     // -----------------------------------------------------------------------
-    // STAGE 3 — Apagar completamente
+    // STAGE 3  Apagar completamente
     // -----------------------------------------------------------------------
     private IEnumerator Stage3Sequence()
     {
@@ -230,15 +230,15 @@ public class SleepEffectController : MonoBehaviour
         // Fade lento para preto total
         yield return StartCoroutine(FadeOverlay(GetOverlayAlpha(), 1f, stageFadeOutTime, EaseInQuad));
 
-        // Ecrã fica permanentemente preto
+        // Ecr fica permanentemente preto
         // Aqui podes chamar GameManager.Instance.GameOver() quando existir
-        Debug.Log("[SleepEffect] Stage 3: o jogador apagou. Ecrã permanentemente preto.");
+        Debug.Log("[SleepEffect] Stage 3: o jogador apagou. Ecr permanentemente preto.");
 
-        // Por enquanto não faz nada mais — o ecrã fica preto
+        // Por enquanto no faz nada mais  o ecr fica preto
     }
 
     // -----------------------------------------------------------------------
-    // Avançar tempo de jogo (blackout)
+    // Avanar tempo de jogo (blackout)
     // -----------------------------------------------------------------------
     private void AdvanceGameTime(float minutes)
     {
@@ -250,18 +250,18 @@ public class SleepEffectController : MonoBehaviour
 
         TimeManager.Instance.SetCurrentMinutes(newMinutes);
 
-        // Acumula fadiga pelo tempo que passou (o jogador "não dormiu")
-        // O TimeManager já acumula no Update, mas como avançamos o tempo artificialmente,
-        // forçamos a acumulação equivalente aqui via Coffee(0) — não, melhor refletido:
-        // O accumulatedSleep é privado, por isso o blackout não adiciona fadiga extra explicitamente.
-        // Se quiseres que os blackouts piorem a fadiga, expõe um método AddSleepDebt(float hours) no TimeManager.
+        // Acumula fadiga pelo tempo que passou (o jogador "no dormiu")
+        // O TimeManager j acumula no Update, mas como avanamos o tempo artificialmente,
+        // foramos a acumulao equivalente aqui via Coffee(0)  no, melhor refletido:
+        // O accumulatedSleep  privado, por isso o blackout no adiciona fadiga extra explicitamente.
+        // Se quiseres que os blackouts piorem a fadiga, expe um mtodo AddSleepDebt(float hours) no TimeManager.
     }
 
     // -----------------------------------------------------------------------
-    // Utilitários de fade
+    // Utilitrios de fade
     // -----------------------------------------------------------------------
 
-    // Fade genérico com easing opcional
+    // Fade genrico com easing opcional
     private IEnumerator FadeOverlay(float from, float to, float duration, System.Func<float, float> easing = null)
     {
         float elapsed = 0f;
@@ -294,16 +294,16 @@ public class SleepEffectController : MonoBehaviour
     private float EaseOutQuad(float t) => t * (2f - t);
 
     // -----------------------------------------------------------------------
-    // API pública — para forçar efeitos externamente se precisares
+    // API pblica  para forar efeitos externamente se precisares
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// Força um piscar imediato (útil para testar ou eventos especiais).
+    /// Fora um piscar imediato (til para testar ou eventos especiais).
     /// </summary>
     public void TriggerBlink() => StartCoroutine(DoBlinkEffect());
 
     /// <summary>
-    /// Força um blackout imediato com avanço de tempo aleatório.
+    /// Fora um blackout imediato com avano de tempo aleatrio.
     /// </summary>
     public void TriggerBlackout() => StartCoroutine(DoBlackoutEffect());
 }

@@ -9,7 +9,7 @@ public class Server2UI : MonoBehaviour
     [Header("Painel")]
     [SerializeField] private GameObject serverPanel;
 
-    [Header("Código")]
+    [Header("Cdigo")]
     [SerializeField] private TMP_InputField[] codeDigits;
     [SerializeField] private TextMeshProUGUI codeResultText;
 

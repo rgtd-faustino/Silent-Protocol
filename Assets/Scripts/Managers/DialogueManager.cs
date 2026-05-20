@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Gere o fluxo completo de diálogo:
+// Gere o fluxo completo de dilogo:
 //  1. recebe o NPCDialogueData do NPC com quem o jogador interagiu
-//  2. filtra os tópicos válidos para o estado atual (suspeita, charisma)
+//  2. filtra os tpicos vlidos para o estado atual (suspeita, charisma)
 //  3. passa a lista filtrada ao DialogueUI
-//  4. quando o jogador escolhe um tópico, avalia o outcome e aplica consequências
+//  4. quando o jogador escolhe um tpico, avalia o outcome e aplica consequncias
 public class DialogueManager : MonoBehaviour
 {
 
     public static DialogueManager Instance;
 
-    // emitido quando o diálogo abre — pode ser usado para parar o tempo ou NPCs
+    // emitido quando o dilogo abre  pode ser usado para parar o tempo ou NPCs
     public event System.Action OnDialogueOpen;
-    // emitido quando o diálogo fecha
+    // emitido quando o dilogo fecha
     public event System.Action OnDialogueClose;
 
     private NPCDialogueData currentData;
@@ -31,14 +31,14 @@ public class DialogueManager : MonoBehaviour
         if (isOpen) return;
         if (data == null)
         {
-            Debug.LogWarning("[DialogueManager] NPCDialogueData é null.");
+            Debug.LogWarning("[DialogueManager] NPCDialogueData  null.");
             return;
         }
 
         currentData = data;
         isOpen = true;
 
-        // bloqueia o movimento do jogador enquanto o diálogo está aberto
+        // bloqueia o movimento do jogador enquanto o dilogo est aberto
         PlayerController.Instance.canMoveRotate = false;
         UIManager.Instance.ChangeCursorState(CursorLockMode.None);
         Cursor.visible = true;
@@ -60,7 +60,7 @@ public class DialogueManager : MonoBehaviour
         OnDialogueOpen?.Invoke();
     }
 
-    // fecha o diálogo e devolve o controlo ao jogador
+    // fecha o dilogo e devolve o controlo ao jogador
     public void CloseDialogue()
     {
         if (!isOpen) return;
@@ -75,7 +75,7 @@ public class DialogueManager : MonoBehaviour
         OnDialogueClose?.Invoke();
     }
 
-    // chamado pelo DialogueUI quando o jogador clica num tópico
+    // chamado pelo DialogueUI quando o jogador clica num tpico
     public void OnTopicSelected(DialogueTopic topic)
     {
         if (topic == null) return;
@@ -84,21 +84,21 @@ public class DialogueManager : MonoBehaviour
 
         // mostra a resposta do NPC
         DialogueUI.Instance.ShowNPCResponse(outcome.npcResponse, () => {
-            // callback após o jogador fechar a resposta
+            // callback aps o jogador fechar a resposta
             ApplyConsequence(outcome);
 
-            // após confronto, fecha sempre — o jogador não escolhe mais tópicos
+            // aps confronto, fecha sempre  o jogador no escolhe mais tpicos
             if (topic.topicType == DialogueTopic.TopicType.Confrontation)
                 CloseDialogue();
             else
-                DialogueUI.Instance.ReturnToTopics(); // volta ao menu de tópicos
+                DialogueUI.Instance.ReturnToTopics(); // volta ao menu de tpicos
         },outcome);
     }
 
-    // filtra os tópicos do NPCDialogueData conforme:
-    //  — suspeita alta injeta o tópico de confronto (e esconde os normais)
-    //  — charisma mínimo do tópico
-    //  — requiresHighSuspicion: só aparece se suspeita >= threshold
+    // filtra os tpicos do NPCDialogueData conforme:
+    //   suspeita alta injeta o tpico de confronto (e esconde os normais)
+    //   charisma mnimo do tpico
+    //   requiresHighSuspicion: s aparece se suspeita >= threshold
     private List<DialogueTopic> FilterTopics(NPCDialogueData data)
     {
         float suspicion = SuspicionManager.Instance.GetSuspicionRatio();
@@ -112,7 +112,7 @@ public class DialogueManager : MonoBehaviour
         {
             DialogueTopic t = data.topics[i];
 
-            Debug.Log($"[Filter] Topic '{t.buttonLabel}' — requiredCharisma: {t.requiredCharisma}, requiresHighSuspicion: {t.requiresHighSuspicion}");
+            Debug.Log($"[Filter] Topic '{t.buttonLabel}'  requiredCharisma: {t.requiredCharisma}, requiresHighSuspicion: {t.requiresHighSuspicion}");
 
             if (charisma < t.requiredCharisma)
             {
@@ -130,7 +130,7 @@ public class DialogueManager : MonoBehaviour
             if (result.Count >= 3) break;
         }
 
-        Debug.Log($"[Filter] Tópicos aprovados: {result.Count}");
+        Debug.Log($"[Filter] Tpicos aprovados: {result.Count}");
         return result;
     }
 
@@ -157,7 +157,7 @@ public class DialogueManager : MonoBehaviour
 
             case TopicOutcome.ConsequenceType.GiveIntel:
                 // IntelInventory.Instance.AddIntel(...) quando o sistema de intel estiver pronto
-                Debug.Log("[DialogueManager] GiveIntel — a implementar com IntelInventory.");
+                Debug.Log("[DialogueManager] GiveIntel  a implementar com IntelInventory.");
                 break;
         }
     }

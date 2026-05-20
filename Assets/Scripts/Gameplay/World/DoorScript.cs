@@ -10,20 +10,29 @@ public class DoorScript : InteractableObject
     private bool isOpen = false;
     private LockScript lockScript;
 
-    // override em vez de private void ó garante que o InteractableObject.Awake() inicializa
-    // o glitch material, o MeshRenderer e as coordenadas baricÍntricas corretamente
+    [Header("Bloqueio Eletr√≥nico")]
+    [SerializeField] private CardReader cardReaderLock;
+
+    // override em vez de private void  garante que o InteractableObject.Awake() inicializa
+    // o glitch material, o MeshRenderer e as coordenadas baricntricas corretamente
     protected override void Awake()
     {
         base.Awake();
         objectName = "Porta";
         lockScript = GetComponentInChildren<LockScript>();
+        tooltipMessage = "E para abrir/fechar Porta";
     }
 
     public override void Interact()
     {
         if (lockScript != null && lockScript.isLocked)
         {
-            Debug.Log("Ser· que consigo destranc·-la?");
+            Debug.Log("Ser que consigo destranc-la?");
+            return;
+        }
+        if (cardReaderLock != null && !cardReaderLock.isUnlocked)
+        {
+            Debug.Log($"[{gameObject.name}] Esta porta est√° bloqueada eletronicamente. Preciso de usar o leitor de cart√µes.");
             return;
         }
         Debug.Log("Miau");

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DayNightLightController : MonoBehaviour {
 
-    [Header("Referência")]
+    [Header("Referncia")]
     [SerializeField] private Light directionalLight;
 
     [Header("Cor ao longo do dia")]
@@ -12,7 +12,7 @@ public class DayNightLightController : MonoBehaviour {
     [Header("Intensidade (x = hora normalizada 0-1, y = intensidade)")]
     [SerializeField] private AnimationCurve intensityCurve;
 
-    [Header("Elevação do sol (x = hora normalizada, y = graus -90 a 90)")]
+    [Header("Elevao do sol (x = hora normalizada, y = graus -90 a 90)")]
     [SerializeField] private AnimationCurve sunElevationCurve;
     [SerializeField] private float sunAzimuth = 170f;
 
@@ -23,7 +23,7 @@ public class DayNightLightController : MonoBehaviour {
             new Keyframe(0.36f, 0.40f),  // nascente
             new Keyframe(0.50f, 1.20f),  // meio-dia
             new Keyframe(0.75f, 0.85f),  // fim de tarde
-            new Keyframe(0.91f, 0.00f),  // pôr do sol
+            new Keyframe(0.91f, 0.00f),  // pr do sol
             new Keyframe(1.00f, 0.00f)
         );
 

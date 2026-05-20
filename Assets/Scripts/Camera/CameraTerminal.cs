@@ -3,8 +3,10 @@ using UnityEngine;
 public class CameraTerminal : InteractableObject {
     [SerializeField] private bool nightOnly = false;
 
-    void Start() {
+    protected override void Awake() {
+        base.Awake();
         objectName = "Monitor de Segurança";
+        tooltipMessage = "E para aceder às Câmaras de Segurança";
     }
 
     public override void Interact() {

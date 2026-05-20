@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "TrashBin/Novo Item")]
 public class TrashItem : ScriptableObject
 {
-    [Header("Conteúdo")]
+    [Header("Contedo")]
     public string titulo;
 
     [TextArea(5, 20)]
@@ -11,7 +11,7 @@ public class TrashItem : ScriptableObject
 
     [Header("Intel")]
     public bool temIntel = false;
-    [Tooltip("Se temIntel = true, este IntelItem será guardado no inventário ao clicar 'Guardar Intel'")]
+    [Tooltip("Se temIntel = true, este IntelItem ser guardado no inventrio ao clicar 'Guardar Intel'")]
     public IntelItem intelAssociado;
 
     [Header("Entrega")]
