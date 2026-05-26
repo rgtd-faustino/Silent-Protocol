@@ -428,7 +428,7 @@ public class GameMenuManager : MonoBehaviour {
     }
 
     // mtodos para os botes, no d para meter o GoTo diretamente porque retorna void em vez da referncia do mtodo
-    private void OnNewGameClicked() {
+    public void OnNewGameClicked() {
         SaveManager.Instance.DeleteSave();
         GoTo(MenuState.CharacterCreation);
     }
@@ -439,7 +439,7 @@ public class GameMenuManager : MonoBehaviour {
         GoTo(MenuState.Playing);
     }
 
-    private void OnQuitClicked() {
+    public void OnQuitClicked() {
         Application.Quit();
     }
 
