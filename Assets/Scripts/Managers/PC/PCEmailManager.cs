@@ -18,8 +18,11 @@ public class PCEmailManager : MonoBehaviour
     private List<EmailItem> inbox = new List<EmailItem>();
     private List<EmailItem> lixo = new List<EmailItem>();
 
-    // emails ainda  espera de ser entregues
+    // emails ainda à espera de ser entregues
     private List<EmailItem> pendentes = new List<EmailItem>();
+
+    // timers de auto-delete para emails críticos (minutos de jogo restantes)
+    private Dictionary<EmailItem, float> autoDeleteTimers = new Dictionary<EmailItem, float>();
 
     // ------------------------------------------------------------------ //
     // Eventos (a EmailUI subscreve-os)                                      //
@@ -41,8 +44,30 @@ public class PCEmailManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
+    void Update() {
+        // actualiza timers de auto-delete de emails críticos
+        if (autoDeleteTimers.Count > 0) {
+            float delta = TimeManager.Instance.lastDeltaMinutes;
+            List<EmailItem> expirados = new List<EmailItem>();
+
+            foreach (var kvp in new Dictionary<EmailItem, float>(autoDeleteTimers)) {
+                float restante = kvp.Value - delta;
+                if (restante <= 0f)
+                    expirados.Add(kvp.Key);
+                else
+                    autoDeleteTimers[kvp.Key] = restante;
+            }
+
+            foreach (var email in expirados) {
+                autoDeleteTimers.Remove(email);
+                inbox.Remove(email);
+                lixo.Remove(email);
+                GameEvent.CriticalEmailExpired(email.emailID);
+                OnEmailApagado?.Invoke(email);
+                Debug.LogWarning($"[PCEmailManager] Email crítico '{email.emailID}' auto-deletado.");
+            }
+        }
+
         if (pendentes.Count == 0) return;
 
         float horaAtual = TimeManager.Instance.GetCurrentTimeInHours();
@@ -69,14 +94,16 @@ public class PCEmailManager : MonoBehaviour
         email.lido = false;
         email.apagado = email.irParaLixoDirectamente;
 
-        if (email.irParaLixoDirectamente)
-        {
+        if (email.irParaLixoDirectamente) {
             lixo.Add(email);
-        }
-        else
-        {
+        } else {
             inbox.Add(email);
             OnEmailRecebido?.Invoke(email);
+
+            if (email.isCritical && email.autoDeleteGameMinutes > 0f) {
+                autoDeleteTimers[email] = email.autoDeleteGameMinutes;
+                GameEvent.CriticalEmailAvailable(email.emailID);
+            }
         }
     }
 
@@ -120,6 +147,12 @@ public class PCEmailManager : MonoBehaviour
 
     public List<EmailItem> GetInbox() => new List<EmailItem>(inbox);
     public List<EmailItem> GetLixo() => new List<EmailItem>(lixo);
+
+    /// <summary>Devolve minutos de jogo restantes antes do auto-delete. -1 se não aplicável.</summary>
+    public float GetAutoDeleteTimeRemaining(EmailItem email) {
+        if (autoDeleteTimers.TryGetValue(email, out float t)) return t;
+        return -1f;
+    }
 
     public int GetNaoLidos()
     {

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da4241d4c0703124b9fc65f19a4d348a, type: 3}
+  m_Name: Call_Recepcao_B
+  m_EditorClassIdentifier: Assembly-CSharp::PhoneCallData
+  channelLabel: INT-05
+  lines:
+  - Lucas do IT. Precisamos de acesso ao piso de servidores esta tarde.
+  - "A janela de manuten\xE7\xE3o \xE9 entre as 16h e as 18h."
+  - "O c\xF3digo de acesso tempor\xE1rio \xE9 4429. N\xE3o o registes em nenhum sistema."
+  - "Confirmado. At\xE9 logo."
+  keywordLineIndices: 02000000
+  intelRewards:
+  - {fileID: 0}
+  lineDelayGameMinutes: 1.5

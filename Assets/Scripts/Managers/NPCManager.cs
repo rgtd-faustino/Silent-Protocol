@@ -31,6 +31,7 @@ public class NPCManager : MonoBehaviour {
     }
 
     public void TriggerMeeting() {
+        GameEvent.MeetingStarted();
         bossD1.ForceRoute(meetingRouteBossD1);
         colega1D1.ForceRoute(meetingRouteColega1D1);
         colega2D1.ForceRoute(meetingRouteColega2D1);

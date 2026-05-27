@@ -238,6 +238,8 @@ public class IntelInventory : MonoBehaviour
         return names;
     }
 
+    public List<IntelItem> GetCollectedIntelItems() => new List<IntelItem>(entradas);
+
     public void RestoreIntelFromNames(List<string> names) {
         entradas.Clear();
         if (names == null) return;

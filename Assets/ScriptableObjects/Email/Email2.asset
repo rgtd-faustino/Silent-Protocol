@@ -9,22 +9,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c260f948319c014409b0e9b65669d7a8, type: 3}
+  m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
   m_Name: Email2
   m_EditorClassIdentifier: Assembly-CSharp::EmailItem
+  emailID: email_reuniao_seguranca
   titulo: "URGENTE: Reuni\xE3o de Seguran\xE7a \u2014 Hoje 18h"
-  remetente: diretor@corporatech.net
   remetenteNome: Diretor Geral
+  remetente: diretor@corporatech.net
   dataHora: 2047-03-12  11:03
-  corpo: "Equipa,\r\n\r\nFoi detetada uma tentativa de intrus\xE3o nos servidores
-    da ala norte durante a madrugada.\r\n\r\nA reuni\xE3o de seguran\xE7a agendada
-    para sexta-feira \xE9 antecipada para HOJE \xE0s 18h00 na Sala de Controlo B.\r\n\r\nPresen\xE7a
-    obrigat\xF3ria para todos os elementos com acesso n\xEDvel 2 ou superior.\r\n\r\nN\xE3o
-    discutam este assunto por canais n\xE3o encriptados.\r\n\r\n\u2014 Dire\xE7\xE3o"
-  temIntel: 0
-  intelAssociado: {fileID: 0}
+  corpo: "Equipa,\n\nFoi detetada uma tentativa de intrus\xE3o nos servidores da
+    ala norte durante a madrugada.\n\nA reuni\xE3o de seguran\xE7a agendada para
+    sexta-feira \xE9 antecipada para HOJE \xE0s 18h00 na Sala de Controlo B.\n\nPresen\xE7a
+    obrigat\xF3ria de todos os chefes de departamento. N\xE3o discutir este assunto
+    por email ou telefone."
   spawnHour: 10
   irParaLixoDirectamente: 1
+  temIntel: 0
+  intelAssociado: {fileID: 0}
+  isCritical: 1
+  isEncrypted: 0
+  autoDeleteGameMinutes: 180
+  requiredKeyFragmentIDs: []
+  entregue: 0
   lido: 0
-  apagado: 1
-  entregue: 1
+  apagado: 0
+  desencriptado: 0

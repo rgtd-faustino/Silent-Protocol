@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
@@ -85,6 +86,25 @@ public class GameManager : MonoBehaviour
     {
         // integrar com Unity SaveSystem ou PlayerPrefs quando necessário
         Debug.Log($"[GameManager] Progresso guardado (dia {currentDay}).");
+    }
+
+    // --- sistema de contribuições para finais ---
+    // índice 0 = Denúncia, 1 = Extorsão, 2 = Lealdade
+    private List<string>[] endingContributions = new List<string>[3] {
+        new List<string>(), new List<string>(), new List<string>()
+    };
+
+    public void RegisterEndingContribution(int endingIndex, string sourceID) {
+        if (endingIndex < 0 || endingIndex >= 3) return;
+        if (!endingContributions[endingIndex].Contains(sourceID)) {
+            endingContributions[endingIndex].Add(sourceID);
+            Debug.Log($"[GameManager] Contribuição para final {endingIndex}: {sourceID}. Total: {endingContributions[endingIndex].Count}");
+        }
+    }
+
+    public int GetEndingContributionCount(int endingIndex) {
+        if (endingIndex < 0 || endingIndex >= 3) return 0;
+        return endingContributions[endingIndex].Count;
     }
 
     // --- getters e setters para o SaveManager ---

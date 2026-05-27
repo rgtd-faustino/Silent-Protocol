@@ -9,18 +9,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c260f948319c014409b0e9b65669d7a8, type: 3}
+  m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
   m_Name: Email 1
   m_EditorClassIdentifier: Assembly-CSharp::EmailItem
+  emailID: email_creds_srv_b
   titulo: "Credenciais Tempor\xE1rias \u2014 Servidor B"
-  remetente: sysadmin@corporatech.net
   remetenteNome: SysAdmin CorporaTech
+  remetente: sysadmin@corporatech.net
   dataHora: 2047-03-12  09:41
-  corpo: "Como combinado, as credenciais tempor\xE1rias para o Servidor B foram atualizadas.\r\n\r\nUtilizador:
-    srv_admin_b\r\nPassword: C0rp#2047!Srv\r\n\r\nLembra-te de alterar a password
-    ap\xF3s o primeiro acesso.\r\nN\xE3o partilhes estas credenciais fora da equipa
-    de IT.\r\n\r\n\u2014 SysAdmin"
+  corpo: "Como combinado, as credenciais tempor\xE1rias para o Servidor B foram actualizadas.\n\nUtilizador:
+    srv_admin_b\\nPassword: C0rp#2047!Srv\n\nLembra-te de alterar a password ap\xF3s
+    o primeiro acesso. N\xE3o partilhes estas credenciais fora da equipa de IT."
+  spawnHour: 9
+  irParaLixoDirectamente: 0
   temIntel: 1
   intelAssociado: {fileID: 11400000, guid: 676b19051c241574fa6fcc5a29104e16, type: 2}
+  isCritical: 0
+  isEncrypted: 0
+  autoDeleteGameMinutes: 0
+  requiredKeyFragmentIDs: []
+  entregue: 0
   lido: 0
   apagado: 0
+  desencriptado: 0

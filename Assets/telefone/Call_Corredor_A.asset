@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da4241d4c0703124b9fc65f19a4d348a, type: 3}
+  m_Name: Call_Corredor_A
+  m_EditorClassIdentifier: Assembly-CSharp::PhoneCallData
+  channelLabel: EXT-09
+  lines:
+  - "A transfer\xEAncia para a conta offshore precisa de ser validada hoje."
+  - "O CEO assinou. O documento est\xE1 no servidor seguro."
+  - 'Pasta: /secure/transfers/2047-Q1. Password: Delta-7-Foxtrot.'
+  - "N\xE3o fales disto com ningu\xE9m. Mesmo ningu\xE9m."
+  keywordLineIndices: 02000000
+  intelRewards:
+  - {fileID: 0}
+  lineDelayGameMinutes: 2

@@ -9,22 +9,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c260f948319c014409b0e9b65669d7a8, type: 3}
+  m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
   m_Name: Email4
   m_EditorClassIdentifier: Assembly-CSharp::EmailItem
+  emailID: email_auth_datacenter
   titulo: "Autoriza\xE7\xE3o de Acesso \u2014 Data Center Piso -2"
-  remetente: seguranca@corporatech.net
   remetenteNome: "Seguran\xE7a Corporativa"
+  remetente: seguranca@corporatech.net
   dataHora: 2047-03-10  08:15
-  corpo: "O teu pedido de acesso tempor\xE1rio ao Data Center do Piso -2 foi aprovado.\r\n\r\nC\xF3digo
-    de acesso: 7743-ALPHA\r\nV\xE1lido de: 2047-03-10 at\xE9 2047-03-14\r\n\r\nAten\xE7\xE3o:
+  corpo: "O teu pedido de acesso tempor\xE1rio ao Data Center do Piso -2 foi aprovado.\n\nC\xF3digo
+    de acesso: 7743-ALPHA\nV\xE1lido de: 2047-03-10 at\xE9 2047-03-14\n\nAten\xE7\xE3o:
     o acesso \xE9 registado e auditado. Qualquer entrada fora do hor\xE1rio autorizado
-    (08h-20h) ir\xE1 despoletar um alerta autom\xE1tico.\r\n\r\nGuarda este c\xF3digo
-    \u2014 n\xE3o ser\xE1 reenviado.\r\n\r\n\u2014 Seguran\xE7a Corporativa"
-  temIntel: 1
-  intelAssociado: {fileID: 11400000, guid: 98006d117748bcc439518d6310e50df0, type: 2}
+    (08h-20h) ir\xE1 despoletar um alerta autom\xE1tico.\n\nEste documento \xE9 confidencial.
+    Destruir ap\xF3s leitura."
   spawnHour: 14
   irParaLixoDirectamente: 1
+  temIntel: 1
+  intelAssociado: {fileID: 11400000, guid: 98006d117748bcc439518d6310e50df0, type: 2}
+  isCritical: 1
+  isEncrypted: 1
+  autoDeleteGameMinutes: 300
+  requiredKeyFragmentIDs:
+  - frag_datacenter
+  entregue: 0
   lido: 0
-  apagado: 1
-  entregue: 1
+  apagado: 0
+  desencriptado: 0

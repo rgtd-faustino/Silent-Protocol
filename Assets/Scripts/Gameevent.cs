@@ -36,4 +36,14 @@ public static class GameEvent {
     public static void SuspicionStateChanged(SuspicionManager.SuspicionState s) => OnSuspicionStateChanged?.Invoke(s);
     public static void CameraOveruseWarning(float dangerLevel) => OnCameraOveruseWarning?.Invoke(dangerLevel);
     public static void DayStarted(int day) => OnDayStarted?.Invoke(day);
+
+    // --- Reunião ---
+    public static event Action OnMeetingStarted;
+    public static void MeetingStarted() => OnMeetingStarted?.Invoke();
+
+    // --- Email Crítico ---
+    public static event Action<string> OnCriticalEmailAvailable;
+    public static event Action<string> OnCriticalEmailExpired;
+    public static void CriticalEmailAvailable(string id) => OnCriticalEmailAvailable?.Invoke(id);
+    public static void CriticalEmailExpired(string id) => OnCriticalEmailExpired?.Invoke(id);
 }

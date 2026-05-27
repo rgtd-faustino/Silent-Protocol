@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb8ea2b00ad03944bb41f282cc5a63f2, type: 3}
+  m_Name: IntelPhone2
+  m_EditorClassIdentifier: Assembly-CSharp::IntelItem
+  titulo: "C\xF3digo Acesso Servidor \u2014 4429"
+  categoria: Credenciais
+  localizacao: Piso de Servidores
+  conteudo: "C\xF3digo de acesso tempor\xE1rio ao piso de servidores: 4429. Janela
+    de manuten\xE7\xE3o 16h-18h."
+  isKeyFragment: 0
+  keyFragmentID: 

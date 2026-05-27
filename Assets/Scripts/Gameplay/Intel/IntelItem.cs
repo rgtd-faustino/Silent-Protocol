@@ -7,4 +7,8 @@ public class IntelItem : ScriptableObject
     public string categoria;
     public string localizacao;
     [TextArea] public string conteudo;
+
+    [Header("Fragmento de Chave (emails encriptados)")]
+    public bool isKeyFragment;
+    public string keyFragmentID;
 }
