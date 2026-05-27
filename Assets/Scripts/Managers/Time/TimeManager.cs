@@ -12,9 +12,9 @@ public class TimeManager : MonoBehaviour {
 
     // daySpeed e nightSpeed controlam quantos "minutos de jogo" passam por segundo real, a noite corre mais depressa
     [Header("Velocidade do tempo")]
-    [SerializeField] private float daySpeed = 1f;
-    [SerializeField] private float nightSpeed = 2f;
-    [SerializeField] private float debugSpeedMultiplier = 50f; // 50, testar o jogo mais depressa
+    private float daySpeed = 1f;
+    private float nightSpeed = 2f;
+    private float debugSpeedMultiplier = 40f; // 50, testar o jogo mais depressa
 
     // outros scripts (ex: PlayerController para a lanterna, BedScript para só deixar dormir à noite) consultam esta variável
     [HideInInspector] public bool isNight = false;

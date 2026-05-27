@@ -6,9 +6,6 @@ using TMPro;
 
 public class MeetingEavesdropScript : MonoBehaviour
 {
-    // ------------------------------------------------------------------ //
-    // Dados da reunião                                                      //
-    // ------------------------------------------------------------------ //
 
     [Header("Linhas da reunião (por ordem)")]
     [Tooltip("Cada MeetingLine é uma frase. Activa hasKeyword nas que têm intel.")]
@@ -17,56 +14,51 @@ public class MeetingEavesdropScript : MonoBehaviour
     [Header("Intel por cada linha com keyword (mesmo índice)")]
     [SerializeField] private IntelItem[] keywordIntelRewards;
 
-    // ------------------------------------------------------------------ //
-    // Suspicion                                                             //
-    // ------------------------------------------------------------------ //
 
     [Header("Suspeita passiva enquanto na zona")]
     [SerializeField] private float suspicionRateWhileLoitering = 0.06f;
     private const int SOURCE_ID = 9901; // ID único para esta fonte de suspicion
 
-    // ------------------------------------------------------------------ //
-    // UI                                                                    //
-    // ------------------------------------------------------------------ //
 
     [Header("Painel do minijogo")]
     [SerializeField] private GameObject eavesdropPanel;
     [SerializeField] private TextMeshProUGUI txtLinha;
     [SerializeField] private TextMeshProUGUI txtPrompt;
     [SerializeField] private TextMeshProUGUI txtScore;
-    [SerializeField] private Image progressBar;
+    [SerializeField] private Slider progressBar;
+    [SerializeField] private Button captureButton;
+    private bool capturePressed = false;
 
     [Header("Timing")]
     [SerializeField] private float charDelay       = 0.04f;  // segundos por carácter
     [SerializeField] private float lingerAfterLine = 1.8f;   // pausa entre linhas (segundos reais)
 
-    // ------------------------------------------------------------------ //
-    // Estado interno                                                        //
-    // ------------------------------------------------------------------ //
-
-    private bool playerInZone   = false;
+    private bool playerInZone = false;
     private bool minigameActive = false;
-    private bool meetingActive  = false;
-    private int  capturedCount  = 0;
+    private bool meetingActive = false;
+    private int capturedCount = 0;
+    [SerializeField] private float interactionRadius = 3f;
 
-    // ------------------------------------------------------------------ //
-    // Unity                                                                 //
-    // ------------------------------------------------------------------ //
 
-    void Awake()
-    {
+    void Awake() {
         if (eavesdropPanel != null) eavesdropPanel.SetActive(false);
+        if (captureButton != null) {
+            captureButton.onClick.AddListener(() => capturePressed = true);
+            captureButton.interactable = false;
+        }
     }
 
     void OnEnable()  => GameEvent.OnMeetingStarted += OnMeetingStarted;
     void OnDisable() => GameEvent.OnMeetingStarted -= OnMeetingStarted;
 
-    void Update()
-    {
+    void Update() {
+        // detecção por distância em vez de trigger
+        float dist = Vector3.Distance(transform.position, PlayerController.Instance.transform.position);
+        playerInZone = dist <= interactionRadius;
+
         if (!meetingActive || minigameActive) return;
 
-        if (playerInZone)
-        {
+        if (playerInZone) {
             // suspicion passiva por loitering
             SuspicionManager.Instance.IncreaseSuspicion(1, SOURCE_ID, SuspicionManager.SuspicionSource.RestrictedArea);
             UIManager.Instance.ShowTooltip("E  — Escutar reunião");
@@ -80,26 +72,7 @@ public class MeetingEavesdropScript : MonoBehaviour
         }
     }
 
-    // ------------------------------------------------------------------ //
-    // Trigger de zona                                                       //
-    // ------------------------------------------------------------------ //
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player")) playerInZone = true;
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (!other.CompareTag("Player")) return;
-        playerInZone = false;
-        UIManager.Instance.HideTooltip();
-        SuspicionManager.Instance.StopIncreasingSuspicion(SOURCE_ID);
-    }
-
-    // ------------------------------------------------------------------ //
-    // Evento de reunião                                                     //
-    // ------------------------------------------------------------------ //
+    // detecção por distância no Update — triggers removidos
 
     private void OnMeetingStarted()
     {
@@ -107,9 +80,6 @@ public class MeetingEavesdropScript : MonoBehaviour
         capturedCount  = 0;
     }
 
-    // ------------------------------------------------------------------ //
-    // Minijogo                                                              //
-    // ------------------------------------------------------------------ //
 
     private void StartMinigame()
     {
@@ -120,8 +90,10 @@ public class MeetingEavesdropScript : MonoBehaviour
         UIManager.Instance.HideTooltip();
 
         if (eavesdropPanel != null) eavesdropPanel.SetActive(true);
-        if (txtScore != null)       txtScore.text = "0 intel capturada(s)";
-        if (progressBar != null)    progressBar.fillAmount = 0f;
+        if (txtScore != null) txtScore.text = "0 intel capturada(s)";
+        if (progressBar != null) progressBar.value = 0f;
+        if (captureButton != null) captureButton.interactable = false;
+        capturePressed = false;
 
         StartCoroutine(RunMinigame());
     }
@@ -136,39 +108,39 @@ public class MeetingEavesdropScript : MonoBehaviour
 
             // barra de progresso
             if (progressBar != null)
-                progressBar.fillAmount = (float)i / meetingLines.Length;
+                progressBar.value = (float)i / meetingLines.Length;
+            capturePressed = false;
 
             // prompt
             if (txtPrompt != null)
-                txtPrompt.text = hasKw ? "<color=#FFD700>[SPACE] Capturar!</color>" : "";
+                txtPrompt.text = hasKw ? "<color=#FFD700>Clica para capturar!</color>" : "";
+            if (captureButton != null) captureButton.interactable = hasKw;
 
-            // typewriter — o jogador pode carregar SPACE durante a digitação
             if (txtLinha != null) txtLinha.text = "";
-            for (int c = 0; c < line.text.Length; c++)
-            {
+            for (int c = 0; c < line.text.Length; c++) {
                 if (txtLinha != null) txtLinha.text += line.text[c];
 
-                if (hasKw && !captured && Input.GetKeyDown(KeyCode.Space))
-                {
+                if (hasKw && !captured && capturePressed) {
                     captured = true;
+                    capturePressed = false;
                     AwardIntel(i);
                 }
 
                 yield return new WaitForSeconds(charDelay);
             }
 
-            // janela extra após a linha terminar
             float linger = lingerAfterLine;
-            while (linger > 0f)
-            {
-                if (hasKw && !captured && Input.GetKeyDown(KeyCode.Space))
-                {
+            while (linger > 0f) {
+                if (hasKw && !captured && capturePressed) {
                     captured = true;
+                    capturePressed = false;
                     AwardIntel(i);
                 }
                 linger -= Time.deltaTime;
                 yield return null;
             }
+
+            if (captureButton != null) captureButton.interactable = false;
 
             // feedback de falha
             if (hasKw && !captured && txtPrompt != null)
@@ -178,7 +150,7 @@ public class MeetingEavesdropScript : MonoBehaviour
         }
 
         // fim
-        if (progressBar != null) progressBar.fillAmount = 1f;
+        if (progressBar != null) progressBar.value = 1f;
         if (txtPrompt != null)   txtPrompt.text = $"Reunião terminada. Capturou {capturedCount} intel(s).";
 
         yield return new WaitForSeconds(2f);

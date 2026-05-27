@@ -6,18 +6,10 @@ using TMPro;
 
 public class PhoneCallUI : MonoBehaviour
 {
-    // ------------------------------------------------------------------ //
-    // Singleton + flag estática                                             //
-    // ------------------------------------------------------------------ //
 
     public static PhoneCallUI Instance;
-    public static bool IsOpen => Instance != null
-                                 && Instance.callPanel != null
-                                 && Instance.callPanel.activeSelf;
+    public static bool IsOpen => Instance != null  && Instance.callPanel != null && Instance.callPanel.activeSelf;
 
-    // ------------------------------------------------------------------ //
-    // Referências de UI                                                     //
-    // ------------------------------------------------------------------ //
 
     [Header("Painel raiz")]
     [SerializeField] private GameObject callPanel;
@@ -33,11 +25,15 @@ public class PhoneCallUI : MonoBehaviour
 
     [Header("Prompt e fechar")]
     [SerializeField] private TextMeshProUGUI txtCapturePrompt;
-    [SerializeField] private Button          closeButton;
+    [SerializeField] private Button closeButton;
 
-    // ------------------------------------------------------------------ //
-    // Estado interno                                                        //
-    // ------------------------------------------------------------------ //
+    [Header("Footer")]
+    [SerializeField] private TextMeshProUGUI txtActiveChannels;
+
+    [Header("Captura")]
+    [SerializeField] private GameObject captureIndicator;
+    [SerializeField] private Button captureButton;
+
 
     private PhoneCallData[] channels;
     private int numChannels   = 0;
@@ -53,9 +49,6 @@ public class PhoneCallUI : MonoBehaviour
     private bool captureWindowOpen = false;
     private bool capturedThisWindow = false;
 
-    // ------------------------------------------------------------------ //
-    // Unity                                                                 //
-    // ------------------------------------------------------------------ //
 
     void Awake()
     {
@@ -74,6 +67,9 @@ public class PhoneCallUI : MonoBehaviour
 
         if (closeButton != null)
             closeButton.onClick.AddListener(CloseCall);
+
+        if (captureButton != null)
+            captureButton.onClick.AddListener(OnCaptureButtonPressed);
     }
 
     void Update()
@@ -81,19 +77,13 @@ public class PhoneCallUI : MonoBehaviour
         if (!IsOpen) return;
 
         // trocar canal com 1/2/3
-        if (Input.GetKeyDown(KeyCode.Escape)) { CloseCall(); return; }
+        if (Input.GetKeyDown(KeyCode.X)) { CloseCall(); return; }
+
         if (Input.GetKeyDown(KeyCode.Alpha1)) SelectChannel(0);
         if (Input.GetKeyDown(KeyCode.Alpha2)) SelectChannel(1);
         if (Input.GetKeyDown(KeyCode.Alpha3)) SelectChannel(2);
-
-        // capturar keyword
-        if (captureWindowOpen && !capturedThisWindow && Input.GetKeyDown(KeyCode.Space))
-            capturedThisWindow = true; // a coroutine do canal lê esta flag
     }
 
-    // ------------------------------------------------------------------ //
-    // API pública                                                           //
-    // ------------------------------------------------------------------ //
 
     public void OpenCall(PhoneCallData[] callData)
     {
@@ -120,7 +110,7 @@ public class PhoneCallUI : MonoBehaviour
             if (!activo) continue;
 
             if (channelLabels[i] != null)       channelLabels[i].text = channels[i].channelLabel;
-            if (channelStatusLabels[i] != null) channelStatusLabels[i].text = "● ACTIVO";
+            if (channelStatusLabels[i] != null) channelStatusLabels[i].text = "ATIVO";
 
             channelCoroutines[i] = StartCoroutine(RunChannel(i));
         }
@@ -131,6 +121,8 @@ public class PhoneCallUI : MonoBehaviour
 
         RefreshTranscript();
         if (txtCapturePrompt != null) txtCapturePrompt.text = "";
+        if (captureIndicator != null) captureIndicator.SetActive(false);
+        AtualizarCanaisAtivos();
 
         callPanel.SetActive(true);
         PlayerController.Instance.canMoveRotate = false;
@@ -153,9 +145,6 @@ public class PhoneCallUI : MonoBehaviour
         Input.ResetInputAxes();
     }
 
-    // ------------------------------------------------------------------ //
-    // Seleção de canal                                                      //
-    // ------------------------------------------------------------------ //
 
     public void SelectChannel(int index)
     {
@@ -167,10 +156,6 @@ public class PhoneCallUI : MonoBehaviour
         if (txtCapturePrompt != null) txtCapturePrompt.text = "";
         RefreshTranscript();
     }
-
-    // ------------------------------------------------------------------ //
-    // Coroutine por canal                                                   //
-    // ------------------------------------------------------------------ //
 
     private IEnumerator RunChannel(int ch)
     {
@@ -197,33 +182,30 @@ public class PhoneCallUI : MonoBehaviour
                     capturedThisWindow = false;
 
                     if (txtCapturePrompt != null)
-                        txtCapturePrompt.text = "<color=#FFD700>[SPACE] Capturar!</color>";
+                        txtCapturePrompt.text = "<color=#FFD700>Capturar!</color>";
+                    if (captureIndicator != null) captureIndicator.SetActive(true);
 
                     float window = delay;
-                    while (window > 0f)
-                    {
+                    while (window > 0f) {
                         if (capturedThisWindow) break;
                         window -= Time.deltaTime;
                         yield return null;
                     }
 
                     captureWindowOpen = false;
+                    if (captureIndicator != null) captureIndicator.SetActive(false);
 
-                    if (capturedThisWindow)
-                    {
+                    if (capturedThisWindow) {
                         AwardChannelIntel(ch, kwIndex);
                         if (txtCapturePrompt != null)
-                            txtCapturePrompt.text = "<color=#00FF88>✓ Capturado!</color>";
-                    }
-                    else
-                    {
+                            txtCapturePrompt.text = "<color=#00FF88>Capturado!</color>";
+                    } else {
                         missedKeywords[ch]++;
                         UpdateChannelStatus(ch);
                         if (txtCapturePrompt != null)
                             txtCapturePrompt.text = "<color=#FF4444>Perdeste!</color>";
                     }
 
-                    // breve pausa de feedback antes de continuar
                     yield return new WaitForSeconds(0.6f);
                     if (txtCapturePrompt != null) txtCapturePrompt.text = "";
                 }
@@ -259,9 +241,6 @@ public class PhoneCallUI : MonoBehaviour
         }
     }
 
-    // ------------------------------------------------------------------ //
-    // Helpers                                                               //
-    // ------------------------------------------------------------------ //
 
     private void AwardChannelIntel(int ch, int rewardIndex)
     {
@@ -294,10 +273,39 @@ public class PhoneCallUI : MonoBehaviour
         if (channelStatusLabels[ch] == null) return;
 
         if (channelFinished[ch])
-            channelStatusLabels[ch].text = "<color=#555555>■ Terminado</color>";
+            channelStatusLabels[ch].text = "<color=#555555>Terminado</color>";
         else if (missedKeywords[ch] > 0)
-            channelStatusLabels[ch].text = $"<color=#FF8800>● {missedKeywords[ch]} perdida(s)</color>";
+            channelStatusLabels[ch].text = $"<color=#FF8800>{missedKeywords[ch]} perdida(s)</color>";
         else
-            channelStatusLabels[ch].text = "● ACTIVO";
+            channelStatusLabels[ch].text = "ATIVO";
+
+        AtualizarCanaisAtivos();
+    }
+
+    private void AtualizarCanaisAtivos() {
+        if (txtActiveChannels == null || channelFinished == null) return;
+        int ativos = 0;
+        for (int i = 0; i < numChannels; i++)
+            if (!channelFinished[i]) ativos++;
+        txtActiveChannels.text = $"{ativos} canal(is) ativo(s)";
+    }
+
+    private void OnCaptureButtonPressed() {
+        if (captureWindowOpen && !capturedThisWindow) {
+            // clique correcto — dentro da janela
+            capturedThisWindow = true;
+        } else if (!captureWindowOpen) {
+            // clique prematuro — sem keyword activa
+            SuspicionManager.Instance.AddInstantSuspicion(0.08f);
+            if (txtCapturePrompt != null)
+                txtCapturePrompt.text = "<color=#FF4444>Interceção detectada!</color>";
+            StartCoroutine(LimparPromptApos(1.5f));
+            CloseCall();
+        }
+    }
+
+    private IEnumerator LimparPromptApos(float segundos) {
+        yield return new WaitForSeconds(segundos);
+        if (txtCapturePrompt != null) txtCapturePrompt.text = "";
     }
 }
