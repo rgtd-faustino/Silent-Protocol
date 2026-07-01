@@ -45,7 +45,7 @@ public class LockScript : InteractableObject
         if (isViewOpen)
         {
             UIManager.Instance.OpenLockView(this); // passa-se a si prprio para o UIManager poder chamar TryCode()
-            UIManager.Instance.ChangeCursorState(CursorLockMode.Confined); // cursor visvel mas preso ao ecr
+            UIManager.Instance.ChangeCursorState(CursorLockMode.None); // cursor visível e livre para clicar nos botões
             PlayerController.Instance.canMoveRotate = false;
 
         }

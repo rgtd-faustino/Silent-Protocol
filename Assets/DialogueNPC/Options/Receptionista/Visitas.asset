@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1683d489c7f39844c812a4e0fc58d0db, type: 3}
+  m_Name: Visitas
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueTopic
+  topicID: Visitas
+  buttonLabel: "Ah ta a correr bem. Mas h\xE1 alguma reuni\xE3o que eu tipo deva
+    saber da existencia... so para tar informado e n\xE3o perder nada"
+  topicType: 0
+  requiresHighSuspicion: 0
+  suspicionThreshold: 0
+  requiredCharisma: 0
+  outcomes:
+  - temIntel: 1
+    intelAssociado: {fileID: 11400000, guid: 365b355e1e7b64d4b94b5d1541fabd1f, type: 2}
+    intelJaRecolhida: 0
+    statCheck: 0
+    threshold: 7
+    luckModifier: 2
+    suspicionAffects: 0
+    suspicionPenalty: 0
+    npcResponse: "Tuas acho que ainda n\xE3o, mas as quartas n\xE3o estranhes ver
+      um senhor que nunca vez. O sr Adler, vem ca todas as quartas."
+    consequence: 0
+    consequenceAmount: 0
+    unlockFloorIndex: 0
+  - temIntel: 0
+    intelAssociado: {fileID: 0}
+    intelJaRecolhida: 0
+    statCheck: 1
+    threshold: 5
+    luckModifier: 2
+    suspicionAffects: 0
+    suspicionPenalty: 0
+    npcResponse: "Quando tiveres reuni\xF5es ser\xE3o te informadas por e-mail. Ent\xE3o
+      \xE9 melhor tomares aten\xE7\xE3o."
+    consequence: 0
+    consequenceAmount: 0
+    unlockFloorIndex: 0

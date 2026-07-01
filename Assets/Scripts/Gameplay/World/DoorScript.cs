@@ -8,7 +8,9 @@ public class DoorScript : InteractableObject
     [SerializeField] private float velocidade = 3f;
 
     private bool isOpen = false;
-    private LockScript lockScript;
+
+    [Header("Fechadura de Código")]
+    [SerializeField] private LockScript lockScript;
 
     [Header("Bloqueio Eletrónico")]
     [SerializeField] private CardReader cardReaderLock;
@@ -19,9 +21,24 @@ public class DoorScript : InteractableObject
     {
         base.Awake();
         objectName = "Porta";
-        lockScript = GetComponentInChildren<LockScript>();
         tooltipMessage = "E para abrir/fechar Porta";
+
+        if (lockScript != null && cardReaderLock != null)
+        {
+            Debug.LogError($"[{gameObject.name}] Esta porta tem LockScript E CardReader atribuídos. Uma porta só pode ter um dos dois. Remove um deles.");
+        }
     }
+
+
+    // aviso visível no Inspector mesmo sem correr o jogo, para apanhar o erro em modo de edição
+    private void OnValidate()
+    {
+        if (lockScript != null && cardReaderLock != null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] ATENÇÃO: porta configurada com LockScript e CardReader em simultâneo. Escolhe apenas um.");
+        }
+    }
+
 
     public override void Interact()
     {

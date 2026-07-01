@@ -16,9 +16,9 @@ MonoBehaviour:
   suspicionGreeting: O que estavas a fazer aqui?
   suspicionThreshold: 0.33
   displayName: NPC
-  greetingText: Bom dia! O queres desta vez?
+  greetingText: "Ol\xE1, Bom dia. Deves de ser o Alex Mercer. Bem vindo a empressa.
+    O teu quarto \xE9 o 3 Esquedo. Qualquer duvida diz!"
   topics:
   - {fileID: 11400000, guid: e66703245e0c0f3459c05225900f606e, type: 2}
   - {fileID: 11400000, guid: c8b761f7ac6e9c14abe47637caa44f84, type: 2}
-  - {fileID: 11400000, guid: e66703245e0c0f3459c05225900f606e, type: 2}
   confrontationTopic: {fileID: 0}
