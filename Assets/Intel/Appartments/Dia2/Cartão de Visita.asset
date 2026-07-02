@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb8ea2b00ad03944bb41f282cc5a63f2, type: 3}
+  m_Name: "Cart\xE3o de Visita"
+  m_EditorClassIdentifier: Assembly-CSharp::IntelItem
+  titulo: Cartao de Visita
+  categoria: "Informa\xE7\xE3o"
+  localizacao: Appartments
+  conteudo: "Proxima entrega: dados brutoss dos clientes -2.3 TB Sexta\n\nBem esta
+    empressa ta a roubar dados dos pr\xF3prios clientes... no meu \xFAltimo dia tenho
+    que estar atento..."
+  isKeyFragment: 0
+  keyFragmentID: 

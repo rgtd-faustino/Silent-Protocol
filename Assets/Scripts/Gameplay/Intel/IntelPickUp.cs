@@ -3,6 +3,10 @@ using UnityEngine;
 public class IntelPickup : InteractableObject
 {
     public IntelItem item;
+
+    [Header("Visibilidade por dia")]
+    public int diaParaAparecer = 1; // defines no Inspector por objeto
+
     private bool usado = false;
 
     protected override void Awake()
@@ -10,6 +14,32 @@ public class IntelPickup : InteractableObject
         base.Awake();
         objectName = item != null ? item.titulo : "Intel";
         tooltipMessage = item != null ? $"E para ler {item.titulo}" : "E para ler Intel";
+
+        // começa invisível
+        gameObject.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        GameEvent.OnDayChanged += HandleDayChanged;
+    }
+
+    private void OnDisable()
+    {
+        GameEvent.OnDayChanged -= HandleDayChanged;
+    }
+
+    private void Start()
+    {
+        // verifica o dia actual quando a cena carrega
+        // para o caso de o objeto já dever estar visível
+        HandleDayChanged(DayManager.Instance.CurrentDay);
+    }
+
+    private void HandleDayChanged(int day)
+    {
+        if (day >= diaParaAparecer)
+            gameObject.SetActive(true);
     }
 
     public override void Interact()
@@ -28,4 +58,4 @@ public class IntelPickup : InteractableObject
             }
         );
     }
-}   
+}
