@@ -14,7 +14,7 @@ public class TimeManager : MonoBehaviour {
     [Header("Velocidade do tempo")]
     private float daySpeed = 1f;
     private float nightSpeed = 2f;
-    private float debugSpeedMultiplier = 40f; // 50, testar o jogo mais depressa
+    private float debugSpeedMultiplier = 100f; // 40, testar o jogo mais depressa
 
     // outros scripts (ex: PlayerController para a lanterna, BedScript para só deixar dormir à noite) consultam esta variável
     [HideInInspector] public bool isNight = false;

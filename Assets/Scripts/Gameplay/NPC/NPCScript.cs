@@ -61,6 +61,10 @@ public class NPCScript : InteractableObject {
 
     [SerializeField] private int departmentID = 0; // por causa dos colegas rececionistas e chefes no piso executivo (0 = sem departamento)
 
+    // identificador unico deste NPC, usado para comparar com o DocumentTaskData.correctRecipientID na task "Entregar documento"
+    [Header("Entrega de Documentos")]
+    [SerializeField] private string npcID;
+
     // arrastar o NPCDialogueData correto aqui no Inspector
     // no futuro pode ser atribuído individualmente por NPC em vez de por tipo
     [Header("Diálogo")]
@@ -103,6 +107,14 @@ public class NPCScript : InteractableObject {
 
     // chamado pelo CameraScript quando o jogador carrega E apontado para este NPC
     public override void Interact() {
+        // se o jogador tiver um documento na mao E a task de entrega estiver ativa,
+        // a interacao tenta entregar o documento em vez de abrir dialogo
+        // (assim continua a poder falar normalmente com NPCs em dias so de Arquivar documento)
+        if (PlayerController.Instance.heldDocument != null && TaskManager.Instance.HasActiveTask("Entregar documento")) {
+            TryDeliverDocument();
+            return;
+        }
+
         if (dialogueData == null) {
             Debug.LogWarning($"[NPCScript] {objectName} não tem NPCDialogueData atribuído.");
             return;
@@ -126,6 +138,24 @@ public class NPCScript : InteractableObject {
 
         // quando o diálogo fechar, retoma o patrol
         DialogueManager.Instance.OnDialogueClose += ResumeAfterDialogue;
+    }
+
+    // tenta entregar o documento que o jogador tem na mao a este NPC
+    // correto ou nao, a task fica completa; a penalidade vem pelo SuspicionManager (mesma logica do ArchiveScript)
+    private void TryDeliverDocument() {
+        DocumentTaskData doc = PlayerController.Instance.heldDocument;
+        bool correct = !string.IsNullOrEmpty(npcID) && doc.correctRecipientID == npcID;
+
+        TaskManager.Instance.CompleteTask("Entregar documento", correct);
+        PlayerController.Instance.heldDocument = null;
+
+        if (correct) {
+            Debug.Log($"[NPCScript] Documento entregue corretamente a '{objectName}'.");
+        } else {
+            Debug.Log($"[NPCScript] Destinatario errado! Documento entregue a '{objectName}' em vez do destinatario correto.");
+            // entrega a pessoa errada levanta suspeita imediata, tal como um documento mal arquivado
+            SuspicionManager.Instance.IncreaseSuspicion(1.5f, GetInstanceID(), SuspicionManager.SuspicionSource.DocumentMisfiled);
+        }
     }
 
     // retoma o movimento após fechar o diálogo — dessubscreve logo para não acumular

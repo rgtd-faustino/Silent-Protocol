@@ -16,6 +16,11 @@ public class DocumentTaskData : ScriptableObject {
     // no  mostrado diretamente na UI para manter a tenso de "ser que estou a arquivar no stio certo?"
     public ArchiveScript.DepartmentType correctDepartment;
 
+    // ID do NPC especifico a quem este documento deve ser entregue
+    // so usado quando a task ativa e "Entregar documento" (nao usado no Arquivar documento)
+    // tem de corresponder ao campo "Npc Id" configurado no NPCScript do destinatario correto
+    public string correctRecipientID;
+
     [System.Serializable]
     public class BlankSlot {
         public string slotID;
