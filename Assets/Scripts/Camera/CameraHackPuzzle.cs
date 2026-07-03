@@ -118,7 +118,7 @@ public class CameraHackPuzzle : MonoBehaviour {
         float t = Mathf.Clamp01(level / 7f);
 
         tolerance = Mathf.Lerp(0.13f, 0.055f, t); // tolerância aperta
-        timeLimit = Mathf.Lerp(60f, 28f, t); // menos tempo
+        timeLimit = Mathf.Lerp(45f, 28f, t); // menos tempo
         holdRequired = Mathf.Lerp(1.0f, 2.8f, t); // mais tempo a manter
         oscillationAmplitude = Mathf.Lerp(0f, 0.07f, t); // JAM começa estático, oscila mais
         oscillationSpeed = Mathf.Lerp(0.4f, 2.2f, t); // oscilação acelera
@@ -291,7 +291,7 @@ public class CameraHackPuzzle : MonoBehaviour {
         active = false;
         statusLabel.text = "SINAL PERDIDO  ·  ACESSO NEGADO";
 
-        SuspicionManager.Instance.IncreaseSuspicion(3f, GetInstanceID(), SuspicionManager.SuspicionSource.Hacking);
+        SuspicionManager.Instance.IncreaseSuspicion(2f, GetInstanceID(), SuspicionManager.SuspicionSource.Hacking);
         yield return new WaitForSeconds(1.2f);
 
         rootPanel.SetActive(false);
