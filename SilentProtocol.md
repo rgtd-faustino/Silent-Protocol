@@ -64,6 +64,8 @@ Estes dois casos revelam o padrão comum de dados que, tendo sido recolhidos sob
 
 A premissa do jogo traduz estes cenários para a empresa fictícia Nexus Corp. O jogador assume o papel de Alex Mercer, um jornalista infiltrado como júnior de cibersegurança, que dispõe de cinco dias, de segunda-feira até às 17h30 de sexta-feira, para expor o "Projeto Hélix", que consiste num esquema interno de exfiltração e venda de dados de 2,4 milhões de clientes.
 
+Entre os 5 dias, o jogador terá que explorar os 5 pisos presentes na empressa (Receção, Executivo, Servidores, Apartamentos, CEO). O jogador terá acesso no ínicio do jogo acecsso livre à receção, ao piso Executivo e ao piso dos Apartamentos. Os restantes 2 pisos encontram-se bloqueados e só podem ser desbloqueados através de cartões de acesso, que por sua vez só são obtidos ao recolher intel específica. Essa intel está espalhada por todo o mundo do jogo, obrigando o jogador a explorar os diferentes espaços e interagir com o ambiente.
+
 Os métodos e ferramentas do jogo estabelecem uma ligação direta a esta realidade. A presença de um analisador de pacotes de rede (inspirado no WireShark) no posto de trabalho do jogador e o facto de a informação mais sensível estar guardada no piso executivo/CEO refletem o facto de que os desvios de dados massivos dependem de decisões e cumplicidades ao mais alto nível das organizações, exigindo uma análise forense detalhada e progressiva para ligar todos os intervenientes da conspiração.
 
 # Capítulo 2
