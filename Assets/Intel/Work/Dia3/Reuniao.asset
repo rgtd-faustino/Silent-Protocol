@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb8ea2b00ad03944bb41f282cc5a63f2, type: 3}
   m_Name: Reuniao
   m_EditorClassIdentifier: Assembly-CSharp::IntelItem
-  titulo: 
-  categoria: 
-  localizacao: 
-  conteudo: 
+  titulo: "Reuni\xE3o"
+  categoria: "Informa\xE7\xE3o"
+  localizacao: Works
+  conteudo: "Reuni\xE3o Hoje"
   isKeyFragment: 0
   keyFragmentID: 
