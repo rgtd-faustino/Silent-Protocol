@@ -16,25 +16,18 @@ public class IntelPickup : InteractableObject
         objectName = item != null ? item.titulo : "Intel";
         tooltipMessage = item != null ? $"E para ler {item.titulo}" : "E para ler Intel";
 
-        // come�a invis�vel
-        gameObject.SetActive(false);
+        GameEvent.OnDayChanged += HandleDayChanged; // inscreve-se aqui, corre sempre
     }
 
-    private void OnEnable()
+    private void OnDestroy()
     {
-        GameEvent.OnDayChanged += HandleDayChanged;
-    }
-
-    private void OnDisable()
-    {
-        GameEvent.OnDayChanged -= HandleDayChanged;
+        GameEvent.OnDayChanged -= HandleDayChanged; // desinscreve só quando o objeto morre de vez
     }
 
     private void Start()
     {
-        // verifica o dia actual quando a cena carrega
-        // para o caso de o objeto j� dever estar vis�vel
-        HandleDayChanged(DayManager.Instance.CurrentDay);
+        // aqui o objeto ainda está ativo (Awake não o desativou), por isso Start corre normalmente
+        gameObject.SetActive(DayManager.Instance.CurrentDay >= diaParaAparecer);
     }
 
     private void HandleDayChanged(int day)
