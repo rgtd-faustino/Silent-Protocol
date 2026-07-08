@@ -1,0 +1,17 @@
+# Declaração de Uso de Inteligência Artificial Generativa no Projeto "Silent Protocol"
+
+De acordo com as diretrizes da unidade curricular, declaramos a utilização de modelos de Inteligência Artificial Generativa como ferramenta de apoio ao longo do desenvolvimento deste projeto. A sua utilização foi estritamente guiada pelo nosso pensamento crítico e validação, incidindo especificamente nas seguintes áreas:
+
+1. **Documentação e Relatório Técnico:**
+   - **Utilização:** A estruturação, formatação e revisão ortográfica/sintática de 100% do relatório foram apoiadas por IA.
+   - **Validação:** A IA operou unicamente como redator e revisor de informações técnicas fornecidas integralmente por nós. Todo o texto gerado foi cuidadosamente lido, escrutinado e alterado para garantir que espelha exatamente a implementação real em código e as decisões de *Game Design* que tomámos. Nada foi aceite às cegas; assumimos total responsabilidade técnica e autoria sobre o conteúdo final.
+
+2. **Criação da Narrativa e *Lore* (História):**
+   - **Utilização:** A IA foi utilizada para expandir as ideias base da história e redigir linhas de diálogo, e-mails, notas e outros elementos narrativos presentes no jogo.
+   - **Validação:** A direção narrativa, os temas abordados (espionagem corporativa, vulnerabilidades de redes) e as personagens foram definidos por nós. A IA atuou como um co-argumentista, cuja produção foi filtrada e adaptada para encaixar nas mecânicas do jogo (por exemplo, os ficheiros de pistas e diálogos no *ScriptableObject* `NPCDialogueData`).
+
+**Conclusão:**
+O uso de IA serviu para acelerar tarefas pesadas de redação e organização estrutural, permitindo-nos focar o nosso tempo na conceção da arquitetura lógica, no desenvolvimento de mecânicas C# e na integração dos sistemas dentro do motor Unity (áreas onde o nosso esforço técnico é demonstrado de forma independente).
+
+
+ABSOLUTAMENTE VITAL, ESTE FICJEIRO TEM DE TER EXEMPLOS DE PROMPTS, NÃO É SUPOSTO SER UMA DECLARAÇÕ

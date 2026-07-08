@@ -6,6 +6,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
+// #my_code - Integração de bibliotecas de encriptação reais para desencriptação in-game
 public static class CryptoHelper
 {
     // chaves fixas do jogo  o jogador no as v, so internas

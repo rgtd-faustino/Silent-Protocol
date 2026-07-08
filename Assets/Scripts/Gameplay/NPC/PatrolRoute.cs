@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using static NPCScript;
 
+// #my_code - Configuração e validação de rotas individuais: probabilidade, loop, descanso, departamento
 public class PatrolRoute : MonoBehaviour {
 
     // tipos de NPC que podem usar esta rota  filtrado pelo GetRandomRoute do NPCManager

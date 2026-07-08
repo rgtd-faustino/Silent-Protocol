@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+// #my_code - Ciclo dia/noite e gestão do estado de fadiga acumulada do jogador
 public class TimeManager : MonoBehaviour {
 
     public static TimeManager Instance;

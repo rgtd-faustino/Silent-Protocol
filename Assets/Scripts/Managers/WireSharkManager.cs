@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// #my_code - Simulação do Wireshark: pacotes como GameObjects, captura e exibição na UI
 public class WiresharkManager : MonoBehaviour
 {
     private WiresharkUI ui;

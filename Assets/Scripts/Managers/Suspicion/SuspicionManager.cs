@@ -1,3 +1,4 @@
+// #my_code - Sistema duplo de suspeita: company awareness + suspeita individual por fonte
 ﻿using System.Collections.Generic;
 using UnityEngine;
 

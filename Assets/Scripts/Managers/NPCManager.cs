@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static NPCScript;
 
+// #my_code - Orquestração centralizada de rotas e eventos (reunião, spawn) para todos os pisos
 public class NPCManager : MonoBehaviour {
 
     public static NPCManager Instance;

@@ -1,3 +1,4 @@
+// #my_code - Sistema de eventos desacoplados (publisher/subscriber) que substitui polling de booleans
 ﻿using System;
 
 // bus de eventos central do jogo, em vez de scripts chamarem uns aos outros diretamente, disparam eventos aqui —> quem precisar de reagir subscreve

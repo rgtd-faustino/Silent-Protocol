@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// #my_code - Recolha de intel: sistema central de progressÃ£o do jogo
 public class IntelPickup : InteractableObject
 {
     public IntelItem item;
@@ -15,7 +16,7 @@ public class IntelPickup : InteractableObject
         objectName = item != null ? item.titulo : "Intel";
         tooltipMessage = item != null ? $"E para ler {item.titulo}" : "E para ler Intel";
 
-        // começa invisível
+        // comeï¿½a invisï¿½vel
         gameObject.SetActive(false);
     }
 
@@ -32,7 +33,7 @@ public class IntelPickup : InteractableObject
     private void Start()
     {
         // verifica o dia actual quando a cena carrega
-        // para o caso de o objeto já dever estar visível
+        // para o caso de o objeto jï¿½ dever estar visï¿½vel
         HandleDayChanged(DayManager.Instance.CurrentDay);
     }
 

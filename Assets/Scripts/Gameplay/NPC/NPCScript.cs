@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
+// #my_code - Comportamento individual de cada NPC, incluindo lógica de patrulha, deteção e diálogo
 public class NPCScript : InteractableObject {
 
     public enum NPCType { Colleague, Boss, Receptionist, Guard, Visitor }

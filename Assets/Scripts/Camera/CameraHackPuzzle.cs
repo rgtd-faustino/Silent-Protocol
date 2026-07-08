@@ -1,3 +1,4 @@
+// #my_code - Lógica central do puzzle de câmaras: recriação do cancelamento de ruído por oposição de fase (sin/cos)
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
