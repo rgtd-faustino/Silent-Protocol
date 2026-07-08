@@ -210,17 +210,26 @@ public class GameMenuManager : MonoBehaviour {
                 // "Continue" s faz sentido se existir um save
                 continueButton.interactable = SaveManager.Instance.HasSave();
 
+                SoundManager.Instance.PlayMusic(SoundManager.Instance.menuTheme);
+
                 // o typewriter comea em OnEnter, enquanto o card ainda est a fazer
                 // fade in > as letras aparecem ao mesmo tempo que o card "materializa",
                 // o que fica bem e esconde o facto de o ttulo estar vazio no incio
                 PlayTypewriter();
                 break;
 
+
             case MenuState.CharacterCreation:
+                SoundManager.Instance.PlayMusic(SoundManager.Instance.menuTheme);
                 InitCharacterCreation();
                 break;
 
+            case MenuState.Playing:
+                SoundManager.Instance.PlayMusic(SoundManager.Instance.gameplayTheme);
+                break;
+
             case MenuState.Paused:
+                SoundManager.Instance.PlayMusic(SoundManager.Instance.menuTheme);
                 // d reset aos valores dos dados
                 RefreshPauseUI();
                 break;
@@ -535,4 +544,6 @@ public class GameMenuManager : MonoBehaviour {
         cg.interactable = interactive;
         cg.blocksRaycasts = interactive;
     }
+
+
 }

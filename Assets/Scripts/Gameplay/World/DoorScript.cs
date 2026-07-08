@@ -4,6 +4,8 @@ using UnityEngine;
 public class DoorScript : InteractableObject
 {
 
+    private AudioSource audioSource;
+
     [SerializeField] private float anguloAberta = 90f;
     [SerializeField] private float velocidade = 3f;
 
@@ -29,6 +31,9 @@ public class DoorScript : InteractableObject
         }
     }
 
+    private void Start() {
+        audioSource = gameObject.GetComponent<AudioSource>();
+    }
 
     // aviso visível no Inspector mesmo sem correr o jogo, para apanhar o erro em modo de edição
     private void OnValidate()
@@ -52,9 +57,13 @@ public class DoorScript : InteractableObject
             Debug.Log($"[{gameObject.name}] Esta porta está bloqueada eletronicamente. Preciso de usar o leitor de cartões.");
             return;
         }
-        Debug.Log("Miau");
+
         isOpen = !isOpen;
+        AudioClip clip = isOpen ? SoundManager.Instance.openDoor : SoundManager.Instance.closeDoor;
+        SoundManager.Instance.PlaySound(audioSource, clip);
+
         StopAllCoroutines();
+
         Quaternion destino = isOpen ? Quaternion.Euler(0f, anguloAberta, 0f) : Quaternion.Euler(0f, 0f, 0f);
         StartCoroutine(AnimarPorta(destino));
     }

@@ -6,6 +6,8 @@ public class SuspicionManager : MonoBehaviour {
 
     public static SuspicionManager Instance;
 
+    AudioSource heartbeatSource;
+
     [SerializeField] private float maxSuspicion = 1f;
     private float currentSuspicion = 0f;
 
@@ -57,6 +59,9 @@ public class SuspicionManager : MonoBehaviour {
         Instance = this;
     }
 
+    private void Start() {
+        heartbeatSource = SoundManager.Instance.heartbeatSource;
+    }
 
     void Update() {
         float totalRate = 0f;
@@ -89,6 +94,7 @@ public class SuspicionManager : MonoBehaviour {
         }
 
         CheckStateChange();
+        UpdateHeartbeat();
     }
 
 
@@ -175,5 +181,22 @@ public class SuspicionManager : MonoBehaviour {
     // setter para o SaveManager restaurar a suspeita
     public void SetSuspicionDirect(float ratio) {
         currentSuspicion = ratio * maxSuspicion;
+    }
+
+    private void UpdateHeartbeat() {
+
+        if (currentSuspicion > 0f) {
+            if (!heartbeatSource.isPlaying) {
+                heartbeatSource.clip = SoundManager.Instance.heartbeatPulse;
+                heartbeatSource.loop = true;
+                heartbeatSource.Play();
+            }
+            int stateIndex = (int)currentState; // enum: None=0, Attention=1, Investigation=2, Expulsion=3
+            heartbeatSource.volume = SoundManager.Instance.heartbeatVolumeSteps[Mathf.Clamp(stateIndex, 0, SoundManager.Instance.heartbeatVolumeSteps.Length - 1)];
+
+        } else {
+            if (heartbeatSource.isPlaying)
+                heartbeatSource.Stop();
+        }
     }
 }

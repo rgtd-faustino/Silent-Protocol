@@ -102,7 +102,6 @@ GameObject:
   - component: {fileID: 8661837048243658673}
   - component: {fileID: -6208257288226775637}
   - component: {fileID: 6251136295330262412}
-  - component: {fileID: 3624199631493770680}
   m_Layer: 6
   m_Name: door_c
   m_TagString: Untagged
@@ -223,24 +222,7 @@ MonoBehaviour:
   glitchMaterial: {fileID: 2100000, guid: 38de246067848514c92003a0c3a5c797, type: 2}
   anguloAberta: 90
   velocidade: 3
-  cardReaderLock: {fileID: 0}
---- !u!114 &3624199631493770680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4126987077432527570}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9507ea635f8e24c4d877f034c4bf1773, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DoorScript
-  objectName: objeto
-  tooltipMessage: E para interagir
-  glitchMaterial: {fileID: 2100000, guid: 38de246067848514c92003a0c3a5c797, type: 2}
-  anguloAberta: 90
-  velocidade: 3
+  lockScript: {fileID: 0}
   cardReaderLock: {fileID: 0}
 --- !u!1 &5855867541527003583
 GameObject:

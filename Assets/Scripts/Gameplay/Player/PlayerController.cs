@@ -103,7 +103,6 @@ public class PlayerController : MonoBehaviour {
     }
 
 
-    // ---- Running ----
 
     // correr só é possível de pé e em movimento — agachado tem prioridade
     private void HandleRunning() {
@@ -114,9 +113,7 @@ public class PlayerController : MonoBehaviour {
     // chamado pelo DocumentPickup quando o jogador interage com o documento
     public void PickupDocument(DocumentTaskData data) {
         heldDocument = data;
-
-        // mostrar indicador de "tens um documento na mão" no HUD
-        // UIManager.Instance.ShowDocumentIndicator(data.documentTitle);
+        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.apanharPapel);
     }
 
 

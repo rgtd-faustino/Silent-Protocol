@@ -3,27 +3,36 @@ using UnityEngine;
 public class SoundManager : MonoBehaviour {
     public static SoundManager Instance;
 
+    [Header("Audio Sources")]
+    public AudioSource audioSource2D;
+    public AudioSource audioSourceTheme;
+    public AudioSource heartbeatSource;
+
     [Header("Music")]
-    [SerializeField] private AudioClip gameplayTheme;
-    [SerializeField] private AudioClip menuTheme;
+    public AudioClip gameplayTheme;
+    public AudioClip menuTheme;
 
     [Header("Sound Effects")]
-    [SerializeField] private AudioClip heartbeatPulse;
-    [SerializeField] private AudioClip alarmExpulsion;
-    [SerializeField] private AudioClip openDoor;
-    [SerializeField] private AudioClip closeDoor;
-    [SerializeField] private AudioClip singKeyboardSound;
-    [SerializeField] private AudioClip typingKeyboard;
-    [SerializeField] private AudioClip buzzerWrong2;
-    [SerializeField] private AudioClip die;
-    [SerializeField] private AudioClip inputCodeNumber;
-    [SerializeField] private AudioClip startHackCamera;
-    [SerializeField] private AudioClip buzzerCorrect;
-    [SerializeField] private AudioClip buzzerWrong;
-    [SerializeField] private AudioClip cameraComputer;
-    [SerializeField] private AudioClip apanharPapel;
-    [SerializeField] private AudioClip footsteps;
+    // 2D
+    public AudioClip apanharPapel;
+    public AudioClip heartbeatPulse;
+    public AudioClip buzzerCorrect;
+    public AudioClip buzzerWrong;
+    public AudioClip buzzerWrong2;
+    public AudioClip die;
+    public AudioClip alarmExpulsion;
+    public AudioClip cameraComputer;
+    public AudioClip singKeyboardSound;
+    public AudioClip startHackCamera;
+    public AudioClip inputCodeNumber;
 
+    // 3D
+    public AudioClip openDoor;
+    public AudioClip closeDoor;
+    public AudioClip footsteps;
+    public AudioClip typingKeyboard;
+
+    [HideInInspector] public float[] heartbeatVolumeSteps = { 0.25f, 0.5f, 0.75f, 1f }; // None, Attention, Investigation, Expulsion
 
     void Awake() {
         if (Instance != null && Instance != this) {
@@ -33,35 +42,32 @@ public class SoundManager : MonoBehaviour {
         Instance = this;
     }
 
-    public void PlaySound(AudioSource audio) {
-        if (!audio.isPlaying) {
-            audio.Play();
-        } else {
+    public void PlaySound(AudioSource audio, AudioClip clip) {
+        audio.clip = clip;
+
+        if (audio.isPlaying) 
             audio.Stop();
-            audio.Play();
-        }
+
+        audio.Play();
     }
 
-    public void StopSound(AudioSource audio) {
-        audio.Stop();
-    }
+    public void PlayMusic(AudioClip clip) {
+        if (audioSourceTheme.clip == clip && audioSourceTheme.isPlaying) 
+            return; // já está a tocar, não reinicia
 
-    public void PlaySound(GameObject soundObject) {
-        AudioSource audio = soundObject.GetComponent<AudioSource>();
-        PlaySound(audio);
+        audioSourceTheme.clip = clip;
+        audioSourceTheme.loop = true;
+        audioSourceTheme.Play();
     }
-
 
     public void PlayFootstepSound(GameObject soundObject) {
         AudioSource audio = soundObject.GetComponent<AudioSource>();
-        audio.clip = footsteps;
-        PlaySound(audio);
+        PlaySound(audio, footsteps);
     }
 
     public void PlayDoorSound(GameObject soundObject, bool openDoorBool) {
         AudioSource audio = soundObject.GetComponent<AudioSource>();
-        audio.clip = openDoorBool ? openDoor : closeDoor;
-        PlaySound(audio);
+        PlaySound(audio, openDoorBool ? openDoor : closeDoor);
     }
 
 }
