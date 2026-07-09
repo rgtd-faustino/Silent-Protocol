@@ -1,0 +1,261 @@
+[33mcommit 817248e6eb743ae30fb29cc528b69084844df0c7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 86c981d 85225fb
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Thu Jul 9 17:42:56 2026 +0100
+
+    debug
+
+[33mcommit 86c981d07184fb1f08d24916e775c4cee26d22d2[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Thu Jul 9 17:40:45 2026 +0100
+
+    intel
+
+[33mcommit 85225fb0ef827aae8beb5aae476b697afaeef88d[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Thu Jul 9 00:47:20 2026 +0100
+
+    added sounds and started using player stats
+
+[33mcommit 576757898990537a05d0a94516f665b46c42a66a[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Wed Jul 8 22:32:05 2026 +0100
+
+    pins nos pcs
+
+[33mcommit a999d596121ff3a189beafb7245680c7806a29a1[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 8 21:14:08 2026 +0100
+
+    fixed some errors
+
+[33mcommit 1c7b72f5f6189168a8ab38dfeebecb7322d37a35[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Wed Jul 8 21:05:35 2026 +0100
+
+    debug
+
+[33mcommit 92bd18663b109d0bc26977f55eee60529037a9cd[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 8 18:13:17 2026 +0100
+
+    integrated a few sounds
+
+[33mcommit 148f3d7fe83acacc863404acba408cef1644a7e4[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 8 17:28:21 2026 +0100
+
+    added sounds and music to assets and created soundManager
+
+[33mcommit d4289810d5c084224483a8cc6e265c61f5986c46[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 8 02:26:02 2026 +0100
+
+    fixed all kinds of things
+
+[33mcommit 60d8e5f061e34adc4cc1158fa28455c21d6da7de[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Tue Jul 7 21:24:07 2026 +0100
+
+    pisos
+
+[33mcommit 563cd116f0e2d2db968e15aa00d9ae45a57415cd[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Tue Jul 7 20:10:02 2026 +0100
+
+    reorganized everything
+
+[33mcommit 46a26bbe5ec117208dd327e5246f602484ed7394[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Sun Jul 5 19:12:29 2026 +0100
+
+    changed time speed
+
+[33mcommit d936a9103113ad0ed983a3cfa8b6fc9ca3087ee5[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Fri Jul 3 15:43:25 2026 +0100
+
+    updated time needed to complete camera puzzle
+
+[33mcommit 8ba991215b9a5981682f882ce19394206fa83621[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Fri Jul 3 13:55:31 2026 +0100
+
+    added entregar tarefa task
+
+[33mcommit 48100953e4a367799692780c912ae25b633ae1e1[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Thu Jul 2 12:43:45 2026 +0100
+
+    mais intel
+
+[33mcommit 5b3eba9cc9b04aafbc6396c5c6c429a6f19180c5[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 1 17:52:21 2026 +0100
+
+    fixed the lock screen not working
+
+[33mcommit fa0c0e551cb4bdce867709f65d67806e62bf8dcb[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Wed Jul 1 17:40:07 2026 +0100
+
+    x
+
+[33mcommit 588e8ddaac79a08d18e6e9c924e8049614058f9c[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 1 04:57:46 2026 +0100
+
+    finished fixing the scaling of every asset
+
+[33mcommit 5328dc47960ad179e23c657cc0aa395d47b3c5b0[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed Jul 1 02:00:37 2026 +0100
+
+    finisshed CEO floor for fixing sizes
+
+[33mcommit 69dc71e14a8c9dd6e9dc4f0dbbf0936d9d3028eb[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Tue Jun 30 19:44:34 2026 +0100
+
+    fixing assets' sizes to match the characters' sizes
+
+[33mcommit a8c1dd05a21ff91e21917781671a03d7bffab06e[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed May 27 03:58:06 2026 +0100
+
+    completed all events and menus
+
+[33mcommit 6ec1504af87bcc98ef9551ccd859274679ae70bf[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed May 27 01:16:17 2026 +0100
+
+    almost completed the 3 new events
+
+[33mcommit 45dd62d2579f492a37d7849bd811acaf71976fc1[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Tue May 26 19:58:08 2026 +0100
+
+    added game over menu and stats
+
+[33mcommit cd8066f6c76f47eeb1268d0df27b990e61498302[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed May 20 19:47:57 2026 +0100
+
+    added credentials and card reader scripts
+
+[33mcommit 84721a35a3523366e8cf203d301420e9595b7cae[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Wed May 20 12:14:08 2026 +0100
+
+    Read intel  and Access card and machine created
+
+[33mcommit 5677bc16100c88580f4bb3979d14507c61be1b2b[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Sun May 17 22:24:11 2026 +0100
+
+    debug
+
+[33mcommit c2717ae5cd558d7cd75d80c6ba5c4a8d74c4336a[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Sun May 17 16:25:20 2026 +0100
+
+    debug
+
+[33mcommit 1a3740bcc1b12c651181dd272e3434cc0fa1fdb5[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Sun May 17 14:05:09 2026 +0100
+
+    Start video
+
+[33mcommit e063da5b2dc820efd63c5eaf5ef0775b2020cf4d[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Thu May 14 02:12:54 2026 +0100
+
+    Degung the dosier
+
+[33mcommit 925e2fe185c1a899470ea9d2a150859ca2796028[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Thu May 14 00:47:04 2026 +0100
+
+    added save and load systems and improved camera scripts
+
+[33mcommit c0d16116fd6278a55d9da66ee5a8ebb8c8db785d[m
+Merge: c2b419a c90c47f
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed May 13 22:49:23 2026 +0100
+
+    Merge branch 'main' of https://github.com/rgtd-faustino/Silent-Protocol
+
+[33mcommit c90c47f840b4bece501ffd26d97fbb2301ee2e4a[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Wed May 13 22:42:36 2026 +0100
+
+    Days logic
+
+[33mcommit c2b419a24114dd61b645a1f2424ed6d30bc7fbf7[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed May 13 22:41:49 2026 +0100
+
+    updated the camera system to show locked cameras
+
+[33mcommit ac789d038dfa61c2c501a1cd2aad4eba5129e267[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Wed May 13 18:42:07 2026 +0100
+
+    created a mini game to access the cameras
+
+[33mcommit 5a4a1fabff1f6b5e0d2a22df5cf416c711a5809d[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Wed May 13 00:10:02 2026 +0100
+
+    Put Mail and Trash not HardCoded
+
+[33mcommit c8eefa95c708184d73a4b7650f3ef11b28072a26[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Tue May 12 21:10:13 2026 +0100
+
+    added security cameras and entire system
+
+[33mcommit 6b83c610582f4db7e71b33536d3f369c606e6bc1[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Tue May 12 12:45:12 2026 +0100
+
+    debug sleep
+
+[33mcommit 63a784161e60740820e9935335e82085909e82f1[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Tue May 12 12:42:52 2026 +0100
+
+    Sleep Screen
+
+[33mcommit d25ba002dde8650358c19636d5829f4a03bfd6ab[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Mon May 11 23:29:03 2026 +0100
+
+    fixed the shader highlighting problem
+
+[33mcommit 5b5f8b8c68b7138d254b48cb78db098ae84a7c39[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Mon May 11 22:39:50 2026 +0100
+
+    Debug WireShark
+
+[33mcommit 73b66d6a96d66c8bdfcb468bda35aa7a2e0aadd9[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Mon May 11 21:17:10 2026 +0100
+
+    updated highlight shader but not working yet
+
+[33mcommit b314a50d7430785cc96dc84e9b921838b644e3c5[m
+Author: G0dJoca <jpmp152005@gmail.com>
+Date:   Mon May 11 20:40:44 2026 +0100
+
+    Debug tarefas
+
+[33mcommit 96979273132810d738810f9dfccdaffda1fca9c9[m
+Author: Rafael Galveia Taveira David Faustino <rgtdfaustino@gmail.com>
+Date:   Mon May 11 18:48:52 2026 +0100
+
+    added door animation
+
+[33mcommit c272c189cdd9a775a3f8
