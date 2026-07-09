@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
+  m_Name: Email3
+  m_EditorClassIdentifier: Assembly-CSharp::EmailItem
+  emailID: Karl Reinholt
+  titulo: Aviso Importante
+  remetenteNome: Karl Reinholt
+  remetente: KR@nexus.com
+  dataHora: 2047-03-11  17h
+  corpo: "Aviso de seguran\xE7a: o acesso n\xE3o autorizado a sistemas e \xE1reas
+    restritas \xE9 monitorizado e reportado de imediato - K.R"
+  diaParaAparecer: 1
+  spawnHour: 17
+  irParaLixoDirectamente: 0
+  temIntel: 0
+  intelAssociado: {fileID: 0}
+  isCritical: 0
+  isEncrypted: 0
+  autoDeleteGameMinutes: 0
+  requiredKeyFragmentIDs: []
+  entregue: 0
+  lido: 0
+  apagado: 0
+  desencriptado: 0

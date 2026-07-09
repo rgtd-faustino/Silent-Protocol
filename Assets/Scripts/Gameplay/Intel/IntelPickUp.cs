@@ -42,6 +42,9 @@ public class IntelPickup : InteractableObject
         usado = true;
 
         UIManager.Instance.HideTooltip();
+        
+        // som de pegar a intel
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.intelPickup);
 
         IntelReadUI.Instance.AbrirLeitura(
             item,

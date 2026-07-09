@@ -5,7 +5,8 @@ public class SoundManager : MonoBehaviour {
 
     [Header("Audio Sources")]
     public AudioSource audioSource2D;
-    public AudioSource audioSourceTheme;
+    public AudioSource gameplayMusicSource;
+    public AudioSource menuMusicSource;
     public AudioSource heartbeatSource;
 
     [Header("Music")]
@@ -16,6 +17,7 @@ public class SoundManager : MonoBehaviour {
     // 2D
     public AudioClip apanharPapel;
     public AudioClip heartbeatPulse;
+    public AudioClip buttonClick;
     public AudioClip buzzerCorrect;
     public AudioClip buzzerWrong;
     public AudioClip buzzerWrong2;
@@ -25,6 +27,12 @@ public class SoundManager : MonoBehaviour {
     public AudioClip singKeyboardSound;
     public AudioClip startHackCamera;
     public AudioClip inputCodeNumber;
+    public AudioClip cardReaderSuccess;
+    public AudioClip cameraSwitch;
+    public AudioClip flashlightToggleOnOff;
+    public AudioClip taskAppeared;
+    public AudioClip travelDingElevator;
+    public AudioClip intelPickup;
 
     // 3D
     public AudioClip openDoor;
@@ -44,20 +52,27 @@ public class SoundManager : MonoBehaviour {
 
     public void PlaySound(AudioSource audio, AudioClip clip) {
         audio.clip = clip;
-
-        if (audio.isPlaying) 
+        if (audio.isPlaying)
             audio.Stop();
-
         audio.Play();
     }
 
-    public void PlayMusic(AudioClip clip) {
-        if (audioSourceTheme.clip == clip && audioSourceTheme.isPlaying) 
-            return; // já está a tocar, não reinicia
+    public void PlayGameplayMusic() {
+        menuMusicSource.Pause();
 
-        audioSourceTheme.clip = clip;
-        audioSourceTheme.loop = true;
-        audioSourceTheme.Play();
+        gameplayMusicSource.clip = gameplayTheme;
+
+        if (!gameplayMusicSource.isPlaying)
+            gameplayMusicSource.Play();
+    }
+
+    public void PlayMenuMusic() {
+        gameplayMusicSource.Pause();
+
+        menuMusicSource.clip = menuTheme;
+
+        if (!menuMusicSource.isPlaying)
+            menuMusicSource.Play();
     }
 
     public void PlayFootstepSound(GameObject soundObject) {
@@ -69,5 +84,4 @@ public class SoundManager : MonoBehaviour {
         AudioSource audio = soundObject.GetComponent<AudioSource>();
         PlaySound(audio, openDoorBool ? openDoor : closeDoor);
     }
-
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 // ligar a lanterna aumenta o alcance de visão dos NPCs (ver NPCScript.IsPlayerInFOV)
 // e o nível de suspeita gerado por segundo quando o jogador é visto (ver NPCScript.FOVCheckRoutine)
@@ -64,6 +64,10 @@ public class FlashlightController : MonoBehaviour {
             TurnOff(); 
         else 
             TurnOn();
+            
+        // som de ligar/desligar lanterna
+        if (PlayerController.Instance.hasFlashlight)
+            SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.flashlightToggleOnOff);
     }
 
     public void TurnOn() {

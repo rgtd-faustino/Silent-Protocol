@@ -250,9 +250,14 @@ public class TimeManager : MonoBehaviour {
     // não horas acordado, mas "desfasamento" entre sono ideal e sono real
     // 0 = sem fadiga, 1 = leve, 2 = moderada, 3 = severa.
     public int GetSleepStage() {
-        if (accumulatedSleep < 19) return 0;
-        if (accumulatedSleep < 42) return 1;
-        if (accumulatedSleep < 50) return 2;
+        float resistanceBonus = 0f;
+        if (PlayerStats.Instance != null) {
+            resistanceBonus = (PlayerStats.Instance.GetResistencia() - 1) * 2f;
+        }
+
+        if (accumulatedSleep < 19f + resistanceBonus) return 0;
+        if (accumulatedSleep < 42f + resistanceBonus) return 1;
+        if (accumulatedSleep < 50f + resistanceBonus) return 2;
         return 3;
     }
 

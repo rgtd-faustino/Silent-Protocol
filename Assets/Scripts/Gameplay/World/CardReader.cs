@@ -52,6 +52,9 @@ public class CardReader : InteractableObject {
 
         Debug.Log($"[{gameObject.name}] Acesso AUTORIZADO com cartão: {cardName}");
 
+        // som de sucesso do leitor de cartões
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.cardReaderSuccess);
+
         // feedback LED verde permanente porque o acesso ficou autorizado
         UpdateLedColor(ledUnlockedMaterial);
 
@@ -65,6 +68,9 @@ public class CardReader : InteractableObject {
 
         string cardNeeded = cardName;
         Debug.Log($"[{gameObject.name}] Acesso NEGADO! Falta credencial: {cardNeeded}");
+
+        // som de erro do leitor de cartões
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.buzzerWrong2);
 
         // alteramos temporariamente a mensagem do HUD para avisar o jogador do cartão que falta
         string originalTooltip = tooltipMessage;

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -213,6 +213,9 @@ public class ElevatorUI : MonoBehaviour
         txtStatusDest.color = ElevatorColors.Muted;
 
         ShowArrived(dest);
+
+        // som ding do elevador
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.travelDingElevator);
 
         // Aqui chamas o teu GameManager para mudar de piso
         GameManager.Instance.SetCurrentFloor(currentFloor - 1);

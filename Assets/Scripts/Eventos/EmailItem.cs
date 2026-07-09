@@ -14,6 +14,7 @@ public class EmailItem : ScriptableObject
     [TextArea(3, 8)] public string corpo;
 
     [Header("Entrega")]
+    public int diaParaAparecer = 1;
     public float spawnHour;            // hora do jogo em que aparece na inbox
     public bool irParaLixoDirectamente;
 

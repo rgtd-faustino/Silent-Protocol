@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
+  m_Name: Email4
+  m_EditorClassIdentifier: Assembly-CSharp::EmailItem
+  emailID: Rascunho
+  titulo: Rascunho
+  remetenteNome: 
+  remetente: 
+  dataHora: 
+  corpo: Descubri algo nos logs dos servidores que me preocupa mjuito. Se alguma
+    coia me acontecer... olha para os arquivos do PC3.
+  diaParaAparecer: 1
+  spawnHour: 8
+  irParaLixoDirectamente: 1
+  temIntel: 0
+  intelAssociado: {fileID: 0}
+  isCritical: 1
+  isEncrypted: 1
+  autoDeleteGameMinutes: 100000
+  requiredKeyFragmentIDs:
+  - frag_datacenter
+  entregue: 0
+  lido: 0
+  apagado: 0
+  desencriptado: 0

@@ -71,6 +71,11 @@ public class PlayerController : MonoBehaviour {
         // subscreve o evento de início de noite para poder reagir
         // (ex: ligar automaticamente a lanterna, mostrar HUD da bateria).
         GameEvent.OnNightStarted += OnNightStarted;
+
+        // Atributo Força: Aumenta a velocidade máxima de corrida
+        if (PlayerStats.Instance != null) {
+            RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
+        }
     }
 
     void OnDestroy() {
@@ -127,7 +132,7 @@ public class PlayerController : MonoBehaviour {
         cc.Move(speed * Time.deltaTime * move);
 
         // passa os valores ao Animator para que as animações de andar/correr/idle correspondam à direção real do movimento
-        float animSpeed = isRunning ? 1f : 0.5f;
+        float animSpeed = isRunning ? 2f : 1f;
         animator.SetFloat("X", x * animSpeed, 0.1f, Time.deltaTime);
         animator.SetFloat("Z", z * animSpeed, 0.1f, Time.deltaTime);
     }
@@ -175,11 +180,17 @@ public class PlayerController : MonoBehaviour {
 
     // raio de ruído atual, consultado pelo NPCScript para saber se o guarda ouve o jogador.
     // correndo -> 10 m  |  normal -> 5 m  |  agachado -> 2 m
-    // quando PlayerStats existir: radius *= (1f - PlayerStats.Instance.agility * 0.05f);
+    // Atributo Agilidade: Reduz o raio de ruído gerado.
     public float GetNoiseRadius() {
-        if (isCrouching) return crouchNoiseRadius;
-        if (isRunning) return runNoiseRadius;
-        return normalNoiseRadius;
+        float radius = normalNoiseRadius;
+        if (isCrouching) radius = crouchNoiseRadius;
+        else if (isRunning) radius = runNoiseRadius;
+
+        if (PlayerStats.Instance != null) {
+            radius *= (1f - PlayerStats.Instance.GetAgilidade() * 0.05f);
+        }
+        
+        return radius;
     }
 
     // verdadeiro se o jogador se estiver a mover — usado pelo NPCScript para só gerar som quando há movimento

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb8ea2b00ad03944bb41f282cc5a63f2, type: 3}
+  m_Name: Acordo de Conformidade
+  m_EditorClassIdentifier: Assembly-CSharp::IntelItem
+  titulo: Acordo de Conformidade
+  categoria: "Informa\xE7\xE3o"
+  localizacao: Works
+  conteudo: "C\xF3pia com as assinaturas originais dos chefes todos... Isto realmente
+    esta a passar rapido... Tenho que me despachar a encontrar o cartao do CEO"
+  isKeyFragment: 0
+  keyFragmentID: 

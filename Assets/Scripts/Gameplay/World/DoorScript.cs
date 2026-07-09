@@ -59,8 +59,7 @@ public class DoorScript : InteractableObject
         }
 
         isOpen = !isOpen;
-        AudioClip clip = isOpen ? SoundManager.Instance.openDoor : SoundManager.Instance.closeDoor;
-        SoundManager.Instance.PlayDoorSound(this.gameObject, clip);
+        SoundManager.Instance.PlayDoorSound(this.gameObject, isOpen);
 
         StopAllCoroutines();
 

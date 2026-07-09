@@ -1,4 +1,4 @@
-﻿// TerminalManager.cs — ATUALIZADO
+// TerminalManager.cs — ATUALIZADO
 // Substituído o hardcode de hex por CryptoHelper real
 // .aes e .des agora desencriptam o payload do GameClipboard corretamente
 
@@ -36,6 +36,9 @@ public class TerminalManager : MonoBehaviour
         if (state == TerminalState.Renaming) { HandleRenameInput(val); return; }
 
         ui.AddLine("user@crypter:~$ " + val, TerminalUI.LineType.Input);
+
+        // som de teclado 2D ao submeter um comando no terminal
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.typingKeyboard);
 
         if (cmd == ".clear") { ClearTerminal(); return; }
         if (cmd == ".help") { ShowHelp(); return; }

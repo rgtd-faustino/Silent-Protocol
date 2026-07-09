@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -93,6 +93,8 @@ public class CameraSystem : MonoBehaviour {
 
         isActive = true;
         residualHeat = Mathf.Min(1f, residualHeat + residualPerSession);
+        // som de acesso ao computador de câmaras
+        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.cameraComputer);
         CameraViewUI.Instance.Show(this);
     }
 
@@ -111,6 +113,9 @@ public class CameraSystem : MonoBehaviour {
         if (IsUnlocked(currentCameraIndex))
             residualHeat = Mathf.Min(1f, residualHeat + residualPerSwitch);
 
+        // som de trocar de câmara
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.cameraSwitch);
+
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }
 
@@ -119,6 +124,9 @@ public class CameraSystem : MonoBehaviour {
 
         if (IsUnlocked(currentCameraIndex))
             residualHeat = Mathf.Min(1f, residualHeat + residualPerSwitch);
+
+        // som de trocar de câmara
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.cameraSwitch);
 
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }

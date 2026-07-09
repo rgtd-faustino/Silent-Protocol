@@ -18,8 +18,9 @@ MonoBehaviour:
     srcIP: 1:1:1:1
     dstIP: 2:2:2:1
     protocol: TCP
-    isEncrypted: 1
+    isEncrypted: 0
     encryptionType: 0
-    plainText: "Est\xE1 quase pronto..."
-    isImportant: 1
-    spawnHour: 12
+    plainText: "Os Logs do servidor 2 ainda n\xE3o foram apagados. Tens at\xE9 amanha
+      para apagalos- credencias para o PC2. Nx!Maint24"
+    isImportant: 0
+    spawnHour: 11

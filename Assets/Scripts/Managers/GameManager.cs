@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -66,6 +66,8 @@ public class GameManager : MonoBehaviour
     private void HandleGameOver()
     {
         Debug.Log("[GameManager] Game Over.");
+        // toca o som de morte ao entrar no Game Over
+        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.die);
         // carregar cena de game over
     }
 

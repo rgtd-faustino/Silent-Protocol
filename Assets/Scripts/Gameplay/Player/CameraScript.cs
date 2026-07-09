@@ -34,6 +34,11 @@ public class CameraScript : MonoBehaviour
 
     void Start()
     {
+        // Atributo Perceção: Aumenta a distância de interação com objetos
+        if (PlayerStats.Instance != null) {
+            interactionDistance = 5f + (PlayerStats.Instance.GetPercecao() * 0.2f);
+        }
+
         StartCoroutine(DetectInteractableRoutine());
     }
 

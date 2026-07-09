@@ -10,19 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
-  m_Name: Email3
+  m_Name: Email5
   m_EditorClassIdentifier: Assembly-CSharp::EmailItem
-  emailID: email_patch_seguranca
-  titulo: "Patch de Seguran\xE7a \u2014 Aplicar Antes de Sexta"
-  remetenteNome: Departamento IT
-  remetente: it-dept@corporatech.net
-  dataHora: 2047-03-11  16:22
-  corpo: "Informamos que o patch de seguran\xE7a CVE-2047-0831 est\xE1 dispon\xEDvel
-    para instala\xE7\xE3o.\n\nEste patch corrige uma vulnerabilidade cr\xEDtica no
-    m\xF3dulo de autentica\xE7\xE3o do sistema interno.\n\nPor favor instala antes
-    de sexta-feira \xE0s 23h59. Ap\xF3s esse prazo o acesso remoto ser\xE1 suspenso
-    para m\xE1quinas sem o patch aplicado."
-  spawnHour: 12
+  emailID: "Seguran\xE7a"
+  titulo: "Seguran\xE7a"
+  remetenteNome: srg
+  remetente: srg@nexus.com
+  dataHora: 
+  corpo: "Estou a considerar falar com algu\xE9m de fora. O projeto H\xE9lix \xE9..."
+  diaParaAparecer: 1
+  spawnHour: 0
   irParaLixoDirectamente: 0
   temIntel: 0
   intelAssociado: {fileID: 0}

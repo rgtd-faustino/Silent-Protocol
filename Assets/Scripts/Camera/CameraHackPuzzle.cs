@@ -120,6 +120,12 @@ public class CameraHackPuzzle : MonoBehaviour {
 
         tolerance = Mathf.Lerp(0.13f, 0.055f, t); // tolerância aperta
         timeLimit = Mathf.Lerp(45f, 28f, t); // menos tempo
+        
+        // Atributo Intelecto: Aumenta o tempo disponível para o minijogo
+        if (PlayerStats.Instance != null) {
+            timeLimit += PlayerStats.Instance.GetIntelecto() * 1.5f;
+        }
+        
         holdRequired = Mathf.Lerp(1.0f, 2.8f, t); // mais tempo a manter
         oscillationAmplitude = Mathf.Lerp(0f, 0.07f, t); // JAM começa estático, oscila mais
         oscillationSpeed = Mathf.Lerp(0.4f, 2.2f, t); // oscilação acelera
@@ -275,6 +281,9 @@ public class CameraHackPuzzle : MonoBehaviour {
         active = false;
         HackLevel++;
 
+        // som de hack bem-sucedido
+        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.startHackCamera);
+
         statusLabel.text = "SINAL ANULADO  ·  ACESSO CONCEDIDO";
         resonanceLabel.text = "RESSONÂNCIA  100%";
         resonanceLabel.color = new Color(0.18f, 1f, 0.42f);
@@ -291,6 +300,9 @@ public class CameraHackPuzzle : MonoBehaviour {
         finished = true;
         active = false;
         statusLabel.text = "SINAL PERDIDO  ·  ACESSO NEGADO";
+
+        // som de hack falhado
+        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.buzzerWrong);
 
         SuspicionManager.Instance.IncreaseSuspicion(2f, GetInstanceID(), SuspicionManager.SuspicionSource.Hacking);
         yield return new WaitForSeconds(1.2f);

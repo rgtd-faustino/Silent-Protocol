@@ -98,11 +98,16 @@ public class SuspicionManager : MonoBehaviour {
     }
 
 
-    // chamado pelo NPCScript (e futuramente por c�maras, �reas restritas, etc.)
-    // level vai de 1 a 3 � representa a gravidade da situa��o
+    // chamado pelo NPCScript (e futuramente por cmaras, reas restritas, etc.)
+    // level vai de 1 a 3  representa a gravidade da situao
     public void IncreaseSuspicion(float level, int sourceId, SuspicionSource source = SuspicionSource.NPCSight) {
         if (level < 1 || level > 3)
-            return; // valores fora do intervalo s�o ignorados
+            return; // valores fora do intervalo so ignorados
+
+        // Atributo Sorte: Reduz a taxa de ganho de suspeita contínua
+        if (PlayerStats.Instance != null) {
+            level *= (1f - PlayerStats.Instance.GetSorte() * 0.03f);
+        }
 
         activeSources[sourceId] = baseIncreaseSpeed * level;
         timeSinceLastIncrease = 0f;
@@ -120,6 +125,11 @@ public class SuspicionManager : MonoBehaviour {
     // usado para eventos discretos como um guarda ouvir um ru�do ou o jogador entrar brevemente numa zona proibida.
     // amount deve ser um valor pequeno (ex: 0.05) para n�o dominar a mec�nica de vis�o.
     public void AddInstantSuspicion(float amount) {
+        // Atributo Sorte: Reduz a suspeita instantânea
+        if (PlayerStats.Instance != null && amount > 0) {
+            amount *= (1f - PlayerStats.Instance.GetSorte() * 0.03f);
+        }
+
         currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + amount);
         timeSinceLastIncrease = 0f;
         isDecaying = false;
@@ -132,8 +142,13 @@ public class SuspicionManager : MonoBehaviour {
     public void ChangeSuspicionOnTaskComplete(float amount, bool doneCorrectly) {
         if (doneCorrectly)
             currentSuspicion = Mathf.Max(0f, currentSuspicion - amount);
-        else
+        else {
+            // Atributo Sorte: Reduz a penalização por falhar tarefas
+            if (PlayerStats.Instance != null) {
+                amount *= (1f - PlayerStats.Instance.GetSorte() * 0.03f);
+            }
             currentSuspicion = Mathf.Min(maxSuspicion, currentSuspicion + amount);
+        }
 
         // reset do decay para que a mudan�a seja processada imediatamente em vez de esperar pelo pr�ximo ciclo de Update.
         timeSinceLastIncrease = 0f;
@@ -157,16 +172,18 @@ public class SuspicionManager : MonoBehaviour {
         else
             newState = SuspicionState.None;
 
-        // s� dispara se o estado realmente mudou
+        // s dispara se o estado realmente mudou
         if (newState != currentState) {
             currentState = newState;
 
             // GameEvent.SuspicionStateChanged notifica o NPCManager, que por sua vez notifica todos os NPCs
             GameEvent.SuspicionStateChanged(newState);
 
-            // expulsion � Game Over -> dispara evento separado para que o GameManager possa reagir.
-            if (newState == SuspicionState.Expulsion)
+            // expulsion  Game Over -> dispara evento separado para que o GameManager possa reagir.
+            if (newState == SuspicionState.Expulsion) {
+                SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.alarmExpulsion);
                 GameEvent.GameOver();
+            }
         }
     }
 

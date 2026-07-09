@@ -71,11 +71,12 @@ public class PCEmailManager : MonoBehaviour
         if (pendentes.Count == 0) return;
 
         float horaAtual = TimeManager.Instance.GetCurrentTimeInHours();
+        int diaAtual = DayManager.Instance.CurrentDay;
 
         for (int i = pendentes.Count - 1; i >= 0; i--)
         {
             var email = pendentes[i];
-            if (horaAtual >= email.spawnHour)
+            if (DeveEntregar(email, diaAtual, horaAtual))
             {
                 pendentes.RemoveAt(i);
                 EntregarEmail(email);
@@ -86,7 +87,15 @@ public class PCEmailManager : MonoBehaviour
     // ------------------------------------------------------------------ //
     // Entrega interna                                                       //
     // ------------------------------------------------------------------ //
-
+    // decide se um email pendente já deve ser entregue, cruzando dia + hora
+    // filosofia igual ao IntelPickup: se já passámos o dia marcado, entrega-se já,
+    // não fica à espera da hora exacta de um dia que já lá vai
+    private bool DeveEntregar(EmailItem email, int diaAtual, float horaAtual)
+    {
+        if (diaAtual > email.diaParaAparecer) return true;
+        if (diaAtual < email.diaParaAparecer) return false;
+        return horaAtual >= email.spawnHour; // é o próprio dia — respeita a hora
+    }
     private void EntregarEmail(EmailItem email)
     {
         if (email.entregue) return;

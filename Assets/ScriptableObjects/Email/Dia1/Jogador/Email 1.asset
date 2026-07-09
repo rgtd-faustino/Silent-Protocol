@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
   m_Name: Email 1
   m_EditorClassIdentifier: Assembly-CSharp::EmailItem
-  emailID: email_creds_srv_b
-  titulo: "Credenciais Tempor\xE1rias \u2014 Servidor B"
-  remetenteNome: SysAdmin CorporaTech
-  remetente: sysadmin@corporatech.net
-  dataHora: 2047-03-12  09:41
-  corpo: "Como combinado, as credenciais tempor\xE1rias para o Servidor B foram actualizadas.\n\nUtilizador:
-    srv_admin_b\\nPassword: C0rp#2047!Srv\n\nLembra-te de alterar a password ap\xF3s
-    o primeiro acesso. N\xE3o partilhes estas credenciais fora da equipa de IT."
-  spawnHour: 9
+  emailID: Recursos Humanos
+  titulo: Boas Vindas
+  remetenteNome: Recursos Humanos
+  remetente: rh@nexus.com
+  dataHora: 2047-03-12  08:00
+  corpo: "Bem-vindo \xE0 Nexus Corp, Alex. A tua secret\xE1ria \xE9 esquerda do elevador
+    no andar de trabalho. O teu PIN de acesso ao quarto nos dormit\xF3rios \xE9 66219. 
+    \u2014 Recursos Humanos"
+  diaParaAparecer: 1
+  spawnHour: 8
   irParaLixoDirectamente: 0
-  temIntel: 1
-  intelAssociado: {fileID: 11400000, guid: 676b19051c241574fa6fcc5a29104e16, type: 2}
+  temIntel: 0
+  intelAssociado: {fileID: 0}
   isCritical: 0
   isEncrypted: 0
   autoDeleteGameMinutes: 0

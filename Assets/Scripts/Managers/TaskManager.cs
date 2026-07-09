@@ -137,6 +137,9 @@ public class TaskManager : MonoBehaviour
         int dm = (int)(task.deadlineMinutes % 60f);
         task.ui.SetTask(task.name, $"{dh:00}:{dm:00}");
 
+        // som de nova task
+        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.taskAppeared);
+
         Debug.Log($"[TaskManager] Task '{task.name}' apareceu. Deadline: {dh:00}:{dm:00}");
     }
 
@@ -189,6 +192,12 @@ public class TaskManager : MonoBehaviour
             _ => 0f
         };
         SuspicionManager.Instance.ChangeSuspicionOnTaskComplete(multiplier, doneCorrectly);
+
+        // feedback sonoro: correto = buzzerCorrect, errado = buzzerWrong
+        if (doneCorrectly)
+            SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.buzzerCorrect);
+        else
+            SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.buzzerWrong);
     }
 
     // ---------------------------------------------------------------

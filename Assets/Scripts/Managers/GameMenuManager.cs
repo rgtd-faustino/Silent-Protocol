@@ -210,7 +210,7 @@ public class GameMenuManager : MonoBehaviour {
                 // "Continue" s faz sentido se existir um save
                 continueButton.interactable = SaveManager.Instance.HasSave();
 
-                SoundManager.Instance.PlayMusic(SoundManager.Instance.menuTheme);
+                SoundManager.Instance.PlayMenuMusic();
 
                 // o typewriter comea em OnEnter, enquanto o card ainda est a fazer
                 // fade in > as letras aparecem ao mesmo tempo que o card "materializa",
@@ -220,16 +220,16 @@ public class GameMenuManager : MonoBehaviour {
 
 
             case MenuState.CharacterCreation:
-                SoundManager.Instance.PlayMusic(SoundManager.Instance.menuTheme);
+                SoundManager.Instance.PlayMenuMusic();
                 InitCharacterCreation();
                 break;
 
             case MenuState.Playing:
-                SoundManager.Instance.PlayMusic(SoundManager.Instance.gameplayTheme);
+                SoundManager.Instance.PlayGameplayMusic();
                 break;
 
             case MenuState.Paused:
-                SoundManager.Instance.PlayMusic(SoundManager.Instance.menuTheme);
+                SoundManager.Instance.PlayMenuMusic();
                 // d reset aos valores dos dados
                 RefreshPauseUI();
                 break;
@@ -433,7 +433,31 @@ public class GameMenuManager : MonoBehaviour {
         saveExitButton.onClick.AddListener(OnSaveExitClicked);
         abandonButton.onClick.AddListener(OnAbandonClicked);
 
-        // settingsButton ainda no tem funcionalidade
+        // settingsButton ainda não tem funcionalidade
+
+        // adiciona som de clique a todos os botões dos menus
+        AddClickSound(newGameButton);
+        AddClickSound(continueButton);
+        AddClickSound(quitButton);
+        AddClickSound(confirmButton);
+        AddClickSound(resetButton);
+        AddClickSound(resumeButton);
+        AddClickSound(saveExitButton);
+        AddClickSound(abandonButton);
+
+        // botões +/- de cada stat na criação de personagem
+        foreach (StatRow row in statRows) {
+            AddClickSound(row.minusButton);
+            AddClickSound(row.plusButton);
+        }
+    }
+
+    // adiciona o som de buttonClick como primeiro listener de qualquer botão de menu
+    private void AddClickSound(Button btn) {
+        if (btn == null) return;
+        btn.onClick.AddListener(() =>
+            SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.buttonClick)
+        );
     }
 
     // mtodos para os botes, no d para meter o GoTo diretamente porque retorna void em vez da referncia do mtodo

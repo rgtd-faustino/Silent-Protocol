@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
   m_Name: Email2
   m_EditorClassIdentifier: Assembly-CSharp::EmailItem
-  emailID: email_reuniao_seguranca
-  titulo: "URGENTE: Reuni\xE3o de Seguran\xE7a \u2014 Hoje 18h"
-  remetenteNome: Diretor Geral
-  remetente: diretor@corporatech.net
-  dataHora: 2047-03-12  11:03
-  corpo: "Equipa,\n\nFoi detetada uma tentativa de intrus\xE3o nos servidores da
-    ala norte durante a madrugada.\n\nA reuni\xE3o de seguran\xE7a agendada para
-    sexta-feira \xE9 antecipada para HOJE \xE0s 18h00 na Sala de Controlo B.\n\nPresen\xE7a
-    obrigat\xF3ria de todos os chefes de departamento. N\xE3o discutir este assunto
-    por email ou telefone."
+  emailID: Ajuda
+  titulo: Pacotes a vir
+  remetenteNome: Ajuda
+  remetente: Secure@mreis
+  dataHora: 2047-03-12  10:00
+  corpo: "Ol\xE1 outra vez, sempre que acordar cheka o e-mail, para esta mensagem.
+    Nestas mesnagens digo te qunado \xE9 o que o pessoal da empressa vai usar a rede.
+    Esta atento ao WIreShark.\n\nHoje v\xE3o haver mexidas na rede as 11h e as 16h
+    est\xE1 atento"
+  diaParaAparecer: 1
   spawnHour: 10
-  irParaLixoDirectamente: 1
+  irParaLixoDirectamente: 0
   temIntel: 0
   intelAssociado: {fileID: 0}
   isCritical: 1
