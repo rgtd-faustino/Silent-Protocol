@@ -3,6 +3,8 @@ using UnityEngine;
 public class PCInteractable : InteractableObject
 {
     public GameObject pcCanvas;
+    
+    // Controla se a interface do PC está visível ou não para evitar múltiplos inputs
     private bool isOpen = false;
 
     [Header("Segurança")]
@@ -13,8 +15,8 @@ public class PCInteractable : InteractableObject
     public bool precisaDePin = false;
     public string pinCorreto = "1234";
 
-    // fica true assim que os requisitos forem cumpridos uma vez — não volta a pedir depois disso
-    // (mesma filosofia do CardReader: uma vez desbloqueado, fica desbloqueado)
+    // Regista se o jogador já validou as credenciais (cartão ou PIN)
+    // Fica a true após o primeiro sucesso para não voltar a pedir na mesma sessão
     private bool isUnlocked = false;
 
     protected override void Awake()
@@ -24,6 +26,8 @@ public class PCInteractable : InteractableObject
         tooltipMessage = "E para usar computador";
     }
 
+    // Chamado pelo PlayerController via raycast de interação
+    // Decide se abre o PC diretamente ou se reencaminha para o fluxo de segurança
     public override void Interact()
     {
         if (isOpen)
@@ -32,7 +36,6 @@ public class PCInteractable : InteractableObject
             return;
         }
 
-        // se já desbloqueou antes, ou se nenhum boolean está ativo, entra logo
         if (isUnlocked || (!precisaDeCartao && !precisaDePin))
         {
             OpenPC();
@@ -42,16 +45,15 @@ public class PCInteractable : InteractableObject
         TentarDesbloquear();
     }
 
+    // Processa a autenticação em duas fases: primeiro valida o cartão silenciosamente e depois pede o PIN com UI
     private void TentarDesbloquear()
     {
-        // 1) cartão primeiro, porque é uma verificação instantânea (sem UI)
         if (precisaDeCartao && !PlayerController.Instance.HasCardCredential(cardID))
         {
             StartCoroutine(AvisoCartaoEmFalta());
             return;
         }
 
-        // 2) se também precisar de pin, só agora abre o teclado
         if (precisaDePin)
         {
             PinEntryUI.Instance.AbrirPin(
@@ -66,11 +68,11 @@ public class PCInteractable : InteractableObject
             return;
         }
 
-        // só precisava de cartão, e o cartão está ok
         isUnlocked = true;
         OpenPC();
     }
 
+    // Dá feedback visual temporário na tooltip quando o jogador não tem o cartão certo
     private System.Collections.IEnumerator AvisoCartaoEmFalta()
     {
         string original = tooltipMessage;
@@ -84,6 +86,8 @@ public class PCInteractable : InteractableObject
             UIManager.Instance.ShowTooltip(tooltipMessage);
     }
 
+    // Bloqueia o movimento e a câmara do jogador e mostra a interface do PC
+    // Aproveita para avisar os componentes do servidor (Server1UI e Server2UI) de que o PC foi reaberto
     private void OpenPC()
     {
         Debug.Log($"[PCInteractable] OpenPC chamado! pcCanvas = {pcCanvas.name}, estava ativo antes? {pcCanvas.activeSelf}");
@@ -96,7 +100,6 @@ public class PCInteractable : InteractableObject
         UIManager.Instance.RefreshPCInterface();
         isOpen = true;
 
-        // reset ao estado do servidor se existir
         Server1UI srv1 = pcCanvas.GetComponentInChildren<Server1UI>();
         if (srv1 != null) srv1.OnOpen();
         Server2UI srv2 = pcCanvas.GetComponentInChildren<Server2UI>();
@@ -105,11 +108,11 @@ public class PCInteractable : InteractableObject
 
     private void Update()
     {
-        // s tenta apanahr o Escape se o PC estiver aberto
         if (isOpen && Input.GetKeyDown(KeyCode.P))
             ClosePC();
     }
 
+    // Oculta a interface e devolve o controlo ao PlayerController
     private void ClosePC()
     {
         pcCanvas.SetActive(false);
@@ -119,6 +122,7 @@ public class PCInteractable : InteractableObject
         isOpen = false;
     }
 
+    // Ativa o brilho no modelo do PC se existirem tarefas no TaskManager que dependam dele
     protected override bool CheckShouldGlowByDefault()
     {
         if (TaskManager.Instance == null) return false;

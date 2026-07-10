@@ -31,13 +31,13 @@ public class ElevatorUI : MonoBehaviour
     public TextMeshProUGUI credentialError;
 
     [Header("Credenciais (definir no Inspector)")]
-    [Tooltip("Credencial correta para desbloquear o Piso 3 (SERVIDORES)")]
+    [Tooltip("Palavra-passe para desbloquear o Piso 3 (SERVIDORES)")]
     [SerializeField] private string credentialFloor3 = "";
-    [Tooltip("Credencial correta para desbloquear o Piso 5 (CEO)")]
+    [Tooltip("Palavra-passe para desbloquear o Piso 5 (CEO)")]
     [SerializeField] private string credentialFloor5 = "";
 
     [Header("Floor Buttons")]
-    public Button[] floorButtons; // index 0 = F5, 1 = F4, ..., 4 = F1
+    public Button[] floorButtons;
 
     [Header("Floor Spawns")]
     public Transform spawnFloor1;
@@ -50,14 +50,12 @@ public class ElevatorUI : MonoBehaviour
     public float carMoveSpeed = 1.3f;
     public float floorHeight = 64f;
 
-    // Estado
     private int currentFloor = 1;
     private int selectedFloor = -1;
     private bool isMoving = false;
     private const string TitleFullText = "// SELEÇÃO DE DESTINO_";
     private const float CharDelay = 0.045f;
 
-    // Dados dos pisos
     private FloorData[] floors;
 
     public static class ElevatorColors
@@ -145,12 +143,8 @@ public class ElevatorUI : MonoBehaviour
     {
         gameObject.SetActive(true);
 
-        // resincroniza os estados de bloqueio sempre que o elevador abre,
-        // para refletir desbloqueios que possam ter ocorrido durante o jogo
         SyncLockedStates();
 
-        // garante que o display de posição mostra o piso atual correto
-        // e que o destino está limpo, independentemente do estado anterior
         FloorData currentData = System.Array.Find(floors, f => f.floorNumber == currentFloor);
         string currentLabel = currentData != null ? currentData.label : "---";
         txtStatusPos.text = $"POSIÇÃO ATUAL: F{currentFloor} — {currentLabel}";
@@ -187,18 +181,14 @@ public class ElevatorUI : MonoBehaviour
 
         selectedFloor = index;
 
-        // Move o carro visualmente para o piso selecionado
         StopAllCoroutines();
         StartCoroutine(MoveCarTo(data.floorNumber, false));
 
-        // Atualiza status
         txtStatusDest.text = $"DESTINO: F{data.floorNumber} — {data.label}";
         txtStatusDest.color = data.locked ? ElevatorColors.Red : ElevatorColors.Green;
 
-        // Atualiza painel de detalhes
         ShowDetails(data);
 
-        // Botão confirmar
         confirmButton.interactable = !data.locked;
     }
 
@@ -210,6 +200,8 @@ public class ElevatorUI : MonoBehaviour
         StartCoroutine(DoTravel());
     }
 
+    // Compara o código inserido com a credencial guardada para o andar
+    // Se estiver certo avançamos para a rotina de desbloqueio e guardamos o progresso
     public void OnCredentialSubmit()
     {
         if (selectedFloor < 0 || isMoving)
@@ -217,7 +209,6 @@ public class ElevatorUI : MonoBehaviour
 
         FloorData d = floors[selectedFloor];
 
-        // se por alguma razão o piso já não precisar de credencial, ignora
         if (!d.locked || string.IsNullOrEmpty(d.requiredCredential) || credentialInput == null)
             return;
 
@@ -241,12 +232,12 @@ public class ElevatorUI : MonoBehaviour
         }
     }
 
+    // Trata do desbloqueio persistente ligando-se ao GameManager
+    // Depois faz o botão ficar verde e avança a viagem no elevador
     IEnumerator UnlockAndTravel(int index)
     {
         FloorData d = floors[index];
 
-        // desbloqueia para o resto da sessão (reseta ao reiniciar o jogo,
-        // porque o estado vive no GameManager em memória)
         d.locked = false;
         GameManager.Instance.UnlockFloor(d.floorNumber - 1);
 
@@ -271,8 +262,6 @@ public class ElevatorUI : MonoBehaviour
         yield return StartCoroutine(DoTravel());
     }
 
-    // Tenta pintar de verde o texto do botão do piso correspondente,
-    // caso os botões de piso tenham um TextMeshProUGUI como filho.
     void UpdateFloorButtonVisual(int index)
     {
         if (floorButtons == null || index < 0 || index >= floorButtons.Length)
@@ -283,6 +272,8 @@ public class ElevatorUI : MonoBehaviour
             btnText.color = ElevatorColors.Green;
     }
 
+    // Faz a animação de espera e invoca o GameManager para mudar a cena
+    // Depois fecha o painel e teleporta efetivamente o jogador para o piso correto
     IEnumerator DoTravel()
     {
         isMoving = true;
@@ -308,12 +299,9 @@ public class ElevatorUI : MonoBehaviour
 
         ShowArrived(dest);
 
-        // som ding do elevador
         SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.travelDingElevator);
 
-        // Aqui chamas o teu GameManager para mudar de piso
         GameManager.Instance.SetCurrentFloor(currentFloor - 1);
-        // Podes fechar o UI depois de X segundos ou esperar input
         yield return new WaitForSecondsRealtime(0.8f);
         TeleportToFloor(currentFloor);
         Close();
@@ -347,19 +335,14 @@ public class ElevatorUI : MonoBehaviour
         {
             case 5:
                 return -33.3f;
-
             case 4:
                 return -98.3f;
-
             case 3:
                 return -162.3f;
-
             case 2:
                 return -226.3f;
-
             case 1:
                 return -290.3f;
-
             default:
                 return -226.3f;
         }
@@ -456,28 +439,22 @@ public class ElevatorUI : MonoBehaviour
             case 1:
                 target = spawnFloor1;
                 break;
-
             case 2:
                 target = spawnFloor2;
                 break;
-
             case 3:
                 target = spawnFloor3;
                 break;
-
             case 4:
                 target = spawnFloor4;
                 break;
-
             case 5:
                 target = spawnFloor5;
                 break;
-
             default:
                 target = spawnFloor1;
                 break;
         }
-
 
         CharacterController cc = PlayerController.Instance.GetComponent<CharacterController>();
         cc.enabled = false;
@@ -519,7 +496,6 @@ public class ElevatorUI : MonoBehaviour
         if (credentialPanel != null) credentialPanel.SetActive(false);
     }
 
-    // Método público para o GameManager desbloquear pisos
     public void UnlockFloor(int floorNumber)
     {
         int index = 5 - floorNumber;
@@ -527,6 +503,8 @@ public class ElevatorUI : MonoBehaviour
             floors[index].locked = false;
     }
 
+    // Atualizamos o estado visual no UI com base naquilo que o GameManager tem guardado
+    // Como os unlocks são persistentes, assim evitamos que o UI resete e tranque tudo de novo
     public void SyncLockedStates()
     {
         foreach (var floor in floors)

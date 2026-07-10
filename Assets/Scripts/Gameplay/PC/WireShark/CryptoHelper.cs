@@ -1,7 +1,3 @@
-// CryptoHelper.cs
-// Encriptao e desencriptao AES e DES real usando System.Security.Cryptography
-// Usado pelo PacketGenerator para encriptar e pelo TerminalManager para desencriptar
-
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,19 +5,16 @@ using System.Text;
 // #my_code - Integração de bibliotecas de encriptação reais para desencriptação in-game
 public static class CryptoHelper
 {
-    // chaves fixas do jogo  o jogador no as v, so internas
-    // AES precisa de 16, 24 ou 32 bytes
+    // Chaves hardcoded usadas na ofuscação de rede
+    // Fixas porque não temos necessidade de gerar chaves dinamicamente para o jogador adivinhar
     private static readonly byte[] AES_KEY = Encoding.UTF8.GetBytes("SilentProtocol16");
     private static readonly byte[] AES_IV = Encoding.UTF8.GetBytes("InitVector123456");
 
-    // DES precisa exatamente de 8 bytes
     private static readonly byte[] DES_KEY = Encoding.UTF8.GetBytes("SecKey8B");
     private static readonly byte[] DES_IV = Encoding.UTF8.GetBytes("IVBytes8");
 
-    // ---------------------------------------------------------------
-    // AES
-    // ---------------------------------------------------------------
-
+    // Usa a implementação de AES da biblioteca nativa para simular payloads encriptados reais
+    // O PacketGenerator chama isto antes de injetar os pacotes na interface
     public static string EncryptAES(string plainText)
     {
         try
@@ -37,7 +30,6 @@ public static class CryptoHelper
                 byte[] inputBytes = Encoding.UTF8.GetBytes(plainText);
                 byte[] outputBytes = encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
 
-                // devolve como hex string separada por espaos (estilo Wireshark)
                 return BytesToHexString(outputBytes);
             }
         }
@@ -48,6 +40,7 @@ public static class CryptoHelper
         }
     }
 
+    // Processo inverso acionado pelo TerminalManager quando o jogador submete um comando de descodificação
     public static string DecryptAES(string hexPayload)
     {
         try
@@ -73,10 +66,7 @@ public static class CryptoHelper
         }
     }
 
-    // ---------------------------------------------------------------
-    // DES
-    // ---------------------------------------------------------------
-
+    // Variante da encriptação com DES para dar variedade visual aos pacotes que passam
     public static string EncryptDES(string plainText)
     {
         try
@@ -127,11 +117,7 @@ public static class CryptoHelper
         }
     }
 
-    // ---------------------------------------------------------------
-    // Utilitrios de converso hex
-    // ---------------------------------------------------------------
-
-    // converte bytes para string hex separada por espaos: "48 65 6c 6c 6f"
+    // Formata o array de bytes numa string hexadecimal espaçada para simular o aspeto dos pacotes reais em ferramentas de rede
     public static string BytesToHexString(byte[] bytes)
     {
         StringBuilder sb = new StringBuilder();
@@ -143,7 +129,7 @@ public static class CryptoHelper
         return sb.ToString();
     }
 
-    // converte string hex (com ou sem espaos) de volta para bytes
+    // Retira os espaços visuais e devolve o array limpo para as funções de desencriptação poderem processar os blocos
     public static byte[] HexStringToBytes(string hexString)
     {
         string clean = hexString.Replace(" ", "").Trim();
@@ -153,7 +139,8 @@ public static class CryptoHelper
         return bytes;
     }
 
-    // gera um hash fictcio mas consistente (primeiros 6 chars do SHA1 do texto)
+    // Gera um identificador rápido usando um bocado do hash SHA1
+    // Ajuda a dar a aparência de uma assinatura digital na interface sem sobrecarregar o sistema com lógicas complexas
     public static string GenerateHash(string text)
     {
         using (SHA1 sha1 = SHA1.Create())
@@ -163,13 +150,13 @@ public static class CryptoHelper
         }
     }
 
-    // mtodo de convenincia: encripta conforme o tipo
+    // Wrapper simples para encaminhar a ofuscação pelo algoritmo correspondente ao pacote
     public static string Encrypt(string plainText, string encType)
     {
         return encType == "DES" ? EncryptDES(plainText) : EncryptAES(plainText);
     }
 
-    // mtodo de convenincia: desencripta conforme o tipo
+    // Wrapper para devolver o texto limpo com base na escolha do Terminal
     public static string Decrypt(string hexPayload, string encType)
     {
         return encType == "DES" ? DecryptDES(hexPayload) : DecryptAES(hexPayload);

@@ -39,13 +39,12 @@ public class PhoneCallUI : MonoBehaviour
     private int numChannels   = 0;
     private int activeChannel = 0;
 
-    // por canal: texto acumulado, keywords perdidas, coroutine
+    // estas arrays precisam de bater certo com o número de canais, usamos listas para o texto ficar dinâmico em vez de concatenar strings enormes
     private List<string>[] transcripts;
     private int[]          missedKeywords;
     private bool[]         channelFinished;
     private Coroutine[]    channelCoroutines;
 
-    // flag de captura: activa durante a janela de keyword no canal activo
     private bool captureWindowOpen = false;
     private bool capturedThisWindow = false;
 
@@ -57,7 +56,6 @@ public class PhoneCallUI : MonoBehaviour
 
         if (callPanel != null) callPanel.SetActive(false);
 
-        // liga botões de canal
         for (int i = 0; i < channelButtons.Length; i++)
         {
             int idx = i;
@@ -76,7 +74,6 @@ public class PhoneCallUI : MonoBehaviour
     {
         if (!IsOpen) return;
 
-        // trocar canal com 1/2/3
         if (Input.GetKeyDown(KeyCode.X)) { CloseCall(); return; }
 
         if (Input.GetKeyDown(KeyCode.Alpha1)) SelectChannel(0);
@@ -93,7 +90,6 @@ public class PhoneCallUI : MonoBehaviour
         numChannels = Mathf.Min(channels != null ? channels.Length : 0, 3);
         if (numChannels == 0) return;
 
-        // inicializa estruturas por canal
         transcripts      = new List<string>[3];
         missedKeywords   = new int[3];
         channelFinished  = new bool[3];
@@ -131,6 +127,7 @@ public class PhoneCallUI : MonoBehaviour
         Input.ResetInputAxes();
     }
 
+    // o fecho pára logo as rotinas todas para o gajo não continuar a receber info no background a comer recursos
     public void CloseCall()
     {
         for (int i = 0; i < 3; i++)
@@ -165,11 +162,9 @@ public class PhoneCallUI : MonoBehaviour
 
         for (int li = 0; li < data.lines.Length; li++)
         {
-            // adiciona linha ao transcript deste canal
             transcripts[ch].Add(data.lines[li]);
             if (ch == activeChannel) RefreshTranscript();
 
-            // verifica se esta linha tem keyword
             int kwIndex = System.Array.IndexOf(kwLines, li);
             bool isKeywordLine = (kwIndex >= 0);
 
@@ -177,7 +172,6 @@ public class PhoneCallUI : MonoBehaviour
             {
                 if (ch == activeChannel)
                 {
-                    // abre janela de captura
                     captureWindowOpen  = true;
                     capturedThisWindow = false;
 
@@ -211,7 +205,6 @@ public class PhoneCallUI : MonoBehaviour
                 }
                 else
                 {
-                    // jogador estava noutro canal — perde automaticamente
                     missedKeywords[ch]++;
                     UpdateChannelStatus(ch);
                     yield return new WaitForSeconds(delay);
@@ -223,13 +216,11 @@ public class PhoneCallUI : MonoBehaviour
             }
         }
 
-        // canal terminou
         channelFinished[ch] = true;
         transcripts[ch].Add("<color=#555555>[FIM DA CHAMADA]</color>");
         if (ch == activeChannel) RefreshTranscript();
         UpdateChannelStatus(ch);
 
-        // fecha o painel se todos os canais terminaram
         bool todosTerminados = true;
         for (int i = 0; i < numChannels; i++)
             if (!channelFinished[i]) { todosTerminados = false; break; }
@@ -260,7 +251,6 @@ public class PhoneCallUI : MonoBehaviour
         if (txtTranscript == null) return;
         txtTranscript.text = string.Join("\n", transcripts[activeChannel]);
 
-        // scroll automático para o fundo
         if (transcriptScroll != null)
         {
             Canvas.ForceUpdateCanvases();
@@ -290,12 +280,11 @@ public class PhoneCallUI : MonoBehaviour
         txtActiveChannels.text = $"{ativos} canal(is) ativo(s)";
     }
 
+    // o clique prematuro castiga bué o jogador na barra de suspeita. o SuspicionManager lida com o estado, nós só chamamos
     private void OnCaptureButtonPressed() {
         if (captureWindowOpen && !capturedThisWindow) {
-            // clique correcto — dentro da janela
             capturedThisWindow = true;
         } else if (!captureWindowOpen) {
-            // clique prematuro — sem keyword activa
             SuspicionManager.Instance.AddInstantSuspicion(0.08f);
             if (txtCapturePrompt != null)
                 txtCapturePrompt.text = "<color=#FF4444>Interceção detectada!</color>";

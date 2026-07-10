@@ -5,39 +5,28 @@ using static NPCScript;
 // #my_code - Configuração e validação de rotas individuais: probabilidade, loop, descanso, departamento
 public class PatrolRoute : MonoBehaviour {
 
-    // tipos de NPC que podem usar esta rota  filtrado pelo GetRandomRoute do NPCManager
-    // NPCs com assignedRoute ignoram este campo porque nunca chamam GetRandomRoute
+    // Lista que filtra as entidades permitidas aquando da chamada aleatoria do gestor global de rotas.
     public NPCType[] allowedTypes;
 
-    // probabilidade relativa de esta rota ser escolhida entre as compatveis
-    // ex: patrulha=1, descanso=0.3 -> guarda descansa ~23% das vezes
+    // Afina o balanco percentual face as alternativas. Da imenso jeito para definir um bias estatistico nalgumas zonas criticas.
     [Range(0f, 1f)]
     public float probability = 1f;
 
-    // segundos que o NPC espera em cada waypoint antes de avanar
-    // til para simular paragens naturais (ex: guarda a observar, rececionista a beber gua)
     public float waitTimePerWaypoint = 0f;
 
-    // se true, o NPC repete a rota do incio ao chegar ao ltimo waypoint, para sempre
-    // usado em guardas em patrulha contnua
-    // se false, chega ao fim e chama EnterPatrol para escolher rota nova
+    // Mantem o script do navmesh a patinar ciclicamente nestes transforms especificos e ignora as conjeturas do EnterPatrol.
     public bool loopWaypoints = false;
 
-    // se true, o NPC vai para o homeBase no fim da rota antes de escolher a prxima
-    // requer que o NPCScript tenha homeBase definido
-    // usado em rececionistas e visitantes que voltam  secretria/entrada depois de cada tarefa
+    // Bloqueia o NPC no loop de retorno forçando a ida a origem pre gravada em vez de sortear um destino parvo no meio do corredor.
     public bool returnHome = false;
 
-    // marca esta rota como zona de descanso
-    // o NPCManager.CanGuardRest verifica este flag para garantir que
-    // s um guarda descansa de cada vez
+    // Tag para detetar a ocupacao. O NPCManager valida isto para impedir congregacoes de muitos segurancas num spot unico a passarem tempo.
     public bool isRestRoute = false;
 
-    // preenchido automaticamente no Awake com os filhos diretos deste GameObject
-    // filhos que tenham PatrolRoute so ignorados (ex: DESCANSO1 dentro de GUARDAS)
+    // Vetor invisivel carregado em runtime com os childs validos da arvore.
     [HideInInspector] public Transform[] waypoints;
 
-    public int departmentID = 0; // por causa dos colegas rececionistas e chefes no piso executivo (0 = sem departamento)
+    public int departmentID = 0;
 
     void Awake() {
         List<Transform> pts = new List<Transform>();

@@ -25,7 +25,6 @@ public class CutsceneDialogueUI : MonoBehaviour
     private int currentLine = 0;
     private System.Action onComplete;
 
-    // painel ativo atual
     private GameObject activePanel;
     private TextMeshProUGUI activeSpeaker;
     private bool lockCursorOnEnd = true;
@@ -43,12 +42,13 @@ public class CutsceneDialogueUI : MonoBehaviour
         if (srv2Panel) srv2Panel.SetActive(false);
     }
 
-    // chamado sem target usa o Main por defeito
     public void Play(DialogueCutscene cutscene, System.Action onDone = null)
     {
         Play(cutscene, PanelTarget.Main, onDone, true);
     }
 
+    // Inicializamos os painéis respetivos da cutscene e congelamos os controlos do jogador
+    // Optámos por suportar os vários layouts visuais num só sítio para não criar um mar de UI scripts espalhados pelas salas dos servidores
     public void Play(DialogueCutscene cutscene, PanelTarget target, System.Action onDone, bool lockOnEnd)
     {
         lockCursorOnEnd = lockOnEnd;

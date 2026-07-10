@@ -1,37 +1,26 @@
 // #my_code - Atribuição e verificação de tarefas diárias ao jogador para manter aparência corporativa
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance;
 
-    // ---------------------------------------------------------------
-    // Prefab de UI — vai ser instanciado uma vez por task
-    // Arrasta aqui o teu prefab de TaskItemUI no Inspector
-    // ---------------------------------------------------------------
     [Header("Prefab de UI para cada task")]
     [SerializeField] private TaskItemUI taskItemUIPrefab;
 
-    // Container onde os TaskItemUI instanciados vão aparecer no ecrã
-    // (um VerticalLayoutGroup funciona bem aqui)
     [SerializeField] private Transform taskListContainer;
 
     [Header("Impressoras disponíveis para a task de imprimir")]
     public GameObject printerList;
 
-    // ---------------------------------------------------------------
-    // HORÁRIOS POR DIA
-    // daySchedules[0] = Dia 1, daySchedules[1] = Dia 2, etc.
-    // ---------------------------------------------------------------
     [Header("Horários  (um DaySchedule asset por dia, por ordem)")]
     [SerializeField] private DaySchedule[] daySchedules;
 
     public enum TaskDifficulty { Small, Medium, Major }
 
-    // ---------------------------------------------------------------
-    // Estrutura interna de cada task ativa
-    // ---------------------------------------------------------------
+    // esta struct junta os dados declarativos vindos do ScriptableObject (DaySchedule) com o estado volátil que muda no runtime.
+    // assim não precisamos de modificar os assets que são lidos, e garantimos que as falhas e sucessos das tarefas ficam limpos para serializar
     private class TaskEntry
     {
         public string name;
@@ -44,10 +33,7 @@ public class TaskManager : MonoBehaviour
         public bool failed;
     }
 
-    // lista de todas as tasks do dia (sem limite de quantidade)
     private List<TaskEntry> activeTasks = new List<TaskEntry>();
-
-    // ---------------------------------------------------------------
 
     void Awake()
     {
@@ -69,12 +55,10 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    // ---------------------------------------------------------------
-    // Carrega o schedule do dia e prepara todas as TaskEntry
-    // ---------------------------------------------------------------
+    // ligámos ao evento OnWorkHoursStarted para inicializar o dia.
+    // destruímos as instâncias de UI do dia anterior e carregamos o schedule novo, se não fizéssemos isto iríamos criar memory leaks com os prefabs antigos empilhados
     private void ActivateTasks()
     {
-        // limpa tasks e UI do dia anterior
         foreach (TaskEntry t in activeTasks)
         {
             if (t.ui != null) Destroy(t.ui.gameObject);
@@ -93,14 +77,12 @@ public class TaskManager : MonoBehaviour
         {
             if (string.IsNullOrEmpty(scheduled.taskName)) continue;
 
-            // valida horas
             if (scheduled.deadlineHour <= scheduled.spawnHour)
             {
                 Debug.LogWarning($"[TaskManager] Task '{scheduled.taskName}': deadlineHour ({scheduled.deadlineHour}) tem de ser maior que spawnHour ({scheduled.spawnHour}). Task ignorada.");
                 continue;
             }
 
-            // instancia um TaskItemUI para esta task (começa escondido)
             TaskItemUI ui = Instantiate(taskItemUIPrefab, taskListContainer);
             ui.gameObject.SetActive(false);
 
@@ -122,9 +104,6 @@ public class TaskManager : MonoBehaviour
         Debug.Log($"[TaskManager] Dia {GameManager.Instance.currentDay}: {activeTasks.Count} task(s) preparada(s).");
     }
 
-    // ---------------------------------------------------------------
-    // Mostra a task na UI quando chega a hora de spawn
-    // ---------------------------------------------------------------
     private void TrySpawnTask(TaskEntry task, float now)
     {
         if (task.spawned || task.failed) return;
@@ -137,15 +116,11 @@ public class TaskManager : MonoBehaviour
         int dm = (int)(task.deadlineMinutes % 60f);
         task.ui.SetTask(task.name, $"{dh:00}:{dm:00}");
 
-        // som de nova task
         SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.taskAppeared);
 
         Debug.Log($"[TaskManager] Task '{task.name}' apareceu. Deadline: {dh:00}:{dm:00}");
     }
 
-    // ---------------------------------------------------------------
-    // Verifica se a deadline passou sem a task ter sido completada
-    // ---------------------------------------------------------------
     private void CheckDeadline(TaskEntry task, float now)
     {
         if (!task.spawned || task.completed || task.failed) return;
@@ -157,12 +132,8 @@ public class TaskManager : MonoBehaviour
         Debug.Log($"[TaskManager] Task '{task.name}' falhada por tempo.");
     }
 
-    // ---------------------------------------------------------------
-    // Chamado pelos objetos do mundo (ArchiveScript, ImpressoraScript, etc.)
-    // ---------------------------------------------------------------
     public void CompleteTask(string taskName, bool doneCorrectly)
     {
-        // procura a primeira task ativa com esse nome (spawned, não completada, não falhada)
         TaskEntry task = activeTasks.Find(t =>
             t.name == taskName &&
             t.spawned &&
@@ -182,6 +153,8 @@ public class TaskManager : MonoBehaviour
         Debug.Log($"[TaskManager] Task '{taskName}' completada. Correto: {doneCorrectly}");
     }
 
+    // decidimos usar valores percentuais rígidos empíricos porque as falhas devem ser difíceis de ignorar,
+    // mas dar um game over direto seria demasiado frustrante. envia a penalização para a barra do SuspicionManager
     private void HandleTaskComplete(TaskDifficulty difficulty, bool doneCorrectly)
     {
         float multiplier = difficulty switch
@@ -193,16 +166,12 @@ public class TaskManager : MonoBehaviour
         };
         SuspicionManager.Instance.ChangeSuspicionOnTaskComplete(multiplier, doneCorrectly);
 
-        // feedback sonoro: correto = buzzerCorrect, errado = buzzerWrong
         if (doneCorrectly)
             SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.buzzerCorrect);
         else
             SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.buzzerWrong);
     }
 
-    // ---------------------------------------------------------------
-    // Ativa uma impressora aleatória para a task de imprimir
-    // ---------------------------------------------------------------
     public ImpressoraScript ActivatePrinterTask()
     {
         int index = Random.Range(0, printerList.transform.childCount);
@@ -211,11 +180,6 @@ public class TaskManager : MonoBehaviour
         return printer;
     }
 
-    // ---------------------------------------------------------------
-    // Helpers usados por WriteDocumentUI, UIManager, etc.
-    // ---------------------------------------------------------------
-
-    // devolve true se existir pelo menos uma task ativa (spawned, não terminada) com esse nome
     public bool HasActiveTask(string name)
     {
         return activeTasks.Exists(t =>
@@ -226,17 +190,13 @@ public class TaskManager : MonoBehaviour
         );
     }
 
-    // mantidos por compatibilidade com WriteDocumentUI e UIManager existentes
     public bool HasActiveMorningTask(string name) => HasActiveTask(name);
     public bool HasActiveAfternoonTask(string name) => HasActiveTask(name);
 
-    // ---------------------------------------------------------------
-    // Seleciona o DaySchedule correto para o dia atual
-    // ---------------------------------------------------------------
     private DaySchedule GetScheduleForToday()
     {
         int index = GameManager.Instance.currentDay - 1;
         if (daySchedules == null || index < 0 || index >= daySchedules.Length) return null;
         return daySchedules[index];
     }
-}   
+}

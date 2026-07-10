@@ -9,19 +9,18 @@ public class NPCManager : MonoBehaviour {
 
     public Transform player;
 
-    // usada para broadcasts de suspeita e para verificar condies (CanReceptionistLeave, CanGuardRest)
+    // mantemos esta lista global atualizada para conseguirmos fazer broadcasts quando a suspeita sobe, 
+    // e também para validar regras estritas tipo não deixar a receção vazia
     private List<NPCScript> activeNPCs = new List<NPCScript>();
 
-    // rotas organizadas por piso  cada elemento tem um floor e um array de PatrolRoutes
-    // o GetRandomRoute filtra por piso, tipo de NPC e outras condies
+    // definimos as rotas no inspector separadas por piso. o GetRandomRoute depois filtra por estes arrays para evitar alocar memória nova a cada sorteio
     [SerializeField] private FloorRoutes[] floorRoutes;
 
-    // os NPCs que vao para a reunio
     [SerializeField] private NPCScript bossD1, colega1D1, colega2D1;
     [SerializeField] private NPCScript bossD2, colega1D2, colega2D2;
     [SerializeField] private NPCScript bossD3, colega1D3, colega2D3;
 
-    // rota para a sala de reunies de cada NPC
+    // isolamos as rotas de reunião das patrulhas normais para não corrermos o risco de um NPC ir parar à sala de reuniões aleatoriamente durante o dia
     [SerializeField] private PatrolRoute meetingRouteBossD1, meetingRouteColega1D1, meetingRouteColega2D1;
     [SerializeField] private PatrolRoute meetingRouteBossD2, meetingRouteColega1D2, meetingRouteColega2D2;
     [SerializeField] private PatrolRoute meetingRouteBossD3, meetingRouteColega1D3, meetingRouteColega2D3;
@@ -31,6 +30,8 @@ public class NPCManager : MonoBehaviour {
 
     }
 
+    // injetamos a rota nos NPCs diretamente quando bate a hora da reunião. 
+    // usamos o ForceRoute para eles ignorarem o que estavam a fazer e marcharem em fila para a sala
     public void TriggerMeeting() {
         GameEvent.MeetingStarted();
         bossD1.ForceRoute(meetingRouteBossD1);
@@ -58,9 +59,8 @@ public class NPCManager : MonoBehaviour {
         Instance = this;
     }
 
-    // devolve uma rota aleatria compatvel com o tipo e piso do NPC
-    // excludeRoute: evita repetir a rota anterior
-    // excludeRest: ignora rotas de descanso (usado quando j h um guarda a descansar)
+    // este algoritmo procura uma rota compatível cruzando os requisitos todos (piso, tipo, departamento).
+    // metemos pesos de probabilidade nas rotas para não parecer mecânico e o NPC preferir as rotas principais em vez de ir sempre à casa de banho
     public PatrolRoute GetRandomRoute(NPCType type, int floor, int departmentID, PatrolRoute excludeRoute = null, bool excludeRest = false) {
         List<PatrolRoute> compatible = new List<PatrolRoute>();
 
@@ -89,15 +89,14 @@ public class NPCManager : MonoBehaviour {
             }
         }
 
-        // se no encontrou nenhuma rota compatvel aps excluir a rota anterior, tenta novamente sem excluso
-        // isto acontece quando o pool do NPC s tem uma rota, excluir a nica opo devolvia null e dava erro
-        // ao repetir sem excluso o NPC fica na mesma rota em vez de ficar parado
+        // salvaguarda parva: se as exclusões derem cabo das opções todas, tentamos outra vez à força bruta sem filtros para o NPC não encravar no sítio
         if (compatible.Count == 0 && excludeRoute != null)
             return GetRandomRoute(type, floor, departmentID, null, excludeRest);
 
         if (compatible.Count == 0)
             return null;
 
+        // sorteio baseado na roleta de probabilidades para permitir rotas mais raras
         float totalWeight = 0f;
         for (int i = 0; i < compatible.Count; i++)
             totalWeight += compatible[i].probability;
@@ -111,8 +110,7 @@ public class NPCManager : MonoBehaviour {
         return compatible[compatible.Count - 1];
     }
 
-    // garante que pelo menos uma rececionista fica sempre na secretria
-    // chamado no EnterPatrol de cada rececionista antes de sair
+    // força a regra de manter sempre alguém na front desk para o jogo fazer sentido narrativamente
     public bool CanReceptionistLeave() {
         int atHome = 0;
         for (int i = 0; i < activeNPCs.Count; i++) {
@@ -122,8 +120,7 @@ public class NPCManager : MonoBehaviour {
         return atHome > 1;
     }
 
-    // garante que s um guarda descansa de cada vez
-    // chamado no EnterPatrol do guarda quando a rota escolhida  isRestRoute
+    // regra de descanso dos guardas para não ficarem todos a beber café ao mesmo tempo e arruinarem o stealth
     public bool CanGuardRest() {
         for (int i = 0; i < activeNPCs.Count; i++) {
             if (activeNPCs[i].npcType == NPCType.Guard && activeNPCs[i].isResting)
@@ -147,8 +144,7 @@ public class NPCManager : MonoBehaviour {
         activeNPCs.Remove(npc);
     }
 
-    // recebido via GameEvent quando a SuspicionManager muda de estado
-    // propaga a mudana a todos os NPCs ativos
+    // o SuspicionManager avisa-nos que deu barraca e nós empurramos esse estado para cada boneco individual reagir
     private void OnSuspicionStateChanged(SuspicionManager.SuspicionState state) {
         foreach (NPCScript npc in activeNPCs)
             npc.OnGlobalSuspicionChanged(state);
@@ -159,6 +155,7 @@ public class NPCManager : MonoBehaviour {
             npc.SetPatrolling(patrolling);
     }
 
+    // otimização básica: o GameManager chama isto ao mudar de piso para desligar a navegação e a física dos gajos que ficaram noutros andares
     public void SetActiveFloor(int floor) {
         foreach (NPCScript npc in activeNPCs)
             npc.SetFloorActive(npc.currentFloor == floor);

@@ -1,11 +1,8 @@
 using UnityEngine;
 
-// guarda os 7 atributos da personagem definidos na criao
 public class PlayerStats : MonoBehaviour {
     public static PlayerStats Instance;
 
-
-    // Ordem: Fora, Perceo, Resistncia, Carisma, Intelecto, Agilidade, Sorte
     public int[] Stats = new int[7] { 1, 1, 1, 1, 1, 1, 1 };
 
     public int GetForca() {
@@ -36,7 +33,6 @@ public class PlayerStats : MonoBehaviour {
         return Stats[6];
     }
 
-
     void Awake() {
         if (Instance != null && Instance != this) { 
             Destroy(gameObject); 
@@ -45,17 +41,11 @@ public class PlayerStats : MonoBehaviour {
         Instance = this;
     }
 
+    // A UI de criação da personagem injeta aqui os pontos distribuídos no início da run. Fica alojado neste singleton para que qualquer classe como o PlayerController consiga consultar os atributos e mudar as mecânicas na hora.
     public void SetStats(int[] newStats) {
         if (newStats == null || newStats.Length != 7) 
             return;
 
         System.Array.Copy(newStats, Stats, 7);
     }
-
-
-    // exemplos de como outros sistemas devem usar os atributos:
-    // - SleepStage.threshold pode ser modificado por endurance
-    // - NPCScript.fovRange do jogador pode ser aumentado por perception
-    // - puzzle success chance pode ser influenciada por intellect
-    // - noise radius pode ser reduzido por agility
 }

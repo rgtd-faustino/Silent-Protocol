@@ -13,8 +13,6 @@ public class DayTitleUI : MonoBehaviour
     [SerializeField] private float holdDuration = 2.5f;
     [SerializeField] private float fadeOutDuration = 0.8f;
 
-
-
     void Awake()
     {
         canvasGroup.alpha = 0f;
@@ -36,18 +34,16 @@ public class DayTitleUI : MonoBehaviour
         StartCoroutine(ShowTitle(day));
     }
 
+    // Coroutine responsável por apresentar o título do dia
+    // Deixamos holdDuration com uns bons 2 ou 3 segundos para dar tempo de assimilação antes de retomar o jogo
     private IEnumerator ShowTitle(int day)
     {
         titleText.text = $"Dia {day}";
         
-
-        // fade in
         yield return StartCoroutine(Fade(0f, 1f, fadeInDuration));
 
-        // espera visvel
         yield return new WaitForSeconds(holdDuration);
 
-        // fade out
         yield return StartCoroutine(Fade(1f, 0f, fadeOutDuration));
     }
 

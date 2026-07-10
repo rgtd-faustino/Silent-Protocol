@@ -1,19 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Gere o fluxo completo de dilogo:
-//  1. recebe o NPCDialogueData do NPC com quem o jogador interagiu
-//  2. filtra os tpicos vlidos para o estado atual (suspeita, charisma)
-//  3. passa a lista filtrada ao DialogueUI
-//  4. quando o jogador escolhe um tpico, avalia o outcome e aplica consequncias
 public class DialogueManager : MonoBehaviour
 {
 
     public static DialogueManager Instance;
 
-    // emitido quando o dilogo abre  pode ser usado para parar o tempo ou NPCs
+    // disparamos isto quando a janela de diálogo abre. útil para quem precisar de pausar o tempo ou congelar as animações dos NPCs sem precisarmos de acoplar aqui
     public event System.Action OnDialogueOpen;
-    // emitido quando o dilogo fecha
     public event System.Action OnDialogueClose;
 
     private NPCDialogueData currentData;
@@ -25,20 +19,21 @@ public class DialogueManager : MonoBehaviour
         Instance = this;
     }
 
-    // chamado pelo NPCScript.Interact()
+    // o NPCScript chama isto no Interact(). nós filtramos as falas possíveis com base nas stats do jogador e mandamos a lista limpa para a UI.
+    // assim mantemos a lógica das regras separada da interface
     public void OpenDialogue(NPCDialogueData data)
     {
         if (isOpen) return;
         if (data == null)
         {
-            Debug.LogWarning("[DialogueManager] NPCDialogueData  null.");
+            Debug.LogWarning("[DialogueManager] NPCDialogueData é null.");
             return;
         }
 
         currentData = data;
         isOpen = true;
 
-        // bloqueia o movimento do jogador enquanto o dilogo est aberto
+        // trancamos o movimento do boneco e libertamos o rato, senão a câmara rodava feita maluca quando tentássemos clicar nas respostas
         PlayerController.Instance.canMoveRotate = false;
         UIManager.Instance.ChangeCursorState(CursorLockMode.None);
         Cursor.visible = true;
@@ -47,7 +42,7 @@ public class DialogueManager : MonoBehaviour
 
         List<DialogueTopic> filtered = FilterTopics(data);
 
-        // escolhe qual greeting usar
+        // a malta decidiu que se a suspeita estiver alta, o NPC arranca logo a espumar da boca com o greeting de confronto em vez do normal
         string greetingToUse = data.greetingText;
 
         if (suspicion >= data.suspicionThreshold)
@@ -60,7 +55,6 @@ public class DialogueManager : MonoBehaviour
         OnDialogueOpen?.Invoke();
     }
 
-    // fecha o dilogo e devolve o controlo ao jogador
     public void CloseDialogue()
     {
         if (!isOpen) return;
@@ -75,30 +69,27 @@ public class DialogueManager : MonoBehaviour
         OnDialogueClose?.Invoke();
     }
 
-    // chamado pelo DialogueUI quando o jogador clica num tpico
+    // este método é o callback da UI. quando o gajo clica numa opção, avaliamos o resultado e aplicamos os buffs ou debuffs.
+    // usamos uma callback na UI para aplicar a consequência só depois de mostrar a resposta do NPC, senão a barra de suspeita subia antes do gajo ler o insulto
     public void OnTopicSelected(DialogueTopic topic)
     {
         if (topic == null) return;
 
         TopicOutcome outcome = topic.Evaluate();
 
-        // mostra a resposta do NPC
         DialogueUI.Instance.ShowNPCResponse(outcome.npcResponse, () => {
-            // callback aps o jogador fechar a resposta
             ApplyConsequence(outcome);
 
-            // aps confronto, fecha sempre  o jogador no escolhe mais tpicos
+            // os tópicos de confronto têm de fechar sempre a conversa no fim, porque o NPC passa-se da cabeça e recusa-se a falar mais
             if (topic.topicType == DialogueTopic.TopicType.Confrontation)
                 CloseDialogue();
             else
-                DialogueUI.Instance.ReturnToTopics(); // volta ao menu de tpicos
+                DialogueUI.Instance.ReturnToTopics();
         },outcome);
     }
 
-    // filtra os tpicos do NPCDialogueData conforme:
-    //   suspeita alta injeta o tpico de confronto (e esconde os normais)
-    //   charisma mnimo do tpico
-    //   requiresHighSuspicion: s aparece se suspeita >= threshold
+    // cortamos as opções se o jogador não tiver carisma suficiente ou se o tópico exigir uma situação de alta suspeita para aparecer.
+    // limitámos a 3 tópicos de cada vez por causa do layout que fizemos na UI
     private List<DialogueTopic> FilterTopics(NPCDialogueData data)
     {
         float suspicion = SuspicionManager.Instance.GetSuspicionRatio();
@@ -130,11 +121,12 @@ public class DialogueManager : MonoBehaviour
             if (result.Count >= 3) break;
         }
 
-        Debug.Log($"[Filter] Tpicos aprovados: {result.Count}");
+        Debug.Log($"[Filter] Tópicos aprovados: {result.Count}");
         return result;
     }
 
-    // aplica o efeito do outcome escolhido nos sistemas do jogo
+    // preferimos canalizar a mudança de suspeita pelo método das tasks no SuspicionManager, 
+    // assim aproveitamos os mesmos sons de sucesso/falha e mantemos a consistência audível
     private void ApplyConsequence(TopicOutcome outcome)
     {
         switch (outcome.consequence)
@@ -156,9 +148,8 @@ public class DialogueManager : MonoBehaviour
                 break;
 
             case TopicOutcome.ConsequenceType.GiveIntel:
-                // IntelInventory.Instance.AddIntel(...) quando o sistema de intel estiver pronto
-                Debug.Log("[DialogueManager] GiveIntel  a implementar com IntelInventory.");
+                Debug.Log("[DialogueManager] GiveIntel - a implementar com IntelInventory.");
                 break;
         }
     }
-}   
+}

@@ -1,7 +1,3 @@
-// ConversationData.cs
-// ScriptableObject  define no Inspector as conversas importantes do jogo
-// Menu: Assets > Create > WireShark > Conversation Data
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,26 +5,26 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ConversationData", menuName = "WireShark/Conversation Data")]
 public class ConversationData : ScriptableObject
 {
-    [Tooltip("Lista de conversas predefinidas com intel importante")]
+    [Tooltip("Conjunto de conversas que contêm informação relevante para a narrativa.")]
     public List<ConversationEntry> conversations = new List<ConversationEntry>();
 }
 
 [Serializable]
 public class ConversationEntry
 {
-    [Header("Identificao")]
-    public string conversationId;   // ex: "CONV-192-10"
-    public string srcIP;            // ex: "192.168.1.2"
-    public string dstIP;            // ex: "10.0.0.3"
-    public string protocol;         // "TCP" ou "UDP"
-    public string encryptionType;   // "AES" ou "DES"
+    [Header("Identificação")]
+    public string conversationId;
+    public string srcIP;
+    public string dstIP;
+    public string protocol;
+    public string encryptionType;
 
     [Header("Dia em que aparece")]
-    [Tooltip("Em que dia do jogo esta conversa comea a aparecer (1-5)")]
+    [Tooltip("O dia da semana no jogo em que esta conversa começa a ser injetada no tráfego.")]
     public int dayToAppear = 1;
 
     [Header("Mensagens da conversa")]
-    [Tooltip("Cada entrada  uma mensagem da conversa por ordem")]
+    [Tooltip("Lista sequencial dos pacotes que compõem a troca de mensagens.")]
     public List<MessageEntry> messages = new List<MessageEntry>();
 }
 
@@ -36,12 +32,12 @@ public class ConversationEntry
 public class MessageEntry
 {
     [TextArea(2, 4)]
-    [Tooltip("Texto plano  ser encriptado automaticamente pelo PacketGenerator")]
+    [Tooltip("Texto legível que será ofuscado pelo PacketGenerator em runtime.")]
     public string plainText;
 
-    [Tooltip("Se true, este pacote aparece ao vivo no stream. Se false, j passou e vai para o histrico")]
+    [Tooltip("Se for verdadeiro, o pacote é visível na stream em tempo real. Caso contrário, vai apenas para o histórico.")]
     public bool appearsLive = true;
 
-    [Tooltip("Se true, este pacote tem intel importante para o jogador")]
+    [Tooltip("Indica se este pacote tem dados cruciais que o jogador deve investigar e guardar.")]
     public bool isImportant = false;
 }

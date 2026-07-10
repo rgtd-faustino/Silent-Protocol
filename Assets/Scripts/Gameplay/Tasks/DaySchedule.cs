@@ -1,10 +1,5 @@
 using UnityEngine;
 
-// Como usar:
-// Boto direito no Project -> Create -> Tasks -> Day Schedule
-// Cria um asset por dia (Day1Schedule, Day2Schedule, etc.)
-// Em "Tasks Do Dia" clica no "+" para adicionar quantas tasks quiseres
-
 [CreateAssetMenu(menuName = "Tasks/Day Schedule")]
 public class DaySchedule : ScriptableObject
 {
@@ -12,22 +7,23 @@ public class DaySchedule : ScriptableObject
     [System.Serializable]
     public class ScheduledTask
     {
-
-        [Tooltip("Nome exato da task.\nOpes: 'Escrever documento' | 'Imprimir documento' | 'Arquivar documento' | 'Entregar documento'")]
+        [Tooltip("Nome exato da task. Opções: Escrever documento, Imprimir documento, Arquivar documento, Entregar documento")]
         public string taskName;
 
-        [Tooltip("Hora a que a task aparece para o jogador.\nExemplos: 9 = 09:00 | 13.5 = 13:30 | 14.25 = 14:15")]
+        // O TaskManager pega neste valor decimal e multiplica por 60 para saber os minutos reais do jogo e cruzar com o TimeManager.
+        [Tooltip("Hora a que a task aparece (decimal). Exemplo: 13.5 corresponde às 13:30.")]
         [Range(0f, 23.99f)]
         public float spawnHour;
 
-        [Tooltip("Hora limite para completar a task.\nTem de ser maior que spawnHour.")]
+        [Tooltip("Hora limite para a task. Tem de ser maior do que a spawnHour.")]
         [Range(0f, 23.99f)]
         public float deadlineHour;
 
-        [Tooltip("Impacto na suspeita ao falhar ou completar.\nSmall = pouco | Medium = mdio | Major = muito")]
+        // Passamos este nível de dificuldade ao TaskManager, que aplica os multiplicadores 0.1, 0.25 ou 0.5 e reencaminha para o SuspicionManager.
+        [Tooltip("Define o impacto na suspeita. Small penaliza pouco, Major penaliza muito.")]
         public TaskManager.TaskDifficulty difficulty;
     }
 
-    [Header("Tasks do Dia  (adiciona quantas quiseres com o '+')")]
+    [Header("Tasks do Dia")]
     public ScheduledTask[] tasks;
 }

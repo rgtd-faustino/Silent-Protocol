@@ -1,21 +1,24 @@
-// PacketData.cs
-// Representa um nico pacote de rede no jogo
-
 using System;
 
 [Serializable]
 public class PacketData
 {
-    public string PacketId;         // ex: "PKT-0041"
-    public string ConversationId;   // ex: "CONV-192-10"  (entre dois IPs)
+    public string PacketId;
+    public string ConversationId;
     public string SrcIP;
     public string DstIP;
-    public string Protocol;         // "TCP" ou "UDP"
-    public string EncryptionType;   // "AES" ou "DES"
-    public string EncryptedPayload; // o texto encriptado (hex string)
-    public string PlainText;        // o texto original  s usado internamente para ScriptableObject
-    public string Hash;             // hash fictcio gerado
-    public int MessageIndex;     // ndice na conversa (1, 2, 3...)
-    public bool IsImportant;      // marca os pacotes com intel relevante
-    public float Timestamp;        // tempo de jogo em que apareceu
+    public string Protocol;
+    public string EncryptionType;
+    
+    // A string em formato hexadecimal visualizada na UI da app de rede
+    public string EncryptedPayload;
+    
+    // Conserva a mensagem limpa internamente para validações do sistema e entrega de intel sem ter de forçar desencriptações redudantes no código
+    public string PlainText;
+    public string Hash;
+    
+    // Posição ordenada na troca de mensagens para sabermos construir a árvore da conversa na interface
+    public int MessageIndex;
+    public bool IsImportant;
+    public float Timestamp;
 }

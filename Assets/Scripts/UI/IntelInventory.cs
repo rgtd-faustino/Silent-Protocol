@@ -7,10 +7,6 @@ public class IntelInventory : MonoBehaviour
 {
     public static IntelInventory Instance;
 
-    // ------------------------------------------------------------------ //
-    // Referências UI                                                        //
-    // ------------------------------------------------------------------ //
-
     [Header("Painel Raiz")]
     public GameObject dossierPanel;
 
@@ -35,21 +31,18 @@ public class IntelInventory : MonoBehaviour
     public TextMeshProUGUI txtCategoria;
     public TextMeshProUGUI txtConteudo;
 
-    [Header("Notificação (opcional — badge no HUD)")]
+    [Header("Notificacao")]
     public GameObject badgeNovoIntel;
     public TextMeshProUGUI txtBadgeNovoIntel;
-
-    // ------------------------------------------------------------------ //
-    // Estado interno                                                        //
-    // ------------------------------------------------------------------ //
 
     private List<IntelItem> entradas = new List<IntelItem>();
     private List<GameObject> entradasAtivas = new List<GameObject>();
     private IntelItem itemSelecionado = null;
     private string filtroAtual = "Todos";
+    
+    // Rastreamos quantos itens ainda não foram vistos para poder colocar a notificação na interface
     private int novosNaoVistos = 0;
 
-    // cores por categoria para o badge (podes expandir)
     private readonly Dictionary<string, string> coresBadge = new Dictionary<string, string>()
     {
         { "Credenciais", "#0F6E56" },
@@ -57,10 +50,6 @@ public class IntelInventory : MonoBehaviour
         { "Contactos",    "#993556" },
         { "Outros",       "#5F5E5A" },
     };
-
-    // ------------------------------------------------------------------ //
-    // Unity                                                                 //
-    // ------------------------------------------------------------------ //
 
     void Awake()
     {
@@ -70,25 +59,19 @@ public class IntelInventory : MonoBehaviour
 
     void Start()
     {
-        // botões de filtro
         btnFiltroTodos.onClick.AddListener(() => AplicarFiltro("Todos"));
         btnFiltroCredenciais.onClick.AddListener(() => AplicarFiltro("Credenciais"));
         btnFiltroLocalizacao.onClick.AddListener(() => AplicarFiltro("Localização"));
         btnFiltroContatos.onClick.AddListener(() => AplicarFiltro("Contactos"));
 
-        // estado inicial
         intelDetailPanel.SetActive(false);
         if (painelVazio != null) painelVazio.SetActive(true);
         AtualizarBadgeNovoIntel();
         AtualizarTotalIntel();
     }
 
-
-
-    // ------------------------------------------------------------------ //
-    // API pública                                                           //
-    // ------------------------------------------------------------------ //
-
+    // Abre e fecha o UI do dossier e gere o input do jogador
+    // Notificamos o TutorialManager caso estejamos a passar a fase de aprender a usar o dossier
     public void ToggleDossier()
     {
         bool abrir = !dossierPanel.activeSelf;
@@ -101,7 +84,6 @@ public class IntelInventory : MonoBehaviour
                 TutorialManager.Instance.CompleteCurrentStep();
             }
 
-            // reset badge de novos ao abrir
             novosNaoVistos = 0;
             AtualizarBadgeNovoIntel();
 
@@ -116,9 +98,8 @@ public class IntelInventory : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Adiciona um IntelItem ao inventário. Chamado pelo EmailUI ou por qualquer outro sistema.
-    /// </summary>
+    // Adiciona o item apanhado à lista e atualiza as contagens
+    // Chamado externamente quando o jogador lê emails ou apanha ficheiros físicos
     public void AdicionarIntel(IntelItem item)
     {
         if (entradas.Contains(item)) return;
@@ -129,17 +110,14 @@ public class IntelInventory : MonoBehaviour
         AtualizarBadgeNovoIntel();
         AtualizarTotalIntel();
 
-        // se o dossier estiver aberto atualiza a lista em direto
         if (dossierPanel.activeSelf)
             AtualizarLista();
     }
 
     public int GetTotalIntel() => entradas.Count;
 
-    /// <summary>
-    /// Soma a percentagem de contribuição de todas as intels já recolhidas (0-100).
-    /// Usado pelo GameManager para decidir o final do jogo.
-    /// </summary>
+    // Calcula a soma do valor das peças de informação recolhidas
+    // Esta percentagem será usada pelo GameManager para determinar o final do jogo
     public float GetTotalPercentage()
     {
         float total = 0f;
@@ -148,10 +126,6 @@ public class IntelInventory : MonoBehaviour
 
         return Mathf.Clamp(total, 0f, 100f);
     }
-
-    // ------------------------------------------------------------------ //
-    // Filtro e Lista                                                        //
-    // ------------------------------------------------------------------ //
 
     private void AplicarFiltro(string filtro)
     {
@@ -185,22 +159,13 @@ public class IntelInventory : MonoBehaviour
         if (labels.Length >= 2) labels[1].text = item.categoria;
 
         var btn = go.GetComponent<Button>();
-        Debug.Log($"[Intel] Botão criado para '{item.titulo}' — btn interactable: {btn.interactable}");
         btn.onClick.AddListener(() => {
-            Debug.Log($"[Intel] CLICADO: {item.titulo}");
             MostrarDetalhe(item);
         });
     }
 
-
-
-    // ------------------------------------------------------------------ //
-    // Detalhe                                                               //
-    // ------------------------------------------------------------------ //
-
     private void MostrarDetalhe(IntelItem item)
     {
-        Debug.Log($"[Intel] MostrarDetalhe chamado para '{item.titulo}'");
         itemSelecionado = item;
 
         txtTitulo.text = item.titulo;
@@ -208,7 +173,6 @@ public class IntelInventory : MonoBehaviour
         txtCategoria.text = item.categoria;
         txtConteudo.text = item.conteudo;
 
-        // badge de categoria com cor
         if (badgeCategoria != null && txtBadgeCategoria != null)
         {
             txtBadgeCategoria.text = item.categoria.ToUpper();
@@ -218,10 +182,6 @@ public class IntelInventory : MonoBehaviour
         if (painelVazio != null) painelVazio.SetActive(false);
         intelDetailPanel.SetActive(true);
     }
-
-    // ------------------------------------------------------------------ //
-    // Helpers visuais                                                       //
-    // ------------------------------------------------------------------ //
 
     private void AtualizarTotalIntel()
     {
@@ -239,10 +199,6 @@ public class IntelInventory : MonoBehaviour
 
     private void AtualizarEstadoBotoesFiltro()
     {
-        // feedback visual de qual filtro está ativo
-        // podes ligar a cores/imagens no Inspector se quiseres highlight
-        // por agora só um log para confirmar
-        Debug.Log($"[IntelInventory] Filtro ativo: {filtroAtual}");
     }
 
     [Header("Save System")]

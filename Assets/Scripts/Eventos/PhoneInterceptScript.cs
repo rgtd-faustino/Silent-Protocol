@@ -5,6 +5,7 @@ public class PhoneInterceptScript : InteractableObject {
     [SerializeField] private PhoneCallData[] callChannels;
 
     [Header("Suspeita instantânea ao interceptar")]
+    // aumenta logo a suspeita assim que o gajo atende, para impedir que fiquem a abusar dos telefones
     private float suspicionOnUse = 0.04f;
 
     [Header("Horário activo")]
@@ -14,7 +15,7 @@ public class PhoneInterceptScript : InteractableObject {
     protected override void Awake() {
         base.Awake();
         objectName = "Telefone";
-        tooltipMessage = "E — Intercetar chamada";
+        tooltipMessage = "E - Intercetar chamada";
     }
 
     public override void Interact() {

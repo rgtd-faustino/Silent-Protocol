@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,8 +7,8 @@ public class EndingUI : MonoBehaviour
 {
 
     [Header("Painel Filho")]
-    [SerializeField] private GameObject endingPanel;         // o filho com toda a UI
-    [SerializeField] private CanvasGroup endingCanvasGroup;  // CanvasGroup só para o fade, no filho
+    [SerializeField] private GameObject endingPanel;
+    [SerializeField] private CanvasGroup endingCanvasGroup;
     [SerializeField] private float fadeInDuration = 1.2f;
     [SerializeField] private float fadeOutDuration = 0.6f;
 
@@ -34,7 +34,7 @@ public class EndingUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI txtIntelRecolhida;
     [SerializeField] private TextMeshProUGUI txtPercentagemFinal;
 
-    [Header("Câmaras")]
+    [Header("Camaras")]
     [SerializeField] private TextMeshProUGUI txtCamerasDesbloqueadas;
     [SerializeField] private TextMeshProUGUI txtHackLevel;
 
@@ -67,7 +67,7 @@ public class EndingUI : MonoBehaviour
 
     void Awake()
     {
-        endingPanel.SetActive(false); // esconde o filho — sem CanvasGroup no root, sem blocksRaycasts
+        endingPanel.SetActive(false);
     }
 
     void OnEnable() { GameEvent.OnEndingReached += HandleEnding; }
@@ -78,8 +78,9 @@ public class EndingUI : MonoBehaviour
         StartCoroutine(ShowEnding(ending));
     }
 
-    // ─── Mostrar ────────────────────────────────────────────────────────────────
 
+    // Cortamos o movimento do PlayerController e pomos o rato visível para o jogador usar o menu final
+    // A coroutine aplica um Alpha lerp no CanvasGroup filho para os visuais aparecerem calmamente sobrepostos ao jogo
     private IEnumerator ShowEnding(int ending)
     {
         PlayerController.Instance.canMoveRotate = false;
@@ -102,9 +103,6 @@ public class EndingUI : MonoBehaviour
         endingCanvasGroup.alpha = 1f;
     }
 
-    // ─── Botões do EndingPanel ───────────────────────────────────────────────────
-    // Liga ESTES métodos aos botões, não os do GameMenuManager directamente
-
     public void OnEndingNewGame()
     {
         StartCoroutine(HideThen(() => GameMenuManager.Instance.OnNewGameClicked()));
@@ -117,10 +115,9 @@ public class EndingUI : MonoBehaviour
 
     public void OnEndingQuit()
     {
-        GameMenuManager.Instance.OnQuitClicked(); // quit não precisa de fade
+        GameMenuManager.Instance.OnQuitClicked(); 
     }
 
-    // ─── Fade out + callback ─────────────────────────────────────────────────────
 
     private IEnumerator HideThen(System.Action callback)
     {
@@ -135,11 +132,11 @@ public class EndingUI : MonoBehaviour
         callback?.Invoke();
     }
 
-    // ─── Populate Stats ──────────────────────────────────────────────────────────
 
+    // Acumula a informação de todos os Managers relevantes antes de o painel ficar visível
+    // Centralizamos as chamadas aqui para o ecrã final servir de sumário geral do estado do jogo e poupar getters desnecessários entre scripts
     private void PopulateStats()
     {
-        // Dia e Tempo
         if (txtDia != null)
             txtDia.text = $"Dia {DayManager.Instance.CurrentDay} / {DayManager.TotalDays}";
 
@@ -157,7 +154,6 @@ public class EndingUI : MonoBehaviour
         if (txtCafes != null)
             txtCafes.text = $"{TimeManager.Instance.GetCoffeesTaken()} cafés";
 
-        // Suspeita
         if (txtSuspeita != null || suspeitaBar != null)
         {
             float ratio = SuspicionManager.Instance.GetSuspicionRatio();
@@ -177,7 +173,6 @@ public class EndingUI : MonoBehaviour
             };
         }
 
-        // Company Awareness
         if (txtCompanyAwareness != null || awarenessBar != null)
         {
             float ratio = DocumentManager.Instance.GetCompanyAwareness();
@@ -185,14 +180,12 @@ public class EndingUI : MonoBehaviour
             if (awarenessBar != null) awarenessBar.value = ratio;
         }
 
-        // Intel
         if (txtIntelRecolhida != null)
             txtIntelRecolhida.text = $"{IntelInventory.Instance.GetTotalIntel()} intel";
 
         if (txtPercentagemFinal != null)
             txtPercentagemFinal.text = $"{IntelInventory.Instance.GetTotalPercentage():F0}%";
 
-        // Câmaras
         if (txtCamerasDesbloqueadas != null)
         {
             bool[] unlocked = CameraSystem.Instance.cameraUnlocked;
@@ -205,7 +198,6 @@ public class EndingUI : MonoBehaviour
         if (txtHackLevel != null)
             txtHackLevel.text = $"nível hack {CameraHackPuzzle.HackLevel}";
 
-        // Pisos
         if (txtPisoAtual != null)
             txtPisoAtual.text = $"piso atual: {GameManager.Instance.currentFloor}";
 
@@ -218,11 +210,9 @@ public class EndingUI : MonoBehaviour
             txtPisosDesbloqueados.text = $"{count} / {total}";
         }
 
-        // Objetivo Final
         if (txtObjFinal != null)
             txtObjFinal.text = DayManager.Instance.finalObjectiveCompleted ? "Concluído" : "Falhado";
 
-        // Stats do Jogador
         if (PlayerStats.Instance == null) return;
         if (txtForca != null) txtForca.text = PlayerStats.Instance.GetForca().ToString();
         if (txtPercecao != null) txtPercecao.text = PlayerStats.Instance.GetPercecao().ToString();

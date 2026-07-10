@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,16 +18,15 @@ public class UIManager : MonoBehaviour {
 
     [Header("Sleep")]
     public GameObject sleepUI;
-    public GameObject sleepInputPanel;       // painel com input field e botões confirmar/cancelar
-    public GameObject sleepAnimPanel;        // painel do relógio radial — só aparece na animação
+    public GameObject sleepInputPanel;
+    public GameObject sleepAnimPanel;
     public TMP_InputField sleepHoursInput;
     public TextMeshProUGUI sleepHoursTextError;
-    public Image sleepRadialClock;           // Image com Fill Type=Filled, Radial 360, anti-clockwise
+    public Image sleepRadialClock;
     public TextMeshProUGUI sleepCountdownText;
     private BedScript currentBed;
 
     [Header("PC")]
-    // botão de imprimir no ecrã do computador — só deve estar ativo quando a task de impressão existir
     [SerializeField] private Button printButton;
 
     private int[] currentCodeTry = new int[5];
@@ -38,32 +37,29 @@ public class UIManager : MonoBehaviour {
     void Awake() {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-
     }
 
     void Start() {
         Cursor.lockState = CursorLockMode.Locked;
     }
 
+    // O reset dos inputs é necessário porque quando bloqueamos o rato de novo o Unity envia um pico de delta para o Input, o que faz a câmara do PlayerController saltar
     public void ChangeCursorState(CursorLockMode mode) {
         Cursor.lockState = mode;
         Cursor.visible = (mode == CursorLockMode.None);
-        Input.ResetInputAxes(); // previne spike de rato no frame da transição
-
+        Input.ResetInputAxes();
     }
 
-    // atualiza os controlos do PC para refletir o estado atual do jogo
-    // chamado pelo PCInteractable quando o PC é aberto
+    // Verificamos no TaskManager se a tarefa de imprimir está ativa para decidir se o botão no ecrã do PC funciona
     public void RefreshPCInterface() {
         if (printButton != null)
             printButton.interactable = TaskManager.Instance.HasActiveMorningTask("Imprimir documento");
     }
 
-    // ---- Sleep ----
-
     public void ShowSleepUI() => sleepUI.SetActive(true);
     public void HideSleepUI() => sleepUI.SetActive(false);
 
+    // Congelamos a rotação e o movimento do PlayerController para garantir que o jogador não anda a passear enquanto escolhe as horas
     public void OpenSleepView(BedScript bed) {
         currentBed = bed;
 
@@ -80,9 +76,11 @@ public class UIManager : MonoBehaviour {
         PlayerController.Instance.canMoveRotate = false;
     }
 
+    // Validamos o input de texto e calculamos as horas de sono
+    // Passamos os dados para o TimeManager processar o avanço no tempo global
     public void ConfirmSleep() {
         string raw = sleepHoursInput.text.Trim();
-        string[] parts = raw.Split(':'); // o jogador introduz sempre no formato HH:MM
+        string[] parts = raw.Split(':');
 
         if (parts.Length != 2 || !int.TryParse(parts[0], out int h) || !int.TryParse(parts[1], out int m)) {
             ShowSleepError("Formato inválido. Usa HH:MM (ex: 07:30)");
@@ -97,7 +95,6 @@ public class UIManager : MonoBehaviour {
         float currentTimeInHours = TimeManager.Instance.GetCurrentTimeInHours();
         float wakeUpTimeInHours = h + m / 60f;
 
-        // se a hora de acordar já passou hoje, assume-se que é amanhã
         if (wakeUpTimeInHours <= currentTimeInHours)
             wakeUpTimeInHours += 24f;
 
@@ -129,18 +126,19 @@ public class UIManager : MonoBehaviour {
         PlayerController.Instance.canMoveRotate = true;
     }
 
+    // Fazemos a animação do relógio radial antes de notificar a cama e o TimeManager
+    // Isto dá uma transição suave em vez de saltar de imediato para o dia seguinte
     private IEnumerator SleepSequence(float hours, float wakeUpTimeInHours) {
         sleepInputPanel.SetActive(false);
         sleepAnimPanel.SetActive(true);
 
-        float duration = 3f; // duração real da animação em segundos
+        float duration = 3f;
         float elapsed = 0f;
 
         while (elapsed < duration) {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
-            // relógio esvazia anti-horário: fillAmount de 1 -> 0
             sleepRadialClock.fillAmount = 1f - t;
 
             if (sleepCountdownText != null) {
@@ -159,7 +157,6 @@ public class UIManager : MonoBehaviour {
 
         yield return new WaitForSeconds(0.5f);
 
-        // notifica a cama (hook para sons/animações futuras) e aplica o sono no TimeManager
         currentBed?.OnSleepConfirmed(hours);
         TimeManager.Instance.Sleep(wakeUpTimeInHours);
 
@@ -169,17 +166,12 @@ public class UIManager : MonoBehaviour {
         currentBed = null;
     }
 
-    // ---- Tooltip ----
-
     public void ShowTooltip(string mensagem = "E para interagir")
     {
         tooltipObject.SetActive(true);
-        // se tiveres um TextMeshPro no tooltip:
         tooltipObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = mensagem;
     }
     public void HideTooltip() => tooltipObject.SetActive(false);
-
-    // ---- Lock ----
 
     public void OpenLockView(LockScript lockScript) {
         currentLock = lockScript;
@@ -196,11 +188,12 @@ public class UIManager : MonoBehaviour {
 
     public bool IsLockViewOpen() => openLockView.activeSelf;
 
+    // Lida com o input do teclado numérico e comunica com o LockScript
+    // Passamos -1 para cancelar e -2 para apagar o último dígito
     public void OnDigitPressed(int digit) {
         if (currentLock == null) return;
 
         if (digit == -1) {
-            // botão de sair — fecha a view sem tentar o código
             currentLock.SyncViewClosed();
             CloseLockView();
             ChangeCursorState(CursorLockMode.Locked);
@@ -209,7 +202,6 @@ public class UIManager : MonoBehaviour {
         }
 
         if (digit == -2) {
-            // botão de apagar — remove o último dígito introduzido
             if (currentIndexDigit > 0) {
                 currentIndexDigit--;
                 UpdateLockDisplay();
@@ -276,8 +268,7 @@ public class UIManager : MonoBehaviour {
         currentCodeTry = new int[5];
     }
 
-
-    // o botão de imprimir no computador só deve funcionar quando a task está ativa
+    // Avança a task no TaskManager quando o jogador clica em imprimir
     public void OnPrinterPrintButton() {
         if (!TaskManager.Instance.HasActiveMorningTask("Imprimir documento")) 
             return;

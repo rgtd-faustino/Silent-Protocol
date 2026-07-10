@@ -2,16 +2,13 @@ using UnityEngine;
 
 public class DocumentPickup : InteractableObject
 {
-
-    // referncia ao ScriptableObject do documento > passada pelo ImpressoraScript no Instantiate
-    //  o que nos diz para que departamento deve ir e quais os pesos narrativos
+    // O ImpressoraScript injeta isto através do Initialize. Tem a info do departamento e os pesos das escolhas da narrativa.
     private DocumentTaskData data;
 
-    // flag que impede que o jogador apanhe o documento se j tiver um na mo (cada dia s h um documento para arquivar)
+    // Uma flag simples para evitar bugs de duplo clique, garantindo que não apanhamos o papel duas vezes seguidas.
     private bool isPickedUp = false;
 
-
-    // chamado pela ImpressoraScript imediatamente aps o Instantiate
+    // O ImpressoraScript chama isto logo após o Instantiate, antes de qualquer update. Serve para ligar o modelo físico ao ScriptableObject do dia atual.
     public void Initialize(DocumentTaskData documentData)
     {
         data = documentData;
@@ -19,13 +16,13 @@ public class DocumentPickup : InteractableObject
         tooltipMessage = $"E para apanhar {data.documentTitle}";
     }
 
-
+    // Faz a ponte com o TaskManager para fechar a task de impressão. O ato de imprimir já foi processado na PrinterAppUI, portanto aqui apenas sinalizamos que o jogador tem o papel na mão.
     public override void Interact()
     {
         if (isPickedUp) return;
         if (PlayerController.Instance.heldDocument != null)
         {
-            Debug.Log("[DocumentPickup] J tens um documento na mo.");
+            Debug.Log("[DocumentPickup] Já tens um documento na mão.");
             return;
         }
 
@@ -35,6 +32,7 @@ public class DocumentPickup : InteractableObject
 
         isPickedUp = true;
         PlayerController.Instance.PickupDocument(data);
+        
         TaskManager.Instance.CompleteTask("Imprimir documento", true);
         gameObject.SetActive(false);
         Debug.Log($"[PlayerController] Apanhei: '{data.documentTitle}' -> departamento {data.correctDepartment}");

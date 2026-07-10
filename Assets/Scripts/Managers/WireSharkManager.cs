@@ -1,7 +1,3 @@
-// WiresharkManager.cs
-// Lgica principal da app Wireshark
-// Adiciona ao mesmo GameObject que o WiresharkUI e o PacketGenerator
-
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,16 +6,15 @@ public class WiresharkManager : MonoBehaviour
 {
     private WiresharkUI ui;
 
-    // pacotes ao vivo (stream atual)
+    // pacotes visíveis no stream ao vivo - inseridos no início para simular a chegada de novos pacotes no topo da lista
     private List<PacketData> livePackets = new List<PacketData>();
 
-    // histrico: conversaId -> lista de pacotes
+    // histório organizado por conversaId -> lista de pacotes - construído pelo PacketGenerator no Start
     private Dictionary<string, List<PacketData>> history = new Dictionary<string, List<PacketData>>();
 
-    // pacote atualmente selecionado
     private PacketData selectedPacket = null;
 
-    // mximo de pacotes visveis no stream ao vivo
+    // limite do stream ao vivo - manter 50 pacotes é suficiente para a ilusão de atividade sem pesar na memória
     private const int MaxLivePackets = 50;
 
     void Awake()
@@ -27,33 +22,33 @@ public class WiresharkManager : MonoBehaviour
         ui = GetComponent<WiresharkUI>();
     }
 
-    // chamado pelo PacketGenerator quando um novo pacote chega
+    // chamado pelo PacketGenerator quando um novo pacote chega - insere no início para que os mais recentes fiquem no topo
     public void ReceivePacket(PacketData pkt)
     {
         livePackets.Insert(0, pkt);
 
-        // limita o histrico vivo
         if (livePackets.Count > MaxLivePackets)
             livePackets.RemoveAt(livePackets.Count - 1);
 
         ui.AddPacketRow(pkt);
     }
 
-    // chamado pelo PacketGenerator no Start com o histrico pr-construdo
+    // chamado pelo PacketGenerator no Start com o histórico pré-construído - passa ao WiresharkUI para popular o painel de histórico
     public void SetHistory(Dictionary<string, List<PacketData>> hist)
     {
         history = hist;
         ui.RefreshHistory(history);
     }
 
-    // chamado pelo PacketRowUI quando o jogador clica numa linha
+    // chamado pelo PacketRowUI quando o jogador clica numa linha - atualiza o painel de detalhe
     public void SelectPacket(PacketData pkt)
     {
         selectedPacket = pkt;
         ui.ShowPacketDetail(pkt);
     }
 
-    // chamado pelo boto COPIAR PACOTE
+    // copia o pacote selecionado para o GameClipboard para que o jogador o possa colar no TerminalManager -
+    // GameClipboard é um estático que persiste entre cenas sem MonoBehaviour
     public void CopySelectedPacket()
     {
         if (selectedPacket == null)
@@ -68,21 +63,21 @@ public class WiresharkManager : MonoBehaviour
         Debug.Log($"[WiresharkManager] Pacote {selectedPacket.PacketId} copiado para GameClipboard.");
     }
 
-    // chamado pelo boto PEDIR ACK numa conversa do histrico
-    // devolve todos os pacotes dessa conversa e aplica suspeita
+    // chamado pelo botão PEDIR ACK numa conversa do histórico -
+    // aceder a dados históricos de outras conversas é suspeito, por isso aumenta a suspeita temporariamente -
+    // o nível aleatório entre 1 e 2 representa que o sistema pode ou não notar o acesso
     public List<PacketData> RequestHistoryConversation(string conversationId)
     {
         if (!history.ContainsKey(conversationId))
             return new List<PacketData>();
 
-        // aplica suspeita  usa o SuspicionManager existente
         float suspicionLevel = Random.Range(1f, 2f);
         SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel, GetInstanceID(), SuspicionManager.SuspicionSource.TerminalAccess);
 
-        // para a suspeita aps um pequeno delay  o ACK  um evento pontual
+        // o ACK é um evento pontual - após 2 segundos, a fonte de suspeita é removida e o decay começa
         StartCoroutine(StopSuspicionAfterDelay(2f));
 
-        Debug.Log($"[WiresharkManager] ACK pedido para {conversationId}  suspeita aumentada.");
+        Debug.Log($"[WiresharkManager] ACK pedido para {conversationId} - suspeita aumentada.");
 
         return history[conversationId];
     }

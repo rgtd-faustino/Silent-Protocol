@@ -1,7 +1,4 @@
 using UnityEngine;
-
-// IntelReadUI.cs
-using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -12,12 +9,12 @@ public class IntelReadUI : MonoBehaviour
     [Header("Painel raiz")]
     public GameObject painelLeitura;
 
-    [Header("Contedo")]
+    [Header("Conteudo")]
     public TextMeshProUGUI txtTitulo;
     public TextMeshProUGUI txtCategoria;
     public TextMeshProUGUI txtConteudo;
 
-    [Header("Botes")]
+    [Header("Botoes")]
     public Button btnGuardar;
     public Button btnIgnorar;
 
@@ -32,9 +29,8 @@ public class IntelReadUI : MonoBehaviour
         painelLeitura.SetActive(false);
     }
 
-
-    /// Abre o painel com o item dado.
-    /// callbackGuardar e callbackIgnorar so chamados quando o jogador decide.
+    // Abre o painel e tranca o jogo todo para o jogador decidir o que fazer com a informação
+    // Bloqueamos a câmara e a visão dos guardas (blockDetection) para evitar que o jogador seja apanhado a meio da leitura
     public void AbrirLeitura(IntelItem item, System.Action callbackGuardar, System.Action callbackIgnorar)
     {
         itemAtual = item;
@@ -47,7 +43,7 @@ public class IntelReadUI : MonoBehaviour
 
         painelLeitura.SetActive(true);
 
-        CameraScript.Instance.blockDetection = true;  // <-- bloqueia deteo
+        CameraScript.Instance.blockDetection = true;
         UIManager.Instance.HideTooltip();
         UIManager.Instance.ChangeCursorState(CursorLockMode.None);
         PlayerController.Instance.canMoveRotate = false;
@@ -62,10 +58,11 @@ public class IntelReadUI : MonoBehaviour
     {
         painelLeitura.SetActive(false);
 
-        CameraScript.Instance.blockDetection = false;  // <-- restaura deteo
+        CameraScript.Instance.blockDetection = false;
         UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
         PlayerController.Instance.canMoveRotate = true;
     }
+    
     private void Guardar()
     {
         IntelInventory.Instance.AdicionarIntel(itemAtual);
@@ -78,6 +75,4 @@ public class IntelReadUI : MonoBehaviour
         Fechar();
         onIgnorar?.Invoke();
     }
-
-    
 }

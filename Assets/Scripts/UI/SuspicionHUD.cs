@@ -6,22 +6,21 @@ using TMPro;
 public class SuspicionHUD : MonoBehaviour
 {
     [Header("Anel radial")]
-    [SerializeField] private Image ringImage; // crculo que enche conforme a suspeita
+    [SerializeField] private Image ringImage; 
 
     [Header("Olho")]
-    [SerializeField] private RectTransform irisRect; // ris (parte colorida)
-    [SerializeField] private Image irisImage; // para mudar a cor da ris
-    [SerializeField] private RectTransform eyeWhiteRect; // parte branca do olho
+    [SerializeField] private RectTransform irisRect; 
+    [SerializeField] private Image irisImage; 
+    [SerializeField] private RectTransform eyeWhiteRect; 
 
     [Header("Texto")]
-    [SerializeField] private TextMeshProUGUI stateLabel; // texto principal (estado)
-    [SerializeField] private TextMeshProUGUI subLabel; // texto secundrio
+    [SerializeField] private TextMeshProUGUI stateLabel; 
+    [SerializeField] private TextMeshProUGUI subLabel; 
 
     [Header("CanvasGroup")]
-    [SerializeField] private CanvasGroup canvasGroup; // usado para fade in/out do HUD
+    [SerializeField] private CanvasGroup canvasGroup; 
 
     [Header("Cores")]
-    // cores para cada estado de suspeita
     [SerializeField] private Color colorNone = new Color(0.53f, 0.53f, 0.50f);
     [SerializeField] private Color colorAttention = new Color(0.73f, 0.46f, 0.09f);
     [SerializeField] private Color colorInvestigation = new Color(0.85f, 0.35f, 0.19f);
@@ -30,19 +29,19 @@ public class SuspicionHUD : MonoBehaviour
     private Coroutine pulseCoroutine;
     private Coroutine fadeCoroutine;
 
-    private Vector3 baseEyeScale; // tamanho inicial do olho
-    private Vector3 baseIrisScale; // tamanho inicial da ris
+    private Vector3 baseEyeScale; 
+    private Vector3 baseIrisScale; 
 
-    private float currentRatio; // valor suavizado da suspeita (0-1)
-    private float velocity; // usado pelo SmoothDamp
+    // O currentRatio é calculado com SmoothDamp a partir do valor real no SuspicionManager
+    // Isto garante que o anel visual cresce de forma fluida mesmo se a suspeita der saltos grandes
+    private float currentRatio; 
+    private float velocity; 
 
-    // at onde o olho e a ris podem crescer
     float eyeMultiplier = 2.0f;
     float irisMultiplier = 1.6f;
 
     void Start()
     {
-        // guardar o tamanho original para depois escalar a partir daqui
         baseEyeScale = eyeWhiteRect.localScale;
         baseIrisScale = irisRect.localScale;
         canvasGroup.alpha = 0.25f;
@@ -50,9 +49,9 @@ public class SuspicionHUD : MonoBehaviour
         HandleStateChanged(SuspicionManager.Instance.GetCurrentState());
     }
 
+    // Usamos os eventos globais para evitar que o SuspicionManager dependa do UI
     void OnEnable()
     {
-        // subscreve ao evento global de mudana de estado
         GameEvent.OnSuspicionStateChanged += HandleStateChanged;
     }
 
@@ -61,6 +60,8 @@ public class SuspicionHUD : MonoBehaviour
         GameEvent.OnSuspicionStateChanged -= HandleStateChanged;
     }
 
+    // Atualizamos o UI com a interpolação exponencial (SmoothStep elevado a 1.3)
+    // Fizemos assim para a pupila só começar a dilatar a sério quando o perigo já é alto
     void Update() {
         float targetRatio = SuspicionManager.Instance.GetSuspicionRatio();
         currentRatio = Mathf.SmoothDamp(currentRatio, targetRatio, ref velocity, 0.2f);
@@ -76,8 +77,6 @@ public class SuspicionHUD : MonoBehaviour
         eyeWhiteRect.localScale = baseEyeScale * eyeScaleFactor;
         irisRect.localScale = baseIrisScale * irisScaleFactor;
 
-        // alpha do HUD acompanha o ratio mesmo no estado None
-        // mnimo 0.25, mximo 1.0  o jogador v sempre algo a mexer
         canvasGroup.alpha = Mathf.Max(canvasGroup.alpha, Mathf.Lerp(0.25f, 1f, currentRatio));
 
         if (currentRatio > 0.6f) {
@@ -86,7 +85,6 @@ public class SuspicionHUD : MonoBehaviour
         }
     }
 
-    // (j no est a ser usado, ficou aqui se for preciso mais tarde)
     float EaseOutBack(float x)
     {
         float c1 = 1.70158f;
@@ -95,14 +93,12 @@ public class SuspicionHUD : MonoBehaviour
         return 1 + c3 * Mathf.Pow(x - 1, 3) + c1 * Mathf.Pow(x - 1, 2);
     }
 
-    // -------------------------------------------------------
-
+    // Reage à mudança de estado decidida pelo SuspicionManager
+    // Altera as cores e os textos de acordo com a gravidade da situação
     private void HandleStateChanged(SuspicionManager.SuspicionState newState)
     {
-        // para o pulso anterior se existir
         if (pulseCoroutine != null) StopCoroutine(pulseCoroutine);
 
-        // muda visuals conforme o estado
         switch (newState)
         {
             case SuspicionManager.SuspicionState.None:
@@ -111,17 +107,17 @@ public class SuspicionHUD : MonoBehaviour
                 break;
 
             case SuspicionManager.SuspicionState.Attention:
-                ApplyVisuals(colorAttention, "ATENO", "NPCs observam-te", false);
+                ApplyVisuals(colorAttention, "ATENÇÃO", "NPCs observam-te", false);
                 SetFade(1f, 0.4f);
                 break;
 
             case SuspicionManager.SuspicionState.Investigation:
-                ApplyVisuals(colorInvestigation, "INVESTIGAO", "Guardas em alerta", true);
+                ApplyVisuals(colorInvestigation, "INVESTIGAÇÃO", "Guardas em alerta", true);
                 SetFade(1f, 0.3f);
                 break;
 
             case SuspicionManager.SuspicionState.Expulsion:
-                ApplyVisuals(colorExpulsion, "EXPULSO", "GAME OVER", true);
+                ApplyVisuals(colorExpulsion, "EXPULSÃO", "GAME OVER", true);
                 SetFade(1f, 0.2f);
                 break;
         }
@@ -129,21 +125,17 @@ public class SuspicionHUD : MonoBehaviour
 
     private void ApplyVisuals(Color c, string label, string sub, bool pulse)
     {
-        // muda cor do anel e da ris
         ringImage.color = c;
         irisImage.color = c;
 
-        // atualiza texto
         stateLabel.text = label;
         stateLabel.color = c;
         subLabel.text = sub;
 
-        // comea o efeito de pulso se necessrio
         if (pulse)
             pulseCoroutine = StartCoroutine(PulseRoutine(c));
     }
 
-    // fade do HUD
     private void SetFade(float target, float duration)
     {
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
@@ -165,7 +157,6 @@ public class SuspicionHUD : MonoBehaviour
         canvasGroup.alpha = target;
     }
 
-    // efeito de "piscar" do anel
     private IEnumerator PulseRoutine(Color baseColor)
     {
         Color dim = new Color(baseColor.r, baseColor.g, baseColor.b, 0.35f);

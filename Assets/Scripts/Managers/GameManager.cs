@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
     public int currentFloor = 0;
     public const int TotalDays = 5;
 
-    // pisos desbloqueados por ndice (0=receo, 1=executivo, 2=servidores, 3=sutes, 4=CEO)
+    // optámos por um array de booleanos indexado diretamente pelo número do piso, assim poupamos a complexidade de um dicionário, até porque são poucos andares
     private bool[] floorUnlocked = new bool[5];
 
     [Header("Final do Jogo")]
@@ -24,15 +24,13 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-
     }
 
     void Start()
     {
-        // receção, andar executivo e suítes acessíveis desde o início
         UnlockFloor(0);
         UnlockFloor(1);
-        UnlockFloor(3); // suítes (floorNumber 4 → índice 3)
+        UnlockFloor(3);
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
@@ -46,16 +44,14 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // TODO: remover quando existir um gatilho real de fim de jogo — por agora, Z força o final para testes
         if (Input.GetKeyDown(debugEndingKey))
             TriggerEnding();
     }
 
+    // o NPCManager e o player dependem disto para saber se os cálculos de raycast fazem sentido para a posição atual, senão consumíamos recursos noutros pisos
     public void SetCurrentFloor(int floorNumber)
     {
         currentFloor = floorNumber;
-        // guarda nula: se o NPCManager ainda não existir (ou não suportar este índice)
-        // a coroutine DoTravel não morre a meio e o teleporte/fecho do UI acontece na mesma
         if (NPCManager.Instance != null)
             NPCManager.Instance.SetActiveFloor(floorNumber);
         Debug.Log($"[GameManager] Jogador moveu-se para F{floorNumber}.");
@@ -67,7 +63,6 @@ public class GameManager : MonoBehaviour
 
         if (currentDay >= TotalDays)
         {
-            // o jogador chegou ao fim — decide o final consoante a percentagem de intel recolhida
             Debug.Log("[GameManager] Último dia concluído.");
             TriggerEnding();
             return;
@@ -78,10 +73,8 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Dia {currentDay} começa.");
     }
 
-    /// <summary>
-    /// Decide e dispara o final do jogo com base na percentagem total de intel recolhida.
-    /// ending 1 = final bom (percentagem >= endingThreshold), ending 2 = final mau.
-    /// </summary>
+    // esta lógica agrupa o esforço da semana inteira e avalia-o em relação ao limiar estipulado no inspector,
+    // definindo qual o estado de narrativa a mandar para a UI final
     private void TriggerEnding()
     {
         if (endingTriggered) return;
@@ -90,16 +83,14 @@ public class GameManager : MonoBehaviour
         float percentagem = IntelInventory.Instance.GetTotalPercentage();
         int ending = percentagem >= endingThreshold ? 1 : 2;
 
-        Debug.Log($"[GameManager] Final acionado — {percentagem:F0}% (limite {endingThreshold}%) -> ending {ending}.");
+        Debug.Log($"[GameManager] Final acionado - {percentagem:F0}% (limite {endingThreshold}%) -> ending {ending}.");
         GameEvent.EndingReached(ending);
     }
 
     private void HandleGameOver()
     {
         Debug.Log("[GameManager] Game Over.");
-        // toca o som de morte ao entrar no Game Over
         SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.die);
-        // carregar cena de game over
     }
 
     public void UnlockFloor(int index)
@@ -117,12 +108,10 @@ public class GameManager : MonoBehaviour
 
     private void SaveProgress()
     {
-        // integrar com Unity SaveSystem ou PlayerPrefs quando necessário
         Debug.Log($"[GameManager] Progresso guardado (dia {currentDay}).");
     }
 
-    // --- sistema de contribuições para finais ---
-    // índice 0 = Denúncia, 1 = Extorsão, 2 = Lealdade
+    // listas separadas para cada fação final. guardamos o ID do source (como um documento específico) para o jogador não poder farmar a mesma decisão várias vezes
     private List<string>[] endingContributions = new List<string>[3] {
         new List<string>(), new List<string>(), new List<string>()
     };
@@ -143,7 +132,6 @@ public class GameManager : MonoBehaviour
         return endingContributions[endingIndex].Count;
     }
 
-    // --- getters e setters para o SaveManager ---
     public bool[] GetFloorsUnlocked() { return (bool[])floorUnlocked.Clone(); }
 
     public void SetFloorsUnlocked(bool[] floors)

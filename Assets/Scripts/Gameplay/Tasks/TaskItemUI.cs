@@ -7,6 +7,7 @@ public class TaskItemUI : MonoBehaviour {
     private string taskName;
     private string deadline;
 
+    // O TaskManager invoca isto quando a task sai da queue e fica visível ao jogador. A string do deadline já vem bem formatada de lá.
     public void SetTask(string name, string deadlineStr) {
         taskName = name;
         deadline = deadlineStr;
@@ -21,6 +22,7 @@ public class TaskItemUI : MonoBehaviour {
         Render(false, true);
     }
 
+    // Usamos as tags de rich text do TextMeshPro para alternar estados visualmente sem ter de instanciar objetos diferentes. Completo fica apenas riscado, falhado fica a vermelho.
     private void Render(bool completed, bool failed) {
         string text = $"{taskName}  <size=75%><color=#AAAAAA>{deadline}</color></size>";
 

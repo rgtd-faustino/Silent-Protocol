@@ -5,20 +5,16 @@ public class DocumentTaskData : ScriptableObject {
 
     public string documentTitle;
 
+    // Usamos índices como {0} e {1} no texto para marcar as lacunas. O script WriteDocumentUI vai processar e injetar tags de rich text do TextMeshPro por cima destes marcadores.
     [TextArea(4, 10)]
     public string bodyText;
-    // usa {0}, {1}, {2} para marcar lacunas
-    // ex: "A reunio foi presidida por {0} e durou {1} minutos."
 
     public BlankSlot[] blanks;
 
-    // departamento correto para este documento > o jogador tem de deduzir com base no contedo
-    // no  mostrado diretamente na UI para manter a tenso de "ser que estou a arquivar no stio certo?"
+    // Ocultamos esta variável da interface para manter o suspense no gameplay. O ArchiveScript consulta isto quando o jogador larga o papel, para validar se acertou no armário.
     public ArchiveScript.DepartmentType correctDepartment;
 
-    // ID do NPC especifico a quem este documento deve ser entregue
-    // so usado quando a task ativa e "Entregar documento" (nao usado no Arquivar documento)
-    // tem de corresponder ao campo "Npc Id" configurado no NPCScript do destinatario correto
+    // Só serve para a tarefa de entrega a NPCs. Tem de bater certo com a string configurada no NPCScript alvo.
     public string correctRecipientID;
 
     [System.Serializable]
@@ -27,12 +23,13 @@ public class DocumentTaskData : ScriptableObject {
         public string correctAnswer;
         public string[] wrongOptions;
 
+        // O DocumentManager vai somando estes valores em background. As escolhas aqui feitas determinam qual dos três finais o jogador desbloqueia, mas não interferem na conclusão imediata da tarefa.
         [Header("Peso narrativo")]
         public float weightDenuncia;
         public float weightExtorsao;
         public float weightLealdade;
 
-        // peso que vai para o Company Awareness ao ser arquivado
+        // Controla o aumento da barra de alerta corporativo. Se pormos valores altos, significa que o documento compromete seriamente a segurança da empresa.
         [Header("Impacto no Company Awareness")]
         [Range(0f, 1f)] public float awarenessWeight;
     }

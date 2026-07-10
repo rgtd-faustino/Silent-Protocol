@@ -9,15 +9,12 @@ public class PlayerController : MonoBehaviour {
     private float CROUCH_SPEED = 4f;
     private float RUN_SPEED = 9f;
 
-    // documento fÃ­sico que o jogador estÃ¡ a segurar (apanhado na impressora, para arquivar)
     [HideInInspector] public DocumentTaskData heldDocument = null;
     [HideInInspector] public bool hasFlashlight = false;
 
-    // lista de cartÃµes que o jogador jÃ¡ coletou
     [HideInInspector] public List<string> unlockedCardIDs = new List<string>();
 
     public void AddCardCredential(string cardID) {
-        // sÃ³ adiciona se nÃ£o tiver o cartÃ£o
         if (!unlockedCardIDs.Contains(cardID)) {
             unlockedCardIDs.Add(cardID);
         }
@@ -27,34 +24,27 @@ public class PlayerController : MonoBehaviour {
         return unlockedCardIDs.Contains(cardID);
     }
 
-    // para poder rodar o jogador com o rato
     public Transform cameraTransform;
 
-    // qualquer sistema de UI (lock, PC, cama) mete isto a false quando abre e volta a true quando fecha
+    // Colocamos isto a false a partir dos scripts de UI quando abrimos o PC ou tentamos abrir uma fechadura, bloqueando assim o input do jogador. Os mesmos scripts repõem a variável a true no fim.
     public bool canMoveRotate = true;
 
-    // inSusPlace indica se o jogador estÃ¡ dentro de um trigger marcado como zona suspeita (tag "SusPlace")
-    // Ã© lido pelo NPCScript para decidir se gera suspeita ao ver o jogador
+    // Fica a true quando o jogador pisa num trigger de uma zona restrita. O NPCScript acede diretamente a isto para saber se deve aumentar a barra de suspeita dos guardas.
     [HideInInspector] public bool inSusPlace = false;
 
-    // raio dentro do qual guardas conseguem ouvir o jogador consoante o tipo de movimento.
-    // Crouching -> raio menor; Running -> raio maior.
-    // NPCScript consulta GetNoiseRadius() e IsPlayerMoving() para decidir se ouve o jogador.
     [SerializeField] private float normalNoiseRadius = 5f;
     [SerializeField] private float crouchNoiseRadius = 2f;
-    [SerializeField] private float runNoiseRadius = 10f;  // correr faz muito mais barulho
+    [SerializeField] private float runNoiseRadius = 10f;
 
     private bool isCrouching = false;
-    private bool isRunning = false;   // verdadeiro enquanto Shift + movimento
+    private bool isRunning = false;
 
     private CharacterController cc;
     private CameraScript camScript;
     private Animator animator;
 
-    // o CharacterController nÃ£o aplica fÃ­sica sozinho.
     private float yVelocity = 0f;
     private float gravity = -9.81f;
-
 
     void Awake() {
         if (Instance != null && Instance != this) {
@@ -68,25 +58,21 @@ public class PlayerController : MonoBehaviour {
         camScript = cameraTransform.GetComponent<CameraScript>();
         animator = GetComponent<Animator>();
 
-        // subscreve o evento de inÃ­cio de noite para poder reagir
-        // (ex: ligar automaticamente a lanterna, mostrar HUD da bateria).
+        // Registamos o evento para saber quando a noite começa e ativar mecânicas específicas, limpamos a subscrição no OnDestroy.
         GameEvent.OnNightStarted += OnNightStarted;
 
-        // Atributo ForÃ§a: Aumenta a velocidade mÃ¡xima de corrida
+        // Fomos buscar a Força ao PlayerStats para calcularmos logo no início um pequeno bónus na velocidade máxima de corrida.
         if (PlayerStats.Instance != null) {
             RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
         }
     }
 
     void OnDestroy() {
-        // desinscrever Ã© obrigatÃ³rio para evitar que o evento tente chamar um mÃ©todo num objeto que jÃ¡ foi destruÃ­do
         GameEvent.OnNightStarted -= OnNightStarted;
     }
 
-
     void Update()
     {
-        // Tab funciona sempre (fora do canMoveRotate)
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             if (EmailUI.AlgumEmailAberto)
@@ -107,9 +93,7 @@ public class PlayerController : MonoBehaviour {
             TimeManager.Instance.Coffee();
     }
 
-
-
-    // correr só é possível de pé e em movimento — agachado tem prioridade
+    // Bloqueamos a corrida se o jogador estiver agachado. Comunicamos com o TutorialManager para dar o passo como concluído se estiver na fase certa.
     private void HandleRunning() {
         bool wasRunning = isRunning;
         isRunning = !isCrouching && Input.GetKey(KeyCode.LeftShift) && IsPlayerMoving();
@@ -121,15 +105,12 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-
-    // chamado pelo DocumentPickup quando o jogador interage com o documento
     public void PickupDocument(DocumentTaskData data) {
         heldDocument = data;
         SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.apanharPapel);
     }
 
-
-    // GetAxisRaw devolve -1, 0 ou 1 (sem suavizaÃ§Ã£o), o que dÃ¡ resposta imediata e Ã© mais adequado para jogos de aÃ§Ã£o/stealth
+    // Usámos GetAxisRaw em vez de GetAxis para anularmos a aceleração nativa do Unity. Dá uma sensação muito mais responsiva nos controlos de movimento.
     private void HandleMovement() {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
@@ -138,20 +119,18 @@ public class PlayerController : MonoBehaviour {
         float speed = isCrouching ? CROUCH_SPEED : (isRunning ? RUN_SPEED : NORMAL_SPEED);
         cc.Move(speed * Time.deltaTime * move);
 
-        // passa os valores ao Animator para que as animaÃ§Ãµes de andar/correr/idle correspondam Ã  direÃ§Ã£o real do movimento
         float animSpeed = isRunning ? 2f : 1f;
         animator.SetFloat("X", x * animSpeed, 0.1f, Time.deltaTime);
         animator.SetFloat("Z", z * animSpeed, 0.1f, Time.deltaTime);
     }
 
-    // sÃ³ rotaÃ§Ã£o horizontal porque o eixo vertical (olhar para cima/baixo) Ã© tratado no CameraScript
+    // Tratamos apenas da rotação horizontal. O olhar vertical ficou isolado no CameraScript para o modelo do jogador não inclinar.
     private void HandleRotation() {
         float mouseX = Input.GetAxis("Mouse X") * camScript.mouseSensitivity * Time.deltaTime;
         transform.Rotate(Vector3.up * mouseX);
     }
 
-    // a altura e centro do CharacterController mudam com o movimento para que a hitbox corresponda visualmente Ã  postura da personagem
-    // os valores sÃ£o diferentes consoante a direÃ§Ã£o do movimento porque a animaÃ§Ã£o de agachamento lateral tem altura diferente da frontal
+    // Tivemos de adaptar a altura e o centro do collider dependendo da pose da animação para garantir que a hitbox física bate certo com a malha 3D. Os valores foram definidos empiricamente.
     private void HandleCrouch() {
         if (Input.GetKeyDown(KeyCode.LeftControl)) {
             if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_crouch")) {
@@ -183,14 +162,11 @@ public class PlayerController : MonoBehaviour {
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
     }
 
-    // chamado quando a noite comeÃ§a (via GameEvent), reservado para HUD da bateria, iluminaÃ§Ã£o, etc.
     private void OnNightStarted() {
 
     }
 
-    // raio de ruÃ­do atual, consultado pelo NPCScript para saber se o guarda ouve o jogador.
-    // correndo -> 10 m  |  normal -> 5 m  |  agachado -> 2 m
-    // Atributo Agilidade: Reduz o raio de ruÃ­do gerado.
+    // Fornecemos o raio atual ao NPCScript que o vai consumir a cada frame para calcular a distância do som. Multiplicamos o valor pelo inverso da Agilidade para dar utilidade ao atributo.
     public float GetNoiseRadius() {
         float radius = normalNoiseRadius;
         if (isCrouching) radius = crouchNoiseRadius;
@@ -203,18 +179,14 @@ public class PlayerController : MonoBehaviour {
         return radius;
     }
 
-    // verdadeiro se o jogador se estiver a mover â€” usado pelo NPCScript para sÃ³ gerar som quando hÃ¡ movimento
     public bool IsPlayerMoving() {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         return x != 0 || z != 0;
     }
 
-    // expÃµe o estado de corrida para o HUD ou outros sistemas (ex: stamina futura)
     public bool IsRunning() => isRunning;
 
-    // quando o jogador entra/sai de um collider trigger com tag "SusPlace", atualiza a flag inSusPlace
-    // o NPCScript lÃª esta flag para decidir se cria suspeita
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("SusPlace"))
             inSusPlace = true;

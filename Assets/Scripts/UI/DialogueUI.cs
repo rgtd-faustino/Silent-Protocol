@@ -1,20 +1,10 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// Gere o painel de diálogo no ecrã.
-// Hierarquia esperada no Canvas:
-//   DialoguePanel
-//     ├── NPCNameText       (TMP)
-//     ├── NPCResponseText   (TMP)
-//     ├── TopicsPanel
-//     │     ├── TopicButton1
-//     │     ├── TopicButton2
-//     │     └── TopicButton3
-//     └── CloseButton
 public class DialogueUI : MonoBehaviour
 {
 
@@ -28,26 +18,21 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI npcNameText;
     [SerializeField] private TextMeshProUGUI npcResponseText;
 
-    [Header("Botões de tópico")]
-    // exatamente 3 botões definidos no Inspector
+    [Header("Botoes de topico")]
     [SerializeField] private Button[] topicButtons;
     [SerializeField] private TextMeshProUGUI[] topicButtonLabels;
 
-    [Header("Botão de fechar")]
+    [Header("Botao de fechar")]
     [SerializeField] private Button closeButton;
 
-    [Header("Painel de tópicos")]
+    [Header("Painel de topicos")]
     [SerializeField] private GameObject topicsPanel;
 
-    [Header("Botão Intel")]
+    [Header("Botao Intel")]
     [SerializeField] private Button saveIntelButton;
 
-
-
-    // callback após o jogador ver a resposta do NPC (volta aos tópicos ou fecha)
     private Action pendingCallback;
 
-    // velocidade do efeito de typewriter (caracteres por segundo)
     [SerializeField] private float typewriterSpeed = 40f;
     private Coroutine typewriterCoroutine;
 
@@ -63,19 +48,18 @@ public class DialogueUI : MonoBehaviour
         dialoguePanel.SetActive(false);
     }
 
-    // abre o painel e mostra os tópicos disponíveis
+    // Inicializamos a interface de diálogo com os dados base que vêm do DialogueManager
+    // Passar o greeting diretamente simplifica o fluxo inicial sem precisarmos de construir um tópico vazio e artificial
     public void ShowDialogue(string npcName, string greeting, List<DialogueTopic> topics)
     {
         dialoguePanel.SetActive(true);
         npcNameText.text = npcName;
-        Debug.Log("Abrir diálogo com: " + npcName);
-
-        ShowResponse(greeting, null); // saudação sem callback
+        
+        ShowResponse(greeting, null); 
         SetupTopicButtons(topics);
         topicsPanel.SetActive(true);
     }
 
-    // esconde o painel por completo
     public void HideDialogue()
     {
         if (typewriterCoroutine != null)
@@ -83,8 +67,8 @@ public class DialogueUI : MonoBehaviour
         dialoguePanel.SetActive(false);
     }
 
-    // mostra a resposta do NPC com typewriter e esconde os botões de tópico
-    // onDone é chamado quando o jogador clicar para continuar após ler a resposta
+    // Recebe o callback para podermos esperar que o jogador acabe de ler
+    // Verificamos logo o TopicOutcome para saber se ligamos o botão de guardar Intel no dossier
     public void ShowNPCResponse(string response, Action onDone, TopicOutcome outcome = null)
     {
         topicsPanel.SetActive(false);
@@ -97,7 +81,8 @@ public class DialogueUI : MonoBehaviour
         ShowResponse(response, onDone);
     }
 
-    // volta a mostrar os botões de tópico (chamado pelo DialogueManager após uma resposta normal)
+    // Reverte a UI para o estado de seleção
+    // Chamado pelo DialogueManager quando a resposta acaba e o painel não se vai fechar de vez
     public void ReturnToTopics()
     {
         topicsPanel.SetActive(true);
@@ -105,14 +90,15 @@ public class DialogueUI : MonoBehaviour
         saveIntelButton.gameObject.SetActive(false);
     }
 
-    // configura os 3 botões com os tópicos filtrados
+    // Limpámos todos os listeners antigos e ligámos o botão ao índice correspondente da lista de tópicos no momento do clique
+    // Escondemos os botões que não estão a ser usados se existirem menos opções de conversa que os limites do UI
     private void SetupTopicButtons(List<DialogueTopic> topics)
     {
         for (int i = 0; i < topicButtons.Length; i++)
         {
             if (i < topics.Count)
             {
-                int index = i; // captura para o closure do lambda
+                int index = i; 
                 topicButtons[i].gameObject.SetActive(true);
                 topicButtonLabels[i].text = topics[i].buttonLabel;
                 topicButtons[i].onClick.RemoveAllListeners();
@@ -120,14 +106,11 @@ public class DialogueUI : MonoBehaviour
             }
             else
             {
-                // esconde botões sem tópico
                 topicButtons[i].gameObject.SetActive(false);
             }
         }
     }
 
-    // mostra o texto com efeito typewriter
-    // se onDone != null, clicar no painel avança / conclui a leitura
     private void ShowResponse(string text, Action onDone)
     {
         if (typewriterCoroutine != null)
@@ -148,27 +131,20 @@ public class DialogueUI : MonoBehaviour
 
         typewriterCoroutine = null;
 
-        // se não há callback (saudação inicial) não precisa de esperar input
         if (onDone == null) yield break;
 
-        // indica ao jogador que pode continuar — pode substituir por um ícone de "continuar"
         npcResponseText.text += " <color=#aaaaaa>[E para continuar]</color>";
     }
 
-    // chamado pelo Update do CameraScript quando carrega E com diálogo aberto
-    // o CameraScript já trata do E — vamos usar o botão de fechar no painel por agora
-    // mas este método pode ser chamado externamente se necessário
+    // Acionado pelo input do jogador quando clica no botão ou pressiona E
+    // A ideia é saltar a animação se o jogador der input a meio do texto a escrever-se, e avançar efetivamente no diálogo se já estiver completo
     public void OnContinuePressed()
     {
         if (typewriterCoroutine != null)
         {
-            // se o typewriter ainda está a correr, salta para o fim
             StopCoroutine(typewriterCoroutine);
             typewriterCoroutine = null;
             string fullText = npcResponseText.text;
-            // remove o indicador se existia parcialmente e re-aplica o texto completo
-            // para simplificar, guardamos o texto completo numa var separada
-            // ver DialogueUI.ShowResponseFull() — refactor futuro se necessário
             return;
         }
 
@@ -179,6 +155,8 @@ public class DialogueUI : MonoBehaviour
             cb();
         }
     }
+    
+    // Liga ao IntelInventory para guardar logo os detalhes vitais recolhidos na conversa sem esperar pelo fecho do diálogo
     private void OnSaveIntelPressed()
     {
         if (currentOutcome == null) return;

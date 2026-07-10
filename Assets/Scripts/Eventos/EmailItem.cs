@@ -4,18 +4,20 @@ using UnityEngine;
 public class EmailItem : ScriptableObject
 {
     [Header("Identificação")]
-    public string emailID; // ID único — usado pelo sistema de auto-delete e endings
+    // usamos esta string no GameEvent e no EmailManager para apagar emails críticos quando o tempo acaba
+    public string emailID;
 
     [Header("Metadados")]
     public string titulo;
     public string remetenteNome;
-    public string remetente;   // endereço (ex: ceo@corp.com)
+    public string remetente;
     public string dataHora;
     [TextArea(3, 8)] public string corpo;
 
     [Header("Entrega")]
     public int diaParaAparecer = 1;
-    public float spawnHour;            // hora do jogo em que aparece na inbox
+    // float decimal para facilitar contas de horas, o EmailManager bate de frente com o TimeManager.GetCurrentTimeInHours()
+    public float spawnHour;
     public bool irParaLixoDirectamente;
 
     [Header("Intel Associada")]
@@ -23,26 +25,25 @@ public class EmailItem : ScriptableObject
     public IntelItem intelAssociado;
 
     [Header("Email Crítico")]
-    [Tooltip("Activa o banner vermelho e os botões especiais na UI.")]
+    [Tooltip("Mostra aviso UI")]
     public bool isCritical;
 
-    [Tooltip("Se true, o corpo fica oculto até o jogador desencriptar.")]
+    [Tooltip("Corpo fica oculto")]
     public bool isEncrypted;
 
-    [Tooltip("Minutos de jogo até auto-delete. 0 = sem limite.")]
+    [Tooltip("Minutos até expirar")]
     public float autoDeleteGameMinutes;
 
-    [Tooltip("IDs dos IntelItems com isKeyFragment=true necessários para desencriptar.")]
+    // array com os IDs dos IntelItems que o jogador tem de colecionar. como estão em várias partes do mapa, forçamos exploração
+    [Tooltip("IDs precisos")]
     public string[] requiredKeyFragmentIDs;
 
-    // ------------------------------------------------------------------ //
-    // Estado runtime — não configurar no Inspector                         //
-    // ------------------------------------------------------------------ //
     [HideInInspector] public bool entregue;
     [HideInInspector] public bool lido;
     [HideInInspector] public bool apagado;
     [HideInInspector] public bool desencriptado;
 
+    // como os ScriptableObjects mantêm valores em memória depois de sairmos do play mode, temos de dar reset antes de cada run
     public void ResetarEstadoRuntime()
     {
         entregue      = false;

@@ -1,7 +1,3 @@
-// TerminalManager.cs — ATUALIZADO
-// Substituído o hardcode de hex por CryptoHelper real
-// .aes e .des agora desencriptam o payload do GameClipboard corretamente
-
 using System.Collections;
 using UnityEngine;
 
@@ -9,6 +5,7 @@ public class TerminalManager : MonoBehaviour
 {
     private TerminalUI ui;
 
+    // máquina de estados do terminal - cada estado determina como HandleInput interpreta o input seguinte
     private enum TerminalState
     {
         Empty, Pasted, Decrypted, Done, AskSave, AskRename, Renaming, Finished
@@ -20,13 +17,15 @@ public class TerminalManager : MonoBehaviour
     private string hexOutput = "";
     private string hashValue = "";
     private string decodedText = "";
-    private string encryptionType = ""; // "AES" ou "DES" — detetado automaticamente
+    // "AES" ou "DES" - detetado automaticamente se o pacote vier do GameClipboard, senão o jogador tem de adivinhar
+    private string encryptionType = "";
 
     void Start()
     {
         ui = GetComponent<TerminalUI>();
     }
 
+    // ponto de entrada único para todo o input do jogador - a máquina de estados redireciona para o handler correto
     public void HandleInput(string val)
     {
         string cmd = val.ToLower().Trim();
@@ -37,7 +36,6 @@ public class TerminalManager : MonoBehaviour
 
         ui.AddLine("user@crypter:~$ " + val, TerminalUI.LineType.Input);
 
-        // som de teclado 2D ao submeter um comando no terminal
         SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.typingKeyboard);
 
         if (cmd == ".clear") { ClearTerminal(); return; }
@@ -46,7 +44,7 @@ public class TerminalManager : MonoBehaviour
         if (cmd == ".des") { TryDecrypt("DES"); return; }
         if (cmd == ".hexdecode") { TryHexDecode(); return; }
 
-        // qualquer coisa com mais de 6 chars que não seja comando = pacote colado manualmente
+        // qualquer string com mais de 6 chars que não comece por "." é tratada como pacote colado manualmente
         if (!cmd.StartsWith(".") && val.Length > 6)
         {
             PastePacket(val); return;
@@ -78,7 +76,7 @@ public class TerminalManager : MonoBehaviour
         ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
         ui.AddLine("  " + pastedContent.Length + " bytes. estrutura encriptada detetada.", TerminalUI.LineType.Dim);
 
-        // dica visual se vier do clipboard
+        // se o pacote veio do GameClipboard, o tipo de encriptação já é conhecido - o jogador ainda tem de escrever o comando certo
         if (GameClipboard.HasContent && GameClipboard.PacketContent == content)
         {
             ui.AddLine("  pacote: " + GameClipboard.PacketId, TerminalUI.LineType.Dim);
@@ -110,16 +108,18 @@ public class TerminalManager : MonoBehaviour
         StartCoroutine(ProcessDecrypt(attemptedType));
     }
 
+    // o delay de 0.5s simula processamento e dá ritmo à interação -
+    // se o tipo de encriptação for conhecido (via clipboard), valida por comparação direta;
+    // se não, tenta desencriptar mesmo e verifica se o resultado é texto legível
     private IEnumerator ProcessDecrypt(string attemptedType)
     {
         yield return new WaitForSeconds(0.5f);
 
-        // se soubermos o tipo (veio do clipboard) validamos, senão o jogador tem de adivinhar
         bool correct;
         if (!string.IsNullOrEmpty(encryptionType))
             correct = (attemptedType == encryptionType);
         else
-            correct = TryDecryptPayload(attemptedType, out _); // tenta mesmo desencriptar
+            correct = TryDecryptPayload(attemptedType, out _);
 
         if (correct)
         {
@@ -136,7 +136,7 @@ public class TerminalManager : MonoBehaviour
             ui.AddLine("  a decifrar...", TerminalUI.LineType.Dim);
             yield return new WaitForSeconds(0.7f);
 
-            // o output do terminal é o hex do texto decifrado (como antes)
+            // o output mostrado no terminal é o hex do texto decifrado - o jogador ainda precisa de usar .hexdecode para ler o conteúdo
             hexOutput = CryptoHelper.BytesToHexString(System.Text.Encoding.UTF8.GetBytes(decrypted));
             hashValue = CryptoHelper.GenerateHash(decrypted);
             state = TerminalState.Decrypted;
@@ -156,7 +156,7 @@ public class TerminalManager : MonoBehaviour
         }
     }
 
-    // tenta desencriptar e verifica se o resultado é texto legível
+    // tenta desencriptar sem saber o tipo - se o resultado for texto legível, consideramos que acertou
     private bool TryDecryptPayload(string encType, out string result)
     {
         try
@@ -190,7 +190,6 @@ public class TerminalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        // converte o hex de volta para texto plano
         byte[] bytes = CryptoHelper.HexStringToBytes(hexOutput);
         decodedText = System.Text.Encoding.UTF8.GetString(bytes).Trim();
         state = TerminalState.Done;
@@ -319,7 +318,7 @@ public class TerminalManager : MonoBehaviour
         ui.AddLine("  CRYPTER aceita comandos que comecam por \".\"", TerminalUI.LineType.Info);
         ui.AddLine("  cola o conteudo do pacote para comecar.", TerminalUI.LineType.Dim);
         ui.AddLine("  os comandos de decifra tens de os descobrir.", TerminalUI.LineType.Dim);
-        ui.AddLine("  .clear   — limpa o terminal", TerminalUI.LineType.Dim);
+        ui.AddLine("  .clear   - limpa o terminal", TerminalUI.LineType.Dim);
         ui.AddBlank();
     }
 

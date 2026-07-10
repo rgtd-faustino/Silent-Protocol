@@ -29,12 +29,11 @@ public class CameraScript : MonoBehaviour
             return;
         }
         Instance = this;
-
     }
 
     void Start()
     {
-        // Atributo Perceção: Aumenta a distância de interação com objetos
+        // Puxámos a Perceção do PlayerStats para dar aos jogadores que apostarem nela uma maior distância de interação com os objetos.
         if (PlayerStats.Instance != null) {
             interactionDistance = 5f + (PlayerStats.Instance.GetPercecao() * 0.2f);
         }
@@ -44,6 +43,7 @@ public class CameraScript : MonoBehaviour
 
     void Update()
     {
+        // Se a interface da fechadura estiver aberta e clicarmos na tecla de interação, forçamos o fecho e devolvemos o controlo ao PlayerController.
         if (UIManager.Instance.IsLockViewOpen() && Input.GetKeyDown(interactKey))
         {
             if (currentLock != null)
@@ -71,7 +71,7 @@ public class CameraScript : MonoBehaviour
 
             currentTarget.Interact();
             UIManager.Instance.HideTooltip();
-            currentTarget.HideGlitch(); // esconde antes de limpar a referência
+            currentTarget.HideGlitch();
             currentTarget = null;
             currentLock = null;
         }
@@ -87,6 +87,7 @@ public class CameraScript : MonoBehaviour
         );
     }
 
+    // Optámos por colocar o raycast numa corrotina com um ligeiro atraso em vez do Update. Poupa recursos e para este tipo de interações o jogador não nota a diferença de performance.
     private IEnumerator DetectInteractableRoutine()
     {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
@@ -98,7 +99,6 @@ public class CameraScript : MonoBehaviour
     }
 
     void DetectInteractable()
-
     {
         if (blockDetection) return;
         Ray ray = new Ray(transform.position, transform.forward);
@@ -110,7 +110,6 @@ public class CameraScript : MonoBehaviour
             {
                 if (target != currentTarget)
                 {
-                    // esconde o anterior antes de mudar
                     if (currentTarget != null)
                         currentTarget.HideGlitch();
 
@@ -118,19 +117,17 @@ public class CameraScript : MonoBehaviour
                     currentTarget.ShowGlitch();
                     currentLock = target as LockScript;
 
-                   
                     UIManager.Instance.ShowTooltip(currentTarget.tooltipMessage);
                 }
                 return;
             }
         }
 
-        // perdeu o target
         if (currentTarget != null)
         {
             UIManager.Instance.HideTooltip();
-            currentTarget.HideGlitch(); // primeiro
-            currentTarget = null;       // depois
+            currentTarget.HideGlitch();
+            currentTarget = null;
             currentLock = null;
         }
     }

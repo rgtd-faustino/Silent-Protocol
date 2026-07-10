@@ -8,7 +8,7 @@ public class MeetingEavesdropScript : MonoBehaviour
 {
 
     [Header("Linhas da reunião (por ordem)")]
-    [Tooltip("Cada MeetingLine é uma frase. Activa hasKeyword nas que têm intel.")]
+    [Tooltip("Linhas da reuniao")]
     [SerializeField] private MeetingLine[] meetingLines;
 
     [Header("Intel por cada linha com keyword (mesmo índice)")]
@@ -16,8 +16,9 @@ public class MeetingEavesdropScript : MonoBehaviour
 
 
     [Header("Suspeita passiva enquanto na zona")]
+    // usamos 0.06 para não dar logo insta-fail, mas o gajo não pode ficar parado ali muito tempo a olhar para o ar
     [SerializeField] private float suspicionRateWhileLoitering = 0.06f;
-    private const int SOURCE_ID = 9901; // ID único para esta fonte de suspicion
+    private const int SOURCE_ID = 9901;
 
 
     [Header("Painel do minijogo")]
@@ -30,8 +31,8 @@ public class MeetingEavesdropScript : MonoBehaviour
     private bool capturePressed = false;
 
     [Header("Timing")]
-    [SerializeField] private float charDelay       = 0.04f;  // segundos por carácter
-    [SerializeField] private float lingerAfterLine = 1.8f;   // pausa entre linhas (segundos reais)
+    [SerializeField] private float charDelay       = 0.04f;
+    [SerializeField] private float lingerAfterLine = 1.8f;
 
     private bool playerInZone = false;
     private bool minigameActive = false;
@@ -51,17 +52,16 @@ public class MeetingEavesdropScript : MonoBehaviour
     void OnEnable()  => GameEvent.OnMeetingStarted += OnMeetingStarted;
     void OnDisable() => GameEvent.OnMeetingStarted -= OnMeetingStarted;
 
+    // fazemos a deteção com Vector3.Distance porque os colliders estavam a bugar com os NPCs que passavam perto
     void Update() {
-        // detecção por distância em vez de trigger
         float dist = Vector3.Distance(transform.position, PlayerController.Instance.transform.position);
         playerInZone = dist <= interactionRadius;
 
         if (!meetingActive || minigameActive) return;
 
         if (playerInZone) {
-            // suspicion passiva por loitering
             SuspicionManager.Instance.IncreaseSuspicion(1, SOURCE_ID, SuspicionManager.SuspicionSource.RestrictedArea);
-            UIManager.Instance.ShowTooltip("E  — Escutar reunião");
+            UIManager.Instance.ShowTooltip("E - Escutar reunião");
 
             if (Input.GetKeyDown(KeyCode.E))
                 StartMinigame();
@@ -71,8 +71,6 @@ public class MeetingEavesdropScript : MonoBehaviour
             SuspicionManager.Instance.StopIncreasingSuspicion(SOURCE_ID);
         }
     }
-
-    // detecção por distância no Update — triggers removidos
 
     private void OnMeetingStarted()
     {
@@ -98,6 +96,7 @@ public class MeetingEavesdropScript : MonoBehaviour
         StartCoroutine(RunMinigame());
     }
 
+    // tem mesmo de ser coroutine para não travar a main thread e porque o texto tem aquele delay manhoso letra a letra
     private IEnumerator RunMinigame()
     {
         for (int i = 0; i < meetingLines.Length; i++)
@@ -106,12 +105,10 @@ public class MeetingEavesdropScript : MonoBehaviour
             bool        hasKw   = line.hasKeyword;
             bool        captured = false;
 
-            // barra de progresso
             if (progressBar != null)
                 progressBar.value = (float)i / meetingLines.Length;
             capturePressed = false;
 
-            // prompt
             if (txtPrompt != null)
                 txtPrompt.text = hasKw ? "<color=#FFD700>Clica para capturar!</color>" : "";
             if (captureButton != null) captureButton.interactable = hasKw;
@@ -142,14 +139,12 @@ public class MeetingEavesdropScript : MonoBehaviour
 
             if (captureButton != null) captureButton.interactable = false;
 
-            // feedback de falha
             if (hasKw && !captured && txtPrompt != null)
                 txtPrompt.text = "<color=#FF4444>Perdeste esta intel!</color>";
 
             yield return new WaitForSeconds(0.4f);
         }
 
-        // fim
         if (progressBar != null) progressBar.value = 1f;
         if (txtPrompt != null)   txtPrompt.text = $"Reunião terminada. Capturou {capturedCount} intel(s).";
 
@@ -173,6 +168,7 @@ public class MeetingEavesdropScript : MonoBehaviour
         }
     }
 
+    // repõe as variáveis de input e UI para não bugar outras interações com objetos depois disto
     private void EndMinigame()
     {
         minigameActive = false;
@@ -185,16 +181,12 @@ public class MeetingEavesdropScript : MonoBehaviour
         Debug.Log($"[MeetingEavesdrop] Minijogo terminado. Intel: {capturedCount}/{meetingLines.Length}");
     }
 
-    // ------------------------------------------------------------------ //
-    // Estrutura de dados                                                    //
-    // ------------------------------------------------------------------ //
-
     [System.Serializable]
     public class MeetingLine
     {
         [TextArea(2, 4)]
         public string text;
-        [Tooltip("Marcar se esta linha contém uma palavra-chave capturável.")]
+        [Tooltip("Tem keyword")]
         public bool hasKeyword;
     }
 }

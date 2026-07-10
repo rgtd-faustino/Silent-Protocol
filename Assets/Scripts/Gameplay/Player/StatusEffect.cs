@@ -5,9 +5,7 @@ public class StatusEffect
     public float duration;
     public float timer;
 
-    // realStage = sono real
-    // currentStage = sono atual com efeitos
-    // time = tempo desde que comeou o efeito
+    // Delegate onde passamos a função do TimeManager. Usamos isto para conseguir intercetar a lógica e injetar debuffs sem precisar de dezenas de if statements manhosos pelo código.
     public System.Func<int, int, float, int> modifySleepStage;
 
     public StatusEffect(float duration, System.Func<int, int, float, int> modify)
@@ -17,8 +15,7 @@ public class StatusEffect
         timer = 0f;
     }
 
-    // Retorna true se o efeito terminou
-    public bool UpdateEffect(float deltaMinutes) // recebe minutos de jogo
+    public bool UpdateEffect(float deltaMinutes)
     {
         timer += deltaMinutes;
         return timer >= duration;

@@ -9,23 +9,20 @@ public class NPCSpawner : MonoBehaviour {
     [SerializeField] private GameObject npcPrefab1;
     [SerializeField] private GameObject npcPrefab2;
     [SerializeField] private GameObject npcPrefab3;
-    // ponto de spawn na cena (porta de entrada, receo, etc.)
+    
     private Transform spawnPoint;
 
-    // rota fixa atribuda a cada NPC spawnado por este spawner
-    // ex: CAMINHO1 para colegas, DEAMBULAR para visitantes
-    // se null, o NPC usa o sistema aleatrio normal do NPCManager
+    // Se associarmos uma rota especifica ignoramos o algoritmo do NPCManager e forcamos o NPC a este caminho. E incrivel para controlar loops rigorosos.
     [SerializeField] private PatrolRoute assignedRoute;
 
     [SerializeField] private PatrolRoute startRoute;
 
-    // quantos NPCs deste spawner podem existir na cena ao mesmo tempo
+    // Limita o spawn de instanciacoes infinitas para travar derrapagens de performance no CPU.
     [SerializeField] private int maxActive = 3;
 
-    // segundos entre cada tentativa de spawn
     [SerializeField] private float spawnInterval = 30f;
 
-    // contador interno  sobe no spawn, desce quando um NPC  destrudo via OnNPCDestroyed
+    // Rastreamos as entradas cruzando o OnNPCDestroyed da classe NPCScript. Assim repomos sempre a fauna na sala sem exceder a quota.
     private int currentActive = 0;
 
 
@@ -45,16 +42,13 @@ public class NPCSpawner : MonoBehaviour {
                 npc.assignedRoute = assignedRoute;
                 npc.startRoute = startRoute;
                 npc.spawner = this;
-                // atribumos a homeBase pelo cdigo porque os colegas spawnados nos elevadores precisam de voltar a casa
-                // e como h sempre mais do que um elevador ele  atribudo quando  spawnado
-                // para as rececnionistas como elas j existem no h problema porque no passam por este cdigo
+                // Injetamos a homeBase a bruto baseados neste transform. Isto soluciona aquelas paragens onde a malta nao sabia para que elevador devia regressar no final da jornada.
                 npc.homeBase = spawnPoint;
             }
         }
     }
 
-    // chamado pelo NPCScript.OnDestroy quando o NPC  destrudo
-    // permite ao spawner saber que pode spawnar mais um
+    // Apanha o callback do recycle para baixar o tracker de atividade e garantir que o iterador liberta mais espaco na memoria.
     public void OnNPCDestroyed() {
         currentActive--;
     }

@@ -8,22 +8,20 @@ public class BedScript : InteractableObject {
         tooltipMessage = "E para deitar";
     }
 
-    // Ao interagir, a cama verifica se  noite, s faz sentido dormir durante a noite. Se for de dia, o jogador recebe feedback
+    // a cama vai ler a propriedade isNight do TimeManager. faz todo o sentido barrar o sono se for de dia para forçar o jogador a lidar com as horas normais
     public override void Interact() {
         if (TimeManager.Instance.isNight) {
             if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_sleep")) {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
 
-            // passa-se a si prpria para que o UIManager possa chamar OnSleepConfirmed() quando o sono for confirmado
-            // (necessrio para futuros efeitos visuais/sonoros especficos da cama)
+            // atiramos o objeto em si para o UIManager conseguir avisar o callback do OnSleepConfirmed caso o utilizador aceite o prompt no menu
             UIManager.Instance.OpenSleepView(this);
         } else {
-            Debug.Log("Se calhar s posso dormir quando for de noite...");
+            Debug.Log("Se calhar só posso dormir quando for de noite...");
         }
     }
 
     public void OnSleepConfirmed(float hours) {
-        // reservado para efeitos visuais/sonoros quando existirem
     }
 }

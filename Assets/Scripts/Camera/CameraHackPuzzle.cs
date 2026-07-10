@@ -120,12 +120,8 @@ public class CameraHackPuzzle : MonoBehaviour {
 
         tolerance = Mathf.Lerp(0.13f, 0.055f, t); // tolerância aperta
         timeLimit = Mathf.Lerp(45f, 28f, t); // menos tempo
-        
-        // Atributo Intelecto: Aumenta o tempo disponível para o minijogo
-        if (PlayerStats.Instance != null) {
-            timeLimit += PlayerStats.Instance.GetIntelecto() * 1.5f;
-        }
-        
+        timeLimit += PlayerStats.Instance.GetIntelecto() * 1.5f; // Atributo Intelecto: Aumenta o tempo disponível para o minijogo
+
         holdRequired = Mathf.Lerp(1.0f, 2.8f, t); // mais tempo a manter
         oscillationAmplitude = Mathf.Lerp(0f, 0.07f, t); // JAM começa estático, oscila mais
         oscillationSpeed = Mathf.Lerp(0.4f, 2.2f, t); // oscilação acelera
