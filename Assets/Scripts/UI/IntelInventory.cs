@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -96,6 +96,10 @@ public class IntelInventory : MonoBehaviour
 
         if (abrir)
         {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_dossier")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
+
             // reset badge de novos ao abrir
             novosNaoVistos = 0;
             AtualizarBadgeNovoIntel();

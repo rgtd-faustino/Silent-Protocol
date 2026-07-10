@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -112,6 +112,12 @@ public class EmailUI : MonoBehaviour
     }
 
     void Update() {
+        if (emailAppPanel != null && emailAppPanel.activeSelf) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
+        }
+
         // Remove este bloco se o teu sistema de PC já chama ToggleApp diretamente.
         if (Input.GetKeyDown(KeyCode.Tab))
             ToggleApp();
@@ -141,6 +147,10 @@ public class EmailUI : MonoBehaviour
 
         if (abrir)
         {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
+
             UIManager.Instance.ChangeCursorState(CursorLockMode.None);
             PlayerController.Instance.canMoveRotate = false;
             AtualizarLista();

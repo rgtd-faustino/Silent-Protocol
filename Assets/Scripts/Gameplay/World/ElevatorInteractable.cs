@@ -12,6 +12,11 @@ public class ElevatorInteractable : InteractableObject {
 
     public override void Interact() {
         if (GameMenuManager.Instance.CurrentState == MenuState.Playing)
+        {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_elevator")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
             elevatorUI.Open();
+        }
     }
 }

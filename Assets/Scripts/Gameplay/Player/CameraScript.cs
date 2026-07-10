@@ -65,6 +65,10 @@ public class CameraScript : MonoBehaviour
 
         if (currentTarget != null && Input.GetKeyDown(interactKey))
         {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_interact")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
+
             currentTarget.Interact();
             UIManager.Instance.HideTooltip();
             currentTarget.HideGlitch(); // esconde antes de limpar a referência

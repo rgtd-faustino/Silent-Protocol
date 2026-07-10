@@ -39,10 +39,10 @@ public class FlashlightController : MonoBehaviour {
 
     void Update() {
         // a lanterna só funciona à noite
-        /*if (!TimeManager.Instance.isNight) {
-            if (IsOn) TurnOff();
+        if (!TimeManager.Instance.isNight) {
+            if (isOn) TurnOff();
             return;
-        }*/
+        }
 
         if (Input.GetKeyDown(KeyCode.F))
             Toggle();
@@ -65,13 +65,17 @@ public class FlashlightController : MonoBehaviour {
         else 
             TurnOn();
             
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_flashlight")) {
+            TutorialManager.Instance.CompleteCurrentStep();
+        }
+            
         // som de ligar/desligar lanterna
         if (PlayerController.Instance.hasFlashlight)
             SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.flashlightToggleOnOff);
     }
 
     public void TurnOn() {
-        if (currentBattery <= 0f || PlayerController.Instance.hasFlashlight == false) 
+        if (currentBattery <= 0f || PlayerController.Instance.hasFlashlight == false || !TimeManager.Instance.isNight) 
             return;
         isOn = true;
 

@@ -27,6 +27,10 @@ public class DayManager : MonoBehaviour
     {
         yield return null;
         GameEvent.DayStarted(CurrentDay);
+
+        if (CurrentDay == 1 && TutorialManager.Instance != null) {
+            TutorialManager.Instance.StartTutorial();
+        }
     }
     // chamado pelo TimeManager.Sleep() no fim
     public void OnDayEnded()

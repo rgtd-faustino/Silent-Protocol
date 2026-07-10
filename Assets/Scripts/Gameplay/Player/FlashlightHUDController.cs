@@ -41,6 +41,21 @@ public class FlashlightHUDController : MonoBehaviour {
     }
 
     void Update() {
+        if (!PlayerController.Instance.hasFlashlight || !TimeManager.Instance.isNight) {
+            if (canvasGroup.alpha > 0f) {
+                StopAllCoroutines();
+                canvasGroup.alpha = 0f;
+                isDead = false; // reset state so it can re-animate if needed later
+                flickerRoutine = null;
+            }
+            return;
+        }
+
+        // Se acabou de ficar visvel e ainda no tinha alpha, mostra (senao o StopFlicker encarrega-se disso)
+        if (canvasGroup.alpha == 0f && FlashlightController.Instance.GetBatteryRatio() > 0f) {
+            canvasGroup.alpha = 1f;
+        }
+
         float ratio = FlashlightController.Instance.GetBatteryRatio();
         UpdateVisuals(ratio);
     }

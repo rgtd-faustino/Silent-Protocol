@@ -7,7 +7,7 @@ public class CardReader : InteractableObject {
     public string cardName;
 
 
-    private string lockedTooltip = "E para usar cartão";
+    private string lockedTooltip = "E para usar cartÃ£o";
     private string unlockedTooltip = "Acesso Autorizado";
 
     public Renderer statusLedRenderer;
@@ -20,22 +20,26 @@ public class CardReader : InteractableObject {
 
     protected override void Awake() {
         base.Awake();
-        objectName = "Leitor de Cartões";
+        objectName = "Leitor de CartÃµes";
 
         // definimos a tooltip inicial consoante o estado de desbloqueio
         tooltipMessage = isUnlocked ? unlockedTooltip : lockedTooltip;
 
-        // mudamos a cor do leitor de cartões bom base no estado do mesmo
+        // mudamos a cor do leitor de cartÃµes bom base no estado do mesmo
         UpdateLedColor(isUnlocked ? ledUnlockedMaterial : ledLockedMaterial);
     }
 
     public override void Interact() {
         if (isUnlocked) {
-            Debug.Log($"[{gameObject.name}] Acesso já está autorizado.");
+            Debug.Log($"[{gameObject.name}] Acesso jÃ¡ estÃ¡ autorizado.");
             return;
         }
 
         if (isProcessing) return;
+
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_card")) {
+            TutorialManager.Instance.CompleteCurrentStep();
+        }
 
         // verificamos se o jogador possui a credencial com o ID correspondente
         if (PlayerController.Instance.HasCardCredential(cardID)) {
@@ -50,9 +54,9 @@ public class CardReader : InteractableObject {
         isUnlocked = true;
         tooltipMessage = unlockedTooltip;
 
-        Debug.Log($"[{gameObject.name}] Acesso AUTORIZADO com cartão: {cardName}");
+        Debug.Log($"[{gameObject.name}] Acesso AUTORIZADO com cartÃ£o: {cardName}");
 
-        // som de sucesso do leitor de cartões
+        // som de sucesso do leitor de cartÃµes
         SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.cardReaderSuccess);
 
         // feedback LED verde permanente porque o acesso ficou autorizado
@@ -69,15 +73,15 @@ public class CardReader : InteractableObject {
         string cardNeeded = cardName;
         Debug.Log($"[{gameObject.name}] Acesso NEGADO! Falta credencial: {cardNeeded}");
 
-        // som de erro do leitor de cartões
+        // som de erro do leitor de cartÃµes
         SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.buzzerWrong2);
 
-        // alteramos temporariamente a mensagem do HUD para avisar o jogador do cartão que falta
+        // alteramos temporariamente a mensagem do HUD para avisar o jogador do cartÃ£o que falta
         string originalTooltip = tooltipMessage;
         tooltipMessage = $"Necessita de {cardNeeded}";
         UIManager.Instance.ShowTooltip(tooltipMessage);
 
-        // flash LED vermelho/apagado para simular alarme/erro eletrónico
+        // flash LED vermelho/apagado para simular alarme/erro eletrÃ³nico
         for (int i = 0; i < 3; i++) {
             UpdateLedColor(ledLockedMaterial);
             yield return new WaitForSeconds(0.15f);
@@ -89,7 +93,7 @@ public class CardReader : InteractableObject {
         UpdateLedColor(ledLockedMaterial);
         tooltipMessage = originalTooltip;
 
-        // se o jogador ainda estiver a olhar para o leitor de cartões, repõe a tooltip
+        // se o jogador ainda estiver a olhar para o leitor de cartÃµes, repÃµe a tooltip
         if (CameraScript.Instance.currentTarget == this) {
             UIManager.Instance.ShowTooltip(tooltipMessage);
         }

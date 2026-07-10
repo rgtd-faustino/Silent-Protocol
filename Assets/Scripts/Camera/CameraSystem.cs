@@ -94,7 +94,7 @@ public class CameraSystem : MonoBehaviour {
         isActive = true;
         residualHeat = Mathf.Min(1f, residualHeat + residualPerSession);
         // som de acesso ao computador de câmaras
-        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.cameraComputer);
+        SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2DCameras, SoundManager.Instance.cameraComputer);
         CameraViewUI.Instance.Show(this);
     }
 
@@ -104,6 +104,7 @@ public class CameraSystem : MonoBehaviour {
 
         isActive = false;
         CameraViewUI.Instance.Hide();
+        SoundManager.Instance.audioSource2DCameras.Stop();
         PlayerController.Instance.canMoveRotate = true;
     }
 

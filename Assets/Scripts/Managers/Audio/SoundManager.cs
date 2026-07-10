@@ -5,6 +5,7 @@ public class SoundManager : MonoBehaviour {
 
     [Header("Audio Sources")]
     public AudioSource audioSource2D;
+    public AudioSource audioSource2DCameras;
     public AudioSource gameplayMusicSource;
     public AudioSource menuMusicSource;
     public AudioSource heartbeatSource;

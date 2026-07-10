@@ -9,15 +9,15 @@ public class PlayerController : MonoBehaviour {
     private float CROUCH_SPEED = 4f;
     private float RUN_SPEED = 9f;
 
-    // documento físico que o jogador está a segurar (apanhado na impressora, para arquivar)
+    // documento fÃ­sico que o jogador estÃ¡ a segurar (apanhado na impressora, para arquivar)
     [HideInInspector] public DocumentTaskData heldDocument = null;
     [HideInInspector] public bool hasFlashlight = false;
 
-    // lista de cartões que o jogador já coletou
+    // lista de cartÃµes que o jogador jÃ¡ coletou
     [HideInInspector] public List<string> unlockedCardIDs = new List<string>();
 
     public void AddCardCredential(string cardID) {
-        // só adiciona se não tiver o cartão
+        // sÃ³ adiciona se nÃ£o tiver o cartÃ£o
         if (!unlockedCardIDs.Contains(cardID)) {
             unlockedCardIDs.Add(cardID);
         }
@@ -33,8 +33,8 @@ public class PlayerController : MonoBehaviour {
     // qualquer sistema de UI (lock, PC, cama) mete isto a false quando abre e volta a true quando fecha
     public bool canMoveRotate = true;
 
-    // inSusPlace indica se o jogador está dentro de um trigger marcado como zona suspeita (tag "SusPlace")
-    // é lido pelo NPCScript para decidir se gera suspeita ao ver o jogador
+    // inSusPlace indica se o jogador estÃ¡ dentro de um trigger marcado como zona suspeita (tag "SusPlace")
+    // Ã© lido pelo NPCScript para decidir se gera suspeita ao ver o jogador
     [HideInInspector] public bool inSusPlace = false;
 
     // raio dentro do qual guardas conseguem ouvir o jogador consoante o tipo de movimento.
@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviour {
     private CameraScript camScript;
     private Animator animator;
 
-    // o CharacterController não aplica física sozinho.
+    // o CharacterController nÃ£o aplica fÃ­sica sozinho.
     private float yVelocity = 0f;
     private float gravity = -9.81f;
 
@@ -68,18 +68,18 @@ public class PlayerController : MonoBehaviour {
         camScript = cameraTransform.GetComponent<CameraScript>();
         animator = GetComponent<Animator>();
 
-        // subscreve o evento de início de noite para poder reagir
+        // subscreve o evento de inÃ­cio de noite para poder reagir
         // (ex: ligar automaticamente a lanterna, mostrar HUD da bateria).
         GameEvent.OnNightStarted += OnNightStarted;
 
-        // Atributo Força: Aumenta a velocidade máxima de corrida
+        // Atributo ForÃ§a: Aumenta a velocidade mÃ¡xima de corrida
         if (PlayerStats.Instance != null) {
             RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
         }
     }
 
     void OnDestroy() {
-        // desinscrever é obrigatório para evitar que o evento tente chamar um método num objeto que já foi destruído
+        // desinscrever Ã© obrigatÃ³rio para evitar que o evento tente chamar um mÃ©todo num objeto que jÃ¡ foi destruÃ­do
         GameEvent.OnNightStarted -= OnNightStarted;
     }
 
@@ -111,7 +111,14 @@ public class PlayerController : MonoBehaviour {
 
     // correr só é possível de pé e em movimento — agachado tem prioridade
     private void HandleRunning() {
+        bool wasRunning = isRunning;
         isRunning = !isCrouching && Input.GetKey(KeyCode.LeftShift) && IsPlayerMoving();
+        
+        if (isRunning && !wasRunning) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_run")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
+        }
     }
 
 
@@ -122,7 +129,7 @@ public class PlayerController : MonoBehaviour {
     }
 
 
-    // GetAxisRaw devolve -1, 0 ou 1 (sem suavização), o que dá resposta imediata e é mais adequado para jogos de ação/stealth
+    // GetAxisRaw devolve -1, 0 ou 1 (sem suavizaÃ§Ã£o), o que dÃ¡ resposta imediata e Ã© mais adequado para jogos de aÃ§Ã£o/stealth
     private void HandleMovement() {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
@@ -131,22 +138,25 @@ public class PlayerController : MonoBehaviour {
         float speed = isCrouching ? CROUCH_SPEED : (isRunning ? RUN_SPEED : NORMAL_SPEED);
         cc.Move(speed * Time.deltaTime * move);
 
-        // passa os valores ao Animator para que as animações de andar/correr/idle correspondam à direção real do movimento
+        // passa os valores ao Animator para que as animaÃ§Ãµes de andar/correr/idle correspondam Ã  direÃ§Ã£o real do movimento
         float animSpeed = isRunning ? 2f : 1f;
         animator.SetFloat("X", x * animSpeed, 0.1f, Time.deltaTime);
         animator.SetFloat("Z", z * animSpeed, 0.1f, Time.deltaTime);
     }
 
-    // só rotação horizontal porque o eixo vertical (olhar para cima/baixo) é tratado no CameraScript
+    // sÃ³ rotaÃ§Ã£o horizontal porque o eixo vertical (olhar para cima/baixo) Ã© tratado no CameraScript
     private void HandleRotation() {
         float mouseX = Input.GetAxis("Mouse X") * camScript.mouseSensitivity * Time.deltaTime;
         transform.Rotate(Vector3.up * mouseX);
     }
 
-    // a altura e centro do CharacterController mudam com o movimento para que a hitbox corresponda visualmente à postura da personagem
-    // os valores são diferentes consoante a direção do movimento porque a animação de agachamento lateral tem altura diferente da frontal
+    // a altura e centro do CharacterController mudam com o movimento para que a hitbox corresponda visualmente Ã  postura da personagem
+    // os valores sÃ£o diferentes consoante a direÃ§Ã£o do movimento porque a animaÃ§Ã£o de agachamento lateral tem altura diferente da frontal
     private void HandleCrouch() {
         if (Input.GetKeyDown(KeyCode.LeftControl)) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_crouch")) {
+                TutorialManager.Instance.CompleteCurrentStep();
+            }
             isCrouching = !isCrouching;
             animator.SetBool("Crouch", isCrouching);
         }
@@ -173,14 +183,14 @@ public class PlayerController : MonoBehaviour {
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
     }
 
-    // chamado quando a noite começa (via GameEvent), reservado para HUD da bateria, iluminação, etc.
+    // chamado quando a noite comeÃ§a (via GameEvent), reservado para HUD da bateria, iluminaÃ§Ã£o, etc.
     private void OnNightStarted() {
 
     }
 
-    // raio de ruído atual, consultado pelo NPCScript para saber se o guarda ouve o jogador.
+    // raio de ruÃ­do atual, consultado pelo NPCScript para saber se o guarda ouve o jogador.
     // correndo -> 10 m  |  normal -> 5 m  |  agachado -> 2 m
-    // Atributo Agilidade: Reduz o raio de ruído gerado.
+    // Atributo Agilidade: Reduz o raio de ruÃ­do gerado.
     public float GetNoiseRadius() {
         float radius = normalNoiseRadius;
         if (isCrouching) radius = crouchNoiseRadius;
@@ -193,18 +203,18 @@ public class PlayerController : MonoBehaviour {
         return radius;
     }
 
-    // verdadeiro se o jogador se estiver a mover — usado pelo NPCScript para só gerar som quando há movimento
+    // verdadeiro se o jogador se estiver a mover â€” usado pelo NPCScript para sÃ³ gerar som quando hÃ¡ movimento
     public bool IsPlayerMoving() {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         return x != 0 || z != 0;
     }
 
-    // expõe o estado de corrida para o HUD ou outros sistemas (ex: stamina futura)
+    // expÃµe o estado de corrida para o HUD ou outros sistemas (ex: stamina futura)
     public bool IsRunning() => isRunning;
 
     // quando o jogador entra/sai de um collider trigger com tag "SusPlace", atualiza a flag inSusPlace
-    // o NPCScript lê esta flag para decidir se cria suspeita
+    // o NPCScript lÃª esta flag para decidir se cria suspeita
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("SusPlace"))
             inSusPlace = true;

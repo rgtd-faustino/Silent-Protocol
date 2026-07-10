@@ -29,6 +29,10 @@ public class DocumentPickup : InteractableObject
             return;
         }
 
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_task")) {
+            TutorialManager.Instance.CompleteCurrentStep();
+        }
+
         isPickedUp = true;
         PlayerController.Instance.PickupDocument(data);
         TaskManager.Instance.CompleteTask("Imprimir documento", true);

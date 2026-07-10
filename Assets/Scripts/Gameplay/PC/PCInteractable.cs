@@ -5,7 +5,7 @@ public class PCInteractable : InteractableObject
     public GameObject pcCanvas;
     private bool isOpen = false;
 
-    [Header("SeguranÁa")]
+    [Header("Seguran√ßa")]
     public bool precisaDeCartao = false;
     public string cardID;
     public string cardName;
@@ -13,7 +13,7 @@ public class PCInteractable : InteractableObject
     public bool precisaDePin = false;
     public string pinCorreto = "1234";
 
-    // fica true assim que os requisitos forem cumpridos uma vez ó n„o volta a pedir depois disso
+    // fica true assim que os requisitos forem cumpridos uma vez ‚Äî n√£o volta a pedir depois disso
     // (mesma filosofia do CardReader: uma vez desbloqueado, fica desbloqueado)
     private bool isUnlocked = false;
 
@@ -32,7 +32,7 @@ public class PCInteractable : InteractableObject
             return;
         }
 
-        // se j· desbloqueou antes, ou se nenhum boolean est· ativo, entra logo
+        // se j√° desbloqueou antes, ou se nenhum boolean est√° ativo, entra logo
         if (isUnlocked || (!precisaDeCartao && !precisaDePin))
         {
             OpenPC();
@@ -44,14 +44,14 @@ public class PCInteractable : InteractableObject
 
     private void TentarDesbloquear()
     {
-        // 1) cart„o primeiro, porque È uma verificaÁ„o instant‚nea (sem UI)
+        // 1) cart√£o primeiro, porque √© uma verifica√ß√£o instant√¢nea (sem UI)
         if (precisaDeCartao && !PlayerController.Instance.HasCardCredential(cardID))
         {
             StartCoroutine(AvisoCartaoEmFalta());
             return;
         }
 
-        // 2) se tambÈm precisar de pin, sÛ agora abre o teclado
+        // 2) se tamb√©m precisar de pin, s√≥ agora abre o teclado
         if (precisaDePin)
         {
             PinEntryUI.Instance.AbrirPin(
@@ -66,7 +66,7 @@ public class PCInteractable : InteractableObject
             return;
         }
 
-        // sÛ precisava de cart„o, e o cart„o est· ok
+        // s√≥ precisava de cart√£o, e o cart√£o est√° ok
         isUnlocked = true;
         OpenPC();
     }
