@@ -39,7 +39,7 @@ public class IntelInventory : MonoBehaviour
     private List<GameObject> entradasAtivas = new List<GameObject>();
     private IntelItem itemSelecionado = null;
     private string filtroAtual = "Todos";
-    
+
     // Rastreamos quantos itens ainda não foram vistos para poder colocar a notificação na interface
     private int novosNaoVistos = 0;
 
@@ -222,15 +222,42 @@ public class IntelInventory : MonoBehaviour
         if (names == null) return;
         foreach (string n in names)
         {
+            bool encontrado = false;
             foreach (var possible in allPossibleIntel)
             {
                 if (possible.name == n)
                 {
                     entradas.Add(possible);
+                    encontrado = true;
                     break;
                 }
             }
+            // se isto disparar, o intel foi guardado corretamente no save mas não está na lista
+            // "allPossibleIntel" deste componente — confirma no Inspector que o asset lá está.
+            if (!encontrado)
+                Debug.LogWarning($"[IntelInventory] Intel '{n}' estava no save mas não foi encontrado em allPossibleIntel.");
         }
         AtualizarTotalIntel();
+    }
+
+    /// <summary>
+    /// Esvazia a intel recolhida e repõe a UI do dossier, para que um "Novo Jogo" comece
+    /// mesmo do zero (sem isto, a intel da partida anterior continuava toda lá).
+    /// </summary>
+    public void ResetForNewGame()
+    {
+        entradas.Clear();
+        novosNaoVistos = 0;
+        itemSelecionado = null;
+        filtroAtual = "Todos";
+
+        if (intelDetailPanel != null) intelDetailPanel.SetActive(false);
+        if (painelVazio != null) painelVazio.SetActive(true);
+
+        AtualizarBadgeNovoIntel();
+        AtualizarTotalIntel();
+        AtualizarLista();
+
+        Debug.Log("[IntelInventory] Estado reiniciado para um novo jogo.");
     }
 }

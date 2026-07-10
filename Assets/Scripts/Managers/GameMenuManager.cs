@@ -416,9 +416,36 @@ public class GameMenuManager : MonoBehaviour {
         );
     }
 
+    // Botão "INIT_NEW_SESSION" do Menu Principal (e também usado pelo ecrã de final).
+    // Como o jogo inteiro corre numa única cena (o menu é só um overlay por cima), apagar o
+    // ficheiro de save NÃO chega — os managers continuam com o estado da partida anterior em
+    // memória. Por isso, "Novo Jogo" tem de repor esse estado explicitamente antes de ir para
+    // a criação de personagem, senão o jogador só "volta" para onde estava.
     public void OnNewGameClicked() {
         SaveManager.Instance.DeleteSave();
+        ResetGameStateForNewGame();
         GoTo(MenuState.CharacterCreation);
+    }
+
+    private void ResetGameStateForNewGame() {
+        if (GameManager.Instance != null) GameManager.Instance.ResetForNewGame();
+        if (TimeManager.Instance != null) TimeManager.Instance.ResetForNewGame();
+        if (SuspicionManager.Instance != null) SuspicionManager.Instance.ResetForNewGame();
+        if (IntelInventory.Instance != null) IntelInventory.Instance.ResetForNewGame();
+        if (DocumentManager.Instance != null) DocumentManager.Instance.ResetForNewGame();
+        if (CameraSystem.Instance != null) CameraSystem.Instance.ResetForNewGame();
+        if (FlashlightController.Instance != null) FlashlightController.Instance.ResetForNewGame();
+        if (PlayerController.Instance != null) PlayerController.Instance.ResetForNewGame();
+
+        if (DayManager.Instance != null) {
+            DayManager.Instance.SetCurrentDay(1);
+            DayManager.Instance.finalObjectiveCompleted = false;
+        }
+
+        CameraHackPuzzle.HackLevel = 0;
+
+        // NOTA: PlayerStats não precisa de reset aqui — ConfirmStats() já o sobrescreve por
+        // completo assim que a criação de personagem termina.
     }
 
     private void OnContinueClicked() {

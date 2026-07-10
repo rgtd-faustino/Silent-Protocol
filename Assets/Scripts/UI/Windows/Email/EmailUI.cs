@@ -90,6 +90,10 @@ public class EmailUI : MonoBehaviour
         btnRestaurar.onClick.AddListener(RestaurarEmailAtual);
         btnGuardarIntel.onClick.AddListener(GuardarIntelAtual);
 
+        // "Enviar Relatório" só existe no PC do jogador — este script é reutilizado por todos os PCs,
+        // por isso só regista o listener se o botão estiver mesmo atribuído no Inspector
+        if (btnEnviarRelatorio != null) btnEnviarRelatorio.onClick.AddListener(EnviarRelatorioAtual);
+
         // Botões email crítico
         if (btnDecrypt != null) btnDecrypt.onClick.AddListener(TentarDesencriptar);
         if (btnForward != null) btnForward.onClick.AddListener(ReencaminharEmailAtual);
@@ -106,15 +110,19 @@ public class EmailUI : MonoBehaviour
         AtualizarBadge();
     }
 
-    void OnDestroy() {
+    void OnDestroy()
+    {
         if (emailManager == null) return;
         emailManager.OnEmailRecebido -= OnEmailRecebido;
         GameEvent.OnCriticalEmailExpired -= OnCriticalEmailExpired;
     }
 
-    void Update() {
-        if (emailAppPanel != null && emailAppPanel.activeSelf) {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email")) {
+    void Update()
+    {
+        if (emailAppPanel != null && emailAppPanel.activeSelf)
+        {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email"))
+            {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
         }
@@ -124,13 +132,17 @@ public class EmailUI : MonoBehaviour
             ToggleApp();
 
         // countdown de auto-delete do email crítico aberto
-        if (emailSelecionado != null && emailSelecionado.isCritical && txtAutoDeleteCountdown != null) {
+        if (emailSelecionado != null && emailSelecionado.isCritical && txtAutoDeleteCountdown != null)
+        {
             float restante = emailManager.GetAutoDeleteTimeRemaining(emailSelecionado);
-            if (restante > 0f) {
+            if (restante > 0f)
+            {
                 int m = Mathf.FloorToInt(restante / 60f);
                 int s = Mathf.FloorToInt(restante % 60f);
                 txtAutoDeleteCountdown.text = $"⚠ AUTO-DELETE EM {m}m {s:00}s";
-            } else if (restante < 0f) {
+            }
+            else if (restante < 0f)
+            {
                 txtAutoDeleteCountdown.text = "";
             }
         }
@@ -148,7 +160,8 @@ public class EmailUI : MonoBehaviour
 
         if (abrir)
         {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email")) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email"))
+            {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
 
@@ -207,7 +220,8 @@ public class EmailUI : MonoBehaviour
     // Detalhe                                                               //
     // ------------------------------------------------------------------ //
 
-    private void AbrirEmail(EmailItem email) {
+    private void AbrirEmail(EmailItem email)
+    {
         emailSelecionado = email;
         email.lido = true;
         AtualizarBadge();
@@ -279,6 +293,13 @@ public class EmailUI : MonoBehaviour
         if (label != null) label.text = "Intel Guardada ✓";
     }
 
+    private void EnviarRelatorioAtual()
+    {
+        Debug.Log("[EmailUI] Relatório enviado — a acionar o final do jogo.");
+        if (GameManager.Instance != null)
+            GameManager.Instance.TriggerReportEnding();
+    }
+
     // ------------------------------------------------------------------ //
     // Badge de não-lidos                                                    //
     // ------------------------------------------------------------------ //
@@ -292,7 +313,8 @@ public class EmailUI : MonoBehaviour
             txtBadgeCount.text = naoLidos.ToString();
     }
 
-    private void OnEmailRecebido(EmailItem email) {
+    private void OnEmailRecebido(EmailItem email)
+    {
         AtualizarBadge();
         if (emailAppPanel.activeSelf && vistaAtual == Vista.Inbox)
             AtualizarLista();
@@ -302,7 +324,8 @@ public class EmailUI : MonoBehaviour
     // Email Crítico                                                         //
     // ------------------------------------------------------------------ //
 
-    private void ConfigurarEmailCritico(EmailItem email) {
+    private void ConfigurarEmailCritico(EmailItem email)
+    {
         if (criticalEmailBanner != null) criticalEmailBanner.SetActive(true);
 
         bool encriptado = email.isEncrypted && !email.desencriptado;
@@ -311,14 +334,16 @@ public class EmailUI : MonoBehaviour
         if (btnForward != null) btnForward.gameObject.SetActive(!encriptado);
         if (btnDestroyEmail != null) btnDestroyEmail.gameObject.SetActive(true);
 
-        if (encriptado && txtEncryptedHint != null) {
+        if (encriptado && txtEncryptedHint != null)
+        {
             int precisa = email.requiredKeyFragmentIDs != null ? email.requiredKeyFragmentIDs.Length : 0;
             int tem = ContarFragmentosDisponiveis(email);
             txtEncryptedHint.text = $"Encriptado — precisas de {precisa} fragmento(s) de chave.\nTens: {tem}/{precisa}";
         }
     }
 
-    private int ContarFragmentosDisponiveis(EmailItem email) {
+    private int ContarFragmentosDisponiveis(EmailItem email)
+    {
         if (email.requiredKeyFragmentIDs == null) return 0;
         int count = 0;
         List<IntelItem> colectados = IntelInventory.Instance.GetCollectedIntelItems();
@@ -328,12 +353,14 @@ public class EmailUI : MonoBehaviour
         return count;
     }
 
-    private void TentarDesencriptar() {
+    private void TentarDesencriptar()
+    {
         if (emailSelecionado == null) return;
         int precisa = emailSelecionado.requiredKeyFragmentIDs != null ? emailSelecionado.requiredKeyFragmentIDs.Length : 0;
         int tem = ContarFragmentosDisponiveis(emailSelecionado);
 
-        if (tem >= precisa) {
+        if (tem >= precisa)
+        {
             emailSelecionado.desencriptado = true;
             txtCorpo.text = emailSelecionado.corpo;
             if (encryptedOverlay != null) encryptedOverlay.SetActive(false);
@@ -341,13 +368,16 @@ public class EmailUI : MonoBehaviour
             if (btnForward != null) btnForward.gameObject.SetActive(true);
             if (txtEncryptedHint != null) txtEncryptedHint.text = "";
             Debug.Log("[EmailUI] Email desencriptado com sucesso.");
-        } else {
+        }
+        else
+        {
             if (txtEncryptedHint != null)
                 txtEncryptedHint.text = $"<color=#FF4444>Fragmentos insuficientes! ({tem}/{precisa})</color>";
         }
     }
 
-    private void ReencaminharEmailAtual() {
+    private void ReencaminharEmailAtual()
+    {
         if (emailSelecionado == null) return;
         GameManager.Instance.RegisterEndingContribution(0, emailSelecionado.emailID);
         emailManager.ApagarEmail(emailSelecionado);
@@ -357,7 +387,8 @@ public class EmailUI : MonoBehaviour
         Debug.Log("[EmailUI] Email reencaminhado — contribuição para final Denúncia.");
     }
 
-    private void DestruirEmailAtual() {
+    private void DestruirEmailAtual()
+    {
         if (emailSelecionado == null) return;
         GameManager.Instance.RegisterEndingContribution(2, emailSelecionado.emailID);
         emailManager.ApagarDefinitivamente(emailSelecionado);
@@ -367,8 +398,10 @@ public class EmailUI : MonoBehaviour
         Debug.Log("[EmailUI] Email destruído — contribuição para final Lealdade.");
     }
 
-    private void OnCriticalEmailExpired(string emailID) {
-        if (emailSelecionado != null && emailSelecionado.emailID == emailID) {
+    private void OnCriticalEmailExpired(string emailID)
+    {
+        if (emailSelecionado != null && emailSelecionado.emailID == emailID)
+        {
             emailDetailPanel.SetActive(false);
             emailSelecionado = null;
         }

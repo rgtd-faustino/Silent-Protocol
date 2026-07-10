@@ -9,13 +9,13 @@ public class GameManager : MonoBehaviour
     public int currentFloor = 0;
     public const int TotalDays = 5;
 
-    // optámos por um array de booleanos indexado diretamente pelo número do piso, assim poupamos a complexidade de um dicionário, até porque são poucos andares
+    // pisos desbloqueados por ndice (0=receo, 1=executivo, 2=servidores, 3=sutes, 4=CEO)
     private bool[] floorUnlocked = new bool[5];
 
     [Header("Final do Jogo")]
     [Tooltip("Percentagem mínima (0-100) para o jogador atingir o final bom.")]
     [SerializeField] private float endingThreshold = 50f;
-    [Tooltip("Tecla de teste para forçar o final enquanto não há um gatilho real no jogo.")]
+    [Tooltip("Tecla de teste (só ativa no Editor) para forçar o final do relatório sem esperar pelo último dia.")]
     [SerializeField] private KeyCode debugEndingKey = KeyCode.Z;
 
     private bool endingTriggered = false;
@@ -24,34 +24,42 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
     }
 
     void Start()
     {
+        // receção, andar executivo e suítes acessíveis desde o início
         UnlockFloor(0);
         UnlockFloor(1);
-        UnlockFloor(3);
+        UnlockFloor(3); // suítes (floorNumber 4 → índice 3)
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
+        GameEvent.OnPlayerExhausted += HandleExhaustion;
     }
 
     void OnDestroy()
     {
         GameEvent.OnDayEnded -= HandleDayEnd;
         GameEvent.OnGameOver -= HandleGameOver;
+        GameEvent.OnPlayerExhausted -= HandleExhaustion;
     }
 
+#if UNITY_EDITOR
     void Update()
     {
+        // tecla de teste, só existe em builds do Editor: força o final do relatório sem precisar de chegar ao último dia
         if (Input.GetKeyDown(debugEndingKey))
-            TriggerEnding();
+            TriggerReportEnding();
     }
+#endif
 
-    // o NPCManager e o player dependem disto para saber se os cálculos de raycast fazem sentido para a posição atual, senão consumíamos recursos noutros pisos
     public void SetCurrentFloor(int floorNumber)
     {
         currentFloor = floorNumber;
+        // guarda nula: se o NPCManager ainda não existir (ou não suportar este índice)
+        // a coroutine DoTravel não morre a meio e o teleporte/fecho do UI acontece na mesma
         if (NPCManager.Instance != null)
             NPCManager.Instance.SetActiveFloor(floorNumber);
         Debug.Log($"[GameManager] Jogador moveu-se para F{floorNumber}.");
@@ -63,8 +71,9 @@ public class GameManager : MonoBehaviour
 
         if (currentDay >= TotalDays)
         {
+            // o jogador chegou ao fim — decide o final consoante a percentagem de intel recolhida
             Debug.Log("[GameManager] Último dia concluído.");
-            TriggerEnding();
+            TriggerReportEnding();
             return;
         }
 
@@ -73,24 +82,57 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Dia {currentDay} começa.");
     }
 
-    // esta lógica agrupa o esforço da semana inteira e avalia-o em relação ao limiar estipulado no inspector,
-    // definindo qual o estado de narrativa a mandar para a UI final
-    private void TriggerEnding()
+    /// <summary>
+    /// Chamado quando o jogador envia o relatório final — pelo botão "Enviar Relatório" no email,
+    /// ou automaticamente no fim do último dia. Decide o final consoante a percentagem de intel
+    /// recolhida: ending 1 = final bom (percentagem >= endingThreshold), ending 2 = final mau.
+    /// </summary>
+    public void TriggerReportEnding()
     {
         if (endingTriggered) return;
-        endingTriggered = true;
 
         float percentagem = IntelInventory.Instance.GetTotalPercentage();
         int ending = percentagem >= endingThreshold ? 1 : 2;
 
-        Debug.Log($"[GameManager] Final acionado - {percentagem:F0}% (limite {endingThreshold}%) -> ending {ending}.");
-        GameEvent.EndingReached(ending);
+        Debug.Log($"[GameManager] Relatório enviado — {percentagem:F0}% (limite {endingThreshold}%) -> ending {ending}.");
+        FireEnding(ending);
     }
 
+    /// <summary>
+    /// Chamado quando a suspeita atinge o máximo (SuspicionManager -> GameEvent.OnGameOver).
+    /// O jogador foi apanhado antes de conseguir agir.
+    /// </summary>
     private void HandleGameOver()
     {
-        Debug.Log("[GameManager] Game Over.");
+        if (endingTriggered) return;
+
+        Debug.Log("[GameManager] Apanhado — suspeita atingiu o máximo.");
+        // toca o som de morte ao ser apanhado
         SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.die);
+        FireEnding(3);
+    }
+
+    /// <summary>
+    /// Chamado quando o sono acumulado atinge o estágio severo (TimeManager -> GameEvent.OnPlayerExhausted).
+    /// O jogador deixou-se ficar sem dormir tempo demais.
+    /// </summary>
+    private void HandleExhaustion()
+    {
+        if (endingTriggered) return;
+
+        Debug.Log("[GameManager] Exaustão — sono acumulado atingiu o estágio severo.");
+        FireEnding(4);
+    }
+
+    /// <summary>
+    /// Ponto único de disparo do final: garante que só um final acontece por partida,
+    /// independentemente de qual das três causas o acionou primeiro.
+    /// </summary>
+    private void FireEnding(int ending)
+    {
+        if (endingTriggered) return;
+        endingTriggered = true;
+        GameEvent.EndingReached(ending);
     }
 
     public void UnlockFloor(int index)
@@ -98,6 +140,28 @@ public class GameManager : MonoBehaviour
         if (index < 0 || index >= floorUnlocked.Length) return;
         floorUnlocked[index] = true;
         Debug.Log($"[GameManager] Piso {index} desbloqueado.");
+    }
+
+    /// <summary>
+    /// Repõe currentDay, currentFloor, pisos desbloqueados, contribuições para finais e a
+    /// flag de final já disparado, para que um "Novo Jogo" comece mesmo do zero.
+    /// </summary>
+    public void ResetForNewGame()
+    {
+        currentDay = 1;
+        currentFloor = 0;
+        endingTriggered = false;
+
+        for (int i = 0; i < floorUnlocked.Length; i++)
+            floorUnlocked[i] = false;
+        UnlockFloor(0);
+        UnlockFloor(1);
+        UnlockFloor(3);
+
+        for (int i = 0; i < endingContributions.Length; i++)
+            endingContributions[i].Clear();
+
+        Debug.Log("[GameManager] Estado reiniciado para um novo jogo.");
     }
 
     public bool IsFloorUnlocked(int index)
@@ -108,10 +172,14 @@ public class GameManager : MonoBehaviour
 
     private void SaveProgress()
     {
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.Save();
+
         Debug.Log($"[GameManager] Progresso guardado (dia {currentDay}).");
     }
 
-    // listas separadas para cada fação final. guardamos o ID do source (como um documento específico) para o jogador não poder farmar a mesma decisão várias vezes
+    // --- sistema de contribuições para finais ---
+    // índice 0 = Denúncia, 1 = Extorsão, 2 = Lealdade
     private List<string>[] endingContributions = new List<string>[3] {
         new List<string>(), new List<string>(), new List<string>()
     };
@@ -132,6 +200,7 @@ public class GameManager : MonoBehaviour
         return endingContributions[endingIndex].Count;
     }
 
+    // --- getters e setters para o SaveManager ---
     public bool[] GetFloorsUnlocked() { return (bool[])floorUnlocked.Clone(); }
 
     public void SetFloorsUnlocked(bool[] floors)

@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
 
     public static PlayerController Instance;
 
@@ -14,17 +15,24 @@ public class PlayerController : MonoBehaviour {
 
     [HideInInspector] public List<string> unlockedCardIDs = new List<string>();
 
-    public void AddCardCredential(string cardID) {
-        if (!unlockedCardIDs.Contains(cardID)) {
+    public void AddCardCredential(string cardID)
+    {
+        if (!unlockedCardIDs.Contains(cardID))
+        {
             unlockedCardIDs.Add(cardID);
         }
     }
 
-    public bool HasCardCredential(string cardID) {
+    public bool HasCardCredential(string cardID)
+    {
         return unlockedCardIDs.Contains(cardID);
     }
 
     public Transform cameraTransform;
+
+    [Header("Novo Jogo")]
+    [Tooltip("Transform para onde o jogador é teleportado ao começar um Novo Jogo (ex: a receção). Arrasta aqui no Inspector.")]
+    [SerializeField] private Transform defaultSpawnPoint;
 
     // Colocamos isto a false a partir dos scripts de UI quando abrimos o PC ou tentamos abrir uma fechadura, bloqueando assim o input do jogador. Os mesmos scripts repõem a variável a true no fim.
     public bool canMoveRotate = true;
@@ -46,14 +54,17 @@ public class PlayerController : MonoBehaviour {
     private float yVelocity = 0f;
     private float gravity = -9.81f;
 
-    void Awake() {
-        if (Instance != null && Instance != this) {
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
             Destroy(gameObject); return;
         }
         Instance = this;
     }
 
-    void Start() {
+    void Start()
+    {
         cc = GetComponent<CharacterController>();
         camScript = cameraTransform.GetComponent<CameraScript>();
         animator = GetComponent<Animator>();
@@ -62,12 +73,14 @@ public class PlayerController : MonoBehaviour {
         GameEvent.OnNightStarted += OnNightStarted;
 
         // Fomos buscar a Força ao PlayerStats para calcularmos logo no início um pequeno bónus na velocidade máxima de corrida.
-        if (PlayerStats.Instance != null) {
+        if (PlayerStats.Instance != null)
+        {
             RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
         }
     }
 
-    void OnDestroy() {
+    void OnDestroy()
+    {
         GameEvent.OnNightStarted -= OnNightStarted;
     }
 
@@ -94,24 +107,55 @@ public class PlayerController : MonoBehaviour {
     }
 
     // Bloqueamos a corrida se o jogador estiver agachado. Comunicamos com o TutorialManager para dar o passo como concluído se estiver na fase certa.
-    private void HandleRunning() {
+    private void HandleRunning()
+    {
         bool wasRunning = isRunning;
         isRunning = !isCrouching && Input.GetKey(KeyCode.LeftShift) && IsPlayerMoving();
-        
-        if (isRunning && !wasRunning) {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_run")) {
+
+        if (isRunning && !wasRunning)
+        {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_run"))
+            {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
         }
     }
 
-    public void PickupDocument(DocumentTaskData data) {
+    public void PickupDocument(DocumentTaskData data)
+    {
         heldDocument = data;
         SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.apanharPapel);
     }
 
+    /// <summary>
+    /// Repõe documentos na mão, cartões desbloqueados, posse da lanterna e teleporta o jogador
+    /// para o defaultSpawnPoint, para que um "Novo Jogo" comece mesmo do zero.
+    /// </summary>
+    public void ResetForNewGame()
+    {
+        heldDocument = null;
+        hasFlashlight = false;
+        unlockedCardIDs.Clear();
+        inSusPlace = false;
+
+        if (defaultSpawnPoint != null)
+        {
+            if (cc != null) cc.enabled = false;
+            transform.position = defaultSpawnPoint.position;
+            transform.eulerAngles = new Vector3(0f, defaultSpawnPoint.eulerAngles.y, 0f);
+            if (cc != null) cc.enabled = true;
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerController] defaultSpawnPoint não está atribuído — a posição do jogador não foi reposta no Novo Jogo.");
+        }
+
+        Debug.Log("[PlayerController] Estado reiniciado para um novo jogo.");
+    }
+
     // Usámos GetAxisRaw em vez de GetAxis para anularmos a aceleração nativa do Unity. Dá uma sensação muito mais responsiva nos controlos de movimento.
-    private void HandleMovement() {
+    private void HandleMovement()
+    {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         Vector3 move = transform.right * x + transform.forward * z;
@@ -125,61 +169,78 @@ public class PlayerController : MonoBehaviour {
     }
 
     // Tratamos apenas da rotação horizontal. O olhar vertical ficou isolado no CameraScript para o modelo do jogador não inclinar.
-    private void HandleRotation() {
+    private void HandleRotation()
+    {
         float mouseX = Input.GetAxis("Mouse X") * camScript.mouseSensitivity * Time.deltaTime;
         transform.Rotate(Vector3.up * mouseX);
     }
 
     // Tivemos de adaptar a altura e o centro do collider dependendo da pose da animação para garantir que a hitbox física bate certo com a malha 3D. Os valores foram definidos empiricamente.
-    private void HandleCrouch() {
-        if (Input.GetKeyDown(KeyCode.LeftControl)) {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_crouch")) {
+    private void HandleCrouch()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_crouch"))
+            {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
             isCrouching = !isCrouching;
             animator.SetBool("Crouch", isCrouching);
         }
 
-        if (isCrouching) {
+        if (isCrouching)
+        {
             float x = Input.GetAxisRaw("Horizontal");
             float z = Input.GetAxisRaw("Vertical");
 
-            if (x != 0 && z == 0) {
+            if (x != 0 && z == 0)
+            {
                 cc.height = 1.37f; cc.center = new Vector3(0, 0.67f, 0);
-            } else if (z != 0) {
+            }
+            else if (z != 0)
+            {
                 cc.height = 1.43f; cc.center = new Vector3(0, 0.7f, 0);
-            } else {
+            }
+            else
+            {
                 cc.height = 0.94f; cc.center = new Vector3(0, 0.46f, 0);
             }
-        } else {
+        }
+        else
+        {
             cc.height = 1.8f;
             cc.center = new Vector3(0, 0.86f, 0);
         }
     }
 
-    private void HandleGravity() {
+    private void HandleGravity()
+    {
         yVelocity += gravity * Time.deltaTime;
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
     }
 
-    private void OnNightStarted() {
+    private void OnNightStarted()
+    {
 
     }
 
     // Fornecemos o raio atual ao NPCScript que o vai consumir a cada frame para calcular a distância do som. Multiplicamos o valor pelo inverso da Agilidade para dar utilidade ao atributo.
-    public float GetNoiseRadius() {
+    public float GetNoiseRadius()
+    {
         float radius = normalNoiseRadius;
         if (isCrouching) radius = crouchNoiseRadius;
         else if (isRunning) radius = runNoiseRadius;
 
-        if (PlayerStats.Instance != null) {
+        if (PlayerStats.Instance != null)
+        {
             radius *= (1f - PlayerStats.Instance.GetAgilidade() * 0.05f);
         }
-        
+
         return radius;
     }
 
-    public bool IsPlayerMoving() {
+    public bool IsPlayerMoving()
+    {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
         return x != 0 || z != 0;
@@ -187,12 +248,14 @@ public class PlayerController : MonoBehaviour {
 
     public bool IsRunning() => isRunning;
 
-    private void OnTriggerEnter(Collider other) {
+    private void OnTriggerEnter(Collider other)
+    {
         if (other.CompareTag("SusPlace"))
             inSusPlace = true;
     }
 
-    private void OnTriggerExit(Collider other) {
+    private void OnTriggerExit(Collider other)
+    {
         if (other.CompareTag("SusPlace"))
             inSusPlace = false;
     }

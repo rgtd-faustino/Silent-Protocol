@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class CameraSystem : MonoBehaviour {
+public class CameraSystem : MonoBehaviour
+{
     public static CameraSystem Instance;
 
     public SurveillanceCamera[] allCameras; // todas as camaras de vigilancia
@@ -23,27 +24,33 @@ public class CameraSystem : MonoBehaviour {
     [HideInInspector] public float signalIntegrity = 1f;
     [HideInInspector] public bool[] cameraUnlocked; // para dizer se a camara já está desbloeuqada ou ainda nao
 
-    public SurveillanceCamera ActiveCamera() {
+    public SurveillanceCamera ActiveCamera()
+    {
         return allCameras[currentCameraIndex];
     }
 
-    public int CameraCount() {
+    public int CameraCount()
+    {
         return allCameras.Length;
     }
 
-    public void SetCameraUnlocked(bool[] data) { 
-        cameraUnlocked = data; 
+    public void SetCameraUnlocked(bool[] data)
+    {
+        cameraUnlocked = data;
     }
 
-    void Awake() {
-        if (Instance != null && Instance != this) {
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
             Destroy(gameObject);
             return;
         }
         Instance = this;
     }
 
-    void Start() {
+    void Start()
+    {
         // inicializar cada camara
         cameraUnlocked = new bool[allCameras.Length];
 
@@ -54,17 +61,21 @@ public class CameraSystem : MonoBehaviour {
         GameEvent.OnDayChanged += OnDayChangedHandler;
     }
 
-    void OnDestroy() {
+    void OnDestroy()
+    {
         GameEvent.OnDayChanged -= OnDayChangedHandler;
     }
 
     // função simples para resetar o tempo assistido
-    void OnDayChangedHandler(int unused) {
+    void OnDayChangedHandler(int unused)
+    {
         cumulativeWatchSeconds = 0f;
     }
 
-    void Update() {
-        if (isActive && !CameraHackPuzzle.Instance.active && IsUnlocked(currentCameraIndex)) {
+    void Update()
+    {
+        if (isActive && !CameraHackPuzzle.Instance.active && IsUnlocked(currentCameraIndex))
+        {
             float dt = Time.deltaTime;
             cumulativeWatchSeconds += dt;
 
@@ -78,7 +89,9 @@ public class CameraSystem : MonoBehaviour {
             float targetIntegrity = Mathf.Lerp(1f, 0.15f, overuseFactor + residualHeat * 0.4f);
             signalIntegrity = Mathf.MoveTowards(signalIntegrity, targetIntegrity, 0.3f * dt);
 
-        } else {
+        }
+        else
+        {
             // camara fechada, deixa de ser uma origem de suspeita e recobre o sinal e resíduo cai
             SuspicionManager.Instance.StopIncreasingSuspicion(GetInstanceID());
             signalIntegrity = Mathf.MoveTowards(signalIntegrity, 1f, signalRecoveryRate * Time.deltaTime);
@@ -87,8 +100,9 @@ public class CameraSystem : MonoBehaviour {
 
     }
 
-    public void OpenCameraView() {
-        if (isActive) 
+    public void OpenCameraView()
+    {
+        if (isActive)
             return;
 
         isActive = true;
@@ -98,8 +112,9 @@ public class CameraSystem : MonoBehaviour {
         CameraViewUI.Instance.Show(this);
     }
 
-    public void CloseCameraView() {
-        if (!isActive) 
+    public void CloseCameraView()
+    {
+        if (!isActive)
             return;
 
         isActive = false;
@@ -108,7 +123,8 @@ public class CameraSystem : MonoBehaviour {
         PlayerController.Instance.canMoveRotate = true;
     }
 
-    public void NextCamera() {
+    public void NextCamera()
+    {
         currentCameraIndex = (currentCameraIndex + 1) % allCameras.Length;
 
         if (IsUnlocked(currentCameraIndex))
@@ -120,7 +136,8 @@ public class CameraSystem : MonoBehaviour {
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }
 
-    public void PreviousCamera() {
+    public void PreviousCamera()
+    {
         currentCameraIndex = (currentCameraIndex - 1 + allCameras.Length) % allCameras.Length;
 
         if (IsUnlocked(currentCameraIndex))
@@ -132,8 +149,9 @@ public class CameraSystem : MonoBehaviour {
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }
 
-    public void SwitchToCamera(int index) {
-        if (index < 0 || index >= allCameras.Length) 
+    public void SwitchToCamera(int index)
+    {
+        if (index < 0 || index >= allCameras.Length)
             return;
 
         currentCameraIndex = index;
@@ -141,14 +159,34 @@ public class CameraSystem : MonoBehaviour {
     }
 
 
-    public bool IsUnlocked(int index) {
+    public bool IsUnlocked(int index)
+    {
         return index >= 0 && index < cameraUnlocked.Length && cameraUnlocked[index];
     }
 
-    public void UnlockCamera(int index) {
+    public void UnlockCamera(int index)
+    {
         if (index < 0 || index >= cameraUnlocked.Length)
             return;
 
         cameraUnlocked[index] = true;
+    }
+
+    /// <summary>
+    /// Repõe as câmaras para o estado inicial (todas trancadas, sem calor residual nem
+    /// degradação de sinal), para que um "Novo Jogo" comece mesmo do zero.
+    /// </summary>
+    public void ResetForNewGame()
+    {
+        isActive = false;
+        currentCameraIndex = 0;
+        cumulativeWatchSeconds = 0f;
+        residualHeat = 0f;
+        signalIntegrity = 1f;
+
+        if (allCameras != null)
+            cameraUnlocked = new bool[allCameras.Length];
+
+        Debug.Log("[CameraSystem] Estado reiniciado para um novo jogo.");
     }
 }
