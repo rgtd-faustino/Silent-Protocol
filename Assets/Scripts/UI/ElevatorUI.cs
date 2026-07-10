@@ -24,6 +24,18 @@ public class ElevatorUI : MonoBehaviour
     public TextMeshProUGUI detFeat3;
     public GameObject detLocked;
 
+    [Header("Credential Access")]
+    public GameObject credentialPanel;
+    public TMP_InputField credentialInput;
+    public Button credentialSubmitButton;
+    public TextMeshProUGUI credentialError;
+
+    [Header("Credenciais (definir no Inspector)")]
+    [Tooltip("Credencial correta para desbloquear o Piso 3 (SERVIDORES)")]
+    [SerializeField] private string credentialFloor3 = "";
+    [Tooltip("Credencial correta para desbloquear o Piso 5 (CEO)")]
+    [SerializeField] private string credentialFloor5 = "";
+
     [Header("Floor Buttons")]
     public Button[] floorButtons; // index 0 = F5, 1 = F4, ..., 4 = F1
 
@@ -71,8 +83,9 @@ public class ElevatorUI : MonoBehaviour
         public string clearance;
         public string[] features;
         public bool locked;
+        public string requiredCredential;
 
-        public FloorData(int num, string lbl, string full, string desc, string acc, string clr, string[] feats, bool locked)
+        public FloorData(int num, string lbl, string full, string desc, string acc, string clr, string[] feats, bool locked, string credential = "")
         {
             floorNumber = num;
             label = lbl;
@@ -82,6 +95,7 @@ public class ElevatorUI : MonoBehaviour
             clearance = clr;
             features = feats;
             this.locked = locked;
+            requiredCredential = credential;
         }
     }
 
@@ -91,7 +105,7 @@ public class ElevatorUI : MonoBehaviour
         {
             new FloorData(5, "CEO", "PISO DO CEO", "Acesso reservado ao CEO. Credencial biométrica obrigatória.",
                 "BLOQUEADO", "NÍVEL-5 MÁXIMO", new[]{"SALA DE REUNIÕES EXECUTIVA","COFRE DE DADOS","TERMINAL SEGURO"},
-                locked: true),
+                locked: true, credential: credentialFloor5),
 
             new FloorData(4, "SUÍTES", "ANDAR DAS SUÍTES", "Dormitórios. Infiltração noturna. Risco elevado — câmaras e guardas.",
                 "RESTRITO",  "NÍVEL-3 REQUERIDO", new[]{"DORMITÓRIOS PRIVADOS","ARMAZENAMENTO PESSOAL","CREDENCIAIS"},
@@ -99,7 +113,7 @@ public class ElevatorUI : MonoBehaviour
 
             new FloorData(3, "SERVIDORES", "ANDAR DOS SERVIDORES", "Centro técnico. Alto risco. Patrulhas frequentes. Câmaras 24h.",
                 "BLOQUEADO", "NÍVEL-4 REQUERIDO", new[]{"RACKS DE SERVIDORES","TERMINAIS TÉCNICOS","PUZZLES DE REDE"},
-                locked: true),
+                locked: true, credential: credentialFloor3),
 
             new FloorData(2, "EXECUTIVO",  "ANDAR EXECUTIVO", "Área principal de trabalho. Manter aparência produtiva.",
                 "LIVRE",     "NÍVEL-1 PADRÃO", new[]{"POSTO DE TRABALHO","SALA DE REUNIÕES","IMPRESSORAS / FAX"},
@@ -113,6 +127,12 @@ public class ElevatorUI : MonoBehaviour
         SetCarPosition(currentFloor, true);
         ClearDetails();
         SyncLockedStates();
+
+        if (credentialSubmitButton != null)
+            credentialSubmitButton.onClick.AddListener(OnCredentialSubmit);
+
+        if (credentialInput != null)
+            credentialInput.onSubmit.AddListener(_ => OnCredentialSubmit());
     }
 
     void Update()
@@ -148,6 +168,7 @@ public class ElevatorUI : MonoBehaviour
         gameObject.SetActive(false);
         selectedFloor = -1;
         ClearDetails();
+        if (credentialPanel != null) credentialPanel.SetActive(false);
         confirmButton.interactable = false;
         PlayerController.Instance.canMoveRotate = true;
         Cursor.lockState = CursorLockMode.Locked;
@@ -187,6 +208,79 @@ public class ElevatorUI : MonoBehaviour
             return;
 
         StartCoroutine(DoTravel());
+    }
+
+    public void OnCredentialSubmit()
+    {
+        if (selectedFloor < 0 || isMoving)
+            return;
+
+        FloorData d = floors[selectedFloor];
+
+        // se por alguma razão o piso já não precisar de credencial, ignora
+        if (!d.locked || string.IsNullOrEmpty(d.requiredCredential) || credentialInput == null)
+            return;
+
+        string entered = credentialInput.text.Trim();
+        bool correct = string.Equals(entered, d.requiredCredential, System.StringComparison.OrdinalIgnoreCase);
+
+        if (correct)
+        {
+            StartCoroutine(UnlockAndTravel(selectedFloor));
+        }
+        else
+        {
+            if (credentialError != null)
+            {
+                credentialError.gameObject.SetActive(true);
+                credentialError.text = "> ACESSO NEGADO — CREDENCIAL INVÁLIDA";
+                credentialError.color = ElevatorColors.Red;
+            }
+            credentialInput.text = "";
+            credentialInput.ActivateInputField();
+        }
+    }
+
+    IEnumerator UnlockAndTravel(int index)
+    {
+        FloorData d = floors[index];
+
+        // desbloqueia para o resto da sessão (reseta ao reiniciar o jogo,
+        // porque o estado vive no GameManager em memória)
+        d.locked = false;
+        GameManager.Instance.UnlockFloor(d.floorNumber - 1);
+
+        if (credentialError != null)
+        {
+            credentialError.text = "> ACESSO CONCEDIDO";
+            credentialError.color = ElevatorColors.Green;
+        }
+
+        detTitle.color = ElevatorColors.Green;
+        detSubtitle.color = ElevatorColors.Green;
+        txtStatusDest.color = ElevatorColors.Green;
+        confirmButton.interactable = true;
+
+        UpdateFloorButtonVisual(index);
+
+        yield return new WaitForSecondsRealtime(0.6f);
+
+        if (credentialPanel != null) credentialPanel.SetActive(false);
+        detLocked.SetActive(false);
+
+        yield return StartCoroutine(DoTravel());
+    }
+
+    // Tenta pintar de verde o texto do botão do piso correspondente,
+    // caso os botões de piso tenham um TextMeshProUGUI como filho.
+    void UpdateFloorButtonVisual(int index)
+    {
+        if (floorButtons == null || index < 0 || index >= floorButtons.Length)
+            return;
+
+        var btnText = floorButtons[index].GetComponentInChildren<TextMeshProUGUI>();
+        if (btnText != null)
+            btnText.color = ElevatorColors.Green;
     }
 
     IEnumerator DoTravel()
@@ -296,11 +390,36 @@ public class ElevatorUI : MonoBehaviour
         detSubtitle.text = $"{d.access}  //  {d.clearance}";
         detSubtitle.color = color;
         detDesc.text = d.description;
-        detFeatLabel.text = "INFRAESTRUTURA DISPONÍVEL:";
-        detFeat1.text = $"— {d.features[0]}";
-        detFeat2.text = $"— {d.features[1]}";
-        detFeat3.text = $"— {d.features[2]}";
-        detLocked.SetActive(d.locked);
+
+        bool needsCredential = d.locked && !string.IsNullOrEmpty(d.requiredCredential);
+
+        if (needsCredential)
+        {
+            detFeatLabel.text = "";
+            detFeat1.text = detFeat2.text = detFeat3.text = "";
+            detLocked.SetActive(true);
+
+            if (credentialPanel != null)
+            {
+                credentialPanel.SetActive(true);
+                if (credentialInput != null)
+                {
+                    credentialInput.text = "";
+                    credentialInput.Select();
+                    credentialInput.ActivateInputField();
+                }
+            }
+        }
+        else
+        {
+            detFeatLabel.text = "INFRAESTRUTURA DISPONÍVEL:";
+            detFeat1.text = $"— {d.features[0]}";
+            detFeat2.text = $"— {d.features[1]}";
+            detFeat3.text = $"— {d.features[2]}";
+            detLocked.SetActive(d.locked);
+
+            if (credentialPanel != null) credentialPanel.SetActive(false);
+        }
     }
 
     void ShowTransit(int from, int to)
@@ -313,6 +432,7 @@ public class ElevatorUI : MonoBehaviour
         detFeatLabel.text = "";
         detFeat1.text = detFeat2.text = detFeat3.text = "";
         detLocked.SetActive(false);
+        if (credentialPanel != null) credentialPanel.SetActive(false);
     }
 
     void ShowArrived(FloorData d)
@@ -324,6 +444,7 @@ public class ElevatorUI : MonoBehaviour
         detDesc.text = detFeatLabel.text = "";
         detFeat1.text = detFeat2.text = detFeat3.text = "";
         detLocked.SetActive(false);
+        if (credentialPanel != null) credentialPanel.SetActive(false);
     }
 
     void TeleportToFloor(int floorNumber)
@@ -395,6 +516,7 @@ public class ElevatorUI : MonoBehaviour
         detFeatLabel.text = "";
         detFeat1.text = detFeat2.text = detFeat3.text = "";
         detLocked.SetActive(false);
+        if (credentialPanel != null) credentialPanel.SetActive(false);
     }
 
     // Método público para o GameManager desbloquear pisos

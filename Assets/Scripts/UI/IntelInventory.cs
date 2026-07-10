@@ -83,7 +83,7 @@ public class IntelInventory : MonoBehaviour
         AtualizarTotalIntel();
     }
 
-   
+
 
     // ------------------------------------------------------------------ //
     // API pública                                                           //
@@ -96,7 +96,8 @@ public class IntelInventory : MonoBehaviour
 
         if (abrir)
         {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_dossier")) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_dossier"))
+            {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
 
@@ -134,6 +135,19 @@ public class IntelInventory : MonoBehaviour
     }
 
     public int GetTotalIntel() => entradas.Count;
+
+    /// <summary>
+    /// Soma a percentagem de contribuição de todas as intels já recolhidas (0-100).
+    /// Usado pelo GameManager para decidir o final do jogo.
+    /// </summary>
+    public float GetTotalPercentage()
+    {
+        float total = 0f;
+        foreach (var item in entradas)
+            total += item.percentagemContribuicao;
+
+        return Mathf.Clamp(total, 0f, 100f);
+    }
 
     // ------------------------------------------------------------------ //
     // Filtro e Lista                                                        //
@@ -178,7 +192,7 @@ public class IntelInventory : MonoBehaviour
         });
     }
 
-   
+
 
     // ------------------------------------------------------------------ //
     // Detalhe                                                               //
@@ -234,9 +248,11 @@ public class IntelInventory : MonoBehaviour
     [Header("Save System")]
     public IntelItem[] allPossibleIntel;
 
-    public List<string> GetCollectedIntelNames() {
+    public List<string> GetCollectedIntelNames()
+    {
         List<string> names = new List<string>();
-        foreach (var item in entradas) {
+        foreach (var item in entradas)
+        {
             names.Add(item.name);
         }
         return names;
@@ -244,12 +260,16 @@ public class IntelInventory : MonoBehaviour
 
     public List<IntelItem> GetCollectedIntelItems() => new List<IntelItem>(entradas);
 
-    public void RestoreIntelFromNames(List<string> names) {
+    public void RestoreIntelFromNames(List<string> names)
+    {
         entradas.Clear();
         if (names == null) return;
-        foreach (string n in names) {
-            foreach (var possible in allPossibleIntel) {
-                if (possible.name == n) {
+        foreach (string n in names)
+        {
+            foreach (var possible in allPossibleIntel)
+            {
+                if (possible.name == n)
+                {
                     entradas.Add(possible);
                     break;
                 }

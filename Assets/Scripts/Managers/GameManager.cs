@@ -12,6 +12,14 @@ public class GameManager : MonoBehaviour
     // pisos desbloqueados por ndice (0=receo, 1=executivo, 2=servidores, 3=sutes, 4=CEO)
     private bool[] floorUnlocked = new bool[5];
 
+    [Header("Final do Jogo")]
+    [Tooltip("Percentagem mínima (0-100) para o jogador atingir o final bom.")]
+    [SerializeField] private float endingThreshold = 50f;
+    [Tooltip("Tecla de teste para forçar o final enquanto não há um gatilho real no jogo.")]
+    [SerializeField] private KeyCode debugEndingKey = KeyCode.Z;
+
+    private bool endingTriggered = false;
+
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -36,6 +44,13 @@ public class GameManager : MonoBehaviour
         GameEvent.OnGameOver -= HandleGameOver;
     }
 
+    void Update()
+    {
+        // TODO: remover quando existir um gatilho real de fim de jogo — por agora, Z força o final para testes
+        if (Input.GetKeyDown(debugEndingKey))
+            TriggerEnding();
+    }
+
     public void SetCurrentFloor(int floorNumber)
     {
         currentFloor = floorNumber;
@@ -52,15 +67,31 @@ public class GameManager : MonoBehaviour
 
         if (currentDay >= TotalDays)
         {
-            // o jogador chegou ao fim — vai para o ecrã de escolha de final
-            // (lógica de final a implementar quando o sistema de intel estiver pronto)
+            // o jogador chegou ao fim — decide o final consoante a percentagem de intel recolhida
             Debug.Log("[GameManager] Último dia concluído.");
+            TriggerEnding();
             return;
         }
 
         currentDay++;
         GameEvent.DayChanged(currentDay);
         Debug.Log($"[GameManager] Dia {currentDay} começa.");
+    }
+
+    /// <summary>
+    /// Decide e dispara o final do jogo com base na percentagem total de intel recolhida.
+    /// ending 1 = final bom (percentagem >= endingThreshold), ending 2 = final mau.
+    /// </summary>
+    private void TriggerEnding()
+    {
+        if (endingTriggered) return;
+        endingTriggered = true;
+
+        float percentagem = IntelInventory.Instance.GetTotalPercentage();
+        int ending = percentagem >= endingThreshold ? 1 : 2;
+
+        Debug.Log($"[GameManager] Final acionado — {percentagem:F0}% (limite {endingThreshold}%) -> ending {ending}.");
+        GameEvent.EndingReached(ending);
     }
 
     private void HandleGameOver()
@@ -96,15 +127,18 @@ public class GameManager : MonoBehaviour
         new List<string>(), new List<string>(), new List<string>()
     };
 
-    public void RegisterEndingContribution(int endingIndex, string sourceID) {
+    public void RegisterEndingContribution(int endingIndex, string sourceID)
+    {
         if (endingIndex < 0 || endingIndex >= 3) return;
-        if (!endingContributions[endingIndex].Contains(sourceID)) {
+        if (!endingContributions[endingIndex].Contains(sourceID))
+        {
             endingContributions[endingIndex].Add(sourceID);
             Debug.Log($"[GameManager] Contribuição para final {endingIndex}: {sourceID}. Total: {endingContributions[endingIndex].Count}");
         }
     }
 
-    public int GetEndingContributionCount(int endingIndex) {
+    public int GetEndingContributionCount(int endingIndex)
+    {
         if (endingIndex < 0 || endingIndex >= 3) return 0;
         return endingContributions[endingIndex].Count;
     }

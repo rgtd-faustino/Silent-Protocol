@@ -18,18 +18,18 @@ MonoBehaviour:
   remetente: rh@nexus.com
   dataHora: 2047-03-12  08:00
   corpo: "Bem-vindo \xE0 Nexus Corp, Alex. A tua secret\xE1ria \xE9 esquerda do elevador
-    no andar de trabalho. O teu PIN de acesso ao quarto nos dormit\xF3rios \xE9 66219. 
-    \u2014 Recursos Humanos"
+    no andar de trabalho. O teu PIN de acesso ao quarto (3 Esquerdo) nos dormit\xF3rios
+    \xE9 66219.  \u2014 Recursos Humanos"
   diaParaAparecer: 1
   spawnHour: 8
   irParaLixoDirectamente: 0
-  temIntel: 0
-  intelAssociado: {fileID: 0}
+  temIntel: 1
+  intelAssociado: {fileID: 11400000, guid: a28825ad783076c449dc8e2ca2bc9970, type: 2}
   isCritical: 0
   isEncrypted: 0
   autoDeleteGameMinutes: 0
   requiredKeyFragmentIDs: []
-  entregue: 0
-  lido: 0
+  entregue: 1
+  lido: 1
   apagado: 0
   desencriptado: 0

@@ -20,7 +20,7 @@ MonoBehaviour:
   corpo: "Estou a considerar falar com algu\xE9m de fora. O projeto H\xE9lix \xE9..."
   diaParaAparecer: 1
   spawnHour: 0
-  irParaLixoDirectamente: 0
+  irParaLixoDirectamente: 1
   temIntel: 0
   intelAssociado: {fileID: 0}
   isCritical: 0

@@ -11,4 +11,9 @@ public class IntelItem : ScriptableObject
     [Header("Fragmento de Chave (emails encriptados)")]
     public bool isKeyFragment;
     public string keyFragmentID;
+
+    [Header("Contribuição para o Final")]
+    [Tooltip("Quanto esta intel contribui para a percentagem total no final do jogo.")]
+    [Range(0f, 100f)]
+    public float percentagemContribuicao = 0f;
 }

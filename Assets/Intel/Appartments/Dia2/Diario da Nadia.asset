@@ -18,6 +18,7 @@ MonoBehaviour:
   conteudo: "DIa 47. Continuo a processar estas faturas. +$50M no total para este
     tal de \"Group Helix\". A Diana diz me para n\xE3o fazer pergntas... Fazer o
     que?.\nGuardo uma c\xF3pia no cofre so por precau\xE7\xE3o. Este pin ta sempre
-    a mudar o deste vez \xE9 1989..\n\n(PIN Cofre 1989)"
+    a mudar o deste vez \xE9 19891..\n\n(PIN Cofre 19891)"
   isKeyFragment: 0
   keyFragmentID: 
+  percentagemContribuicao: 1

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba6c7780d394a6747abe8c64cf97d945, type: 3}
+  m_Name: FimJogo
+  m_EditorClassIdentifier: Assembly-CSharp::EmailItem
+  emailID: "Finliza\xE7\xE3o"
+  titulo: "A espera de Confirma\xE7\xE3o"
+  remetenteNome: .....
+  remetente: ..........@.....com
+  dataHora: 
+  corpo: "J\xE1 os tens? N\xE3o te esquecas do prazo... Tem aten\xE7\xE3o aos meninos.
+    Se eles n aparecerem j\xE1 sabes "
+  diaParaAparecer: 1
+  spawnHour: 0
+  irParaLixoDirectamente: 0
+  temIntel: 0
+  intelAssociado: {fileID: 11400000, guid: b7625333db846a6499bee6fb28090bc5, type: 2}
+  isCritical: 1
+  isEncrypted: 0
+  autoDeleteGameMinutes: 0
+  requiredKeyFragmentIDs: []
+  entregue: 0
+  lido: 0
+  apagado: 0
+  desencriptado: 0

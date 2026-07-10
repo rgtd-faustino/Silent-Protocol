@@ -21,14 +21,13 @@ MonoBehaviour:
     coia me acontecer... olha para os arquivos do PC3.
   diaParaAparecer: 1
   spawnHour: 8
-  irParaLixoDirectamente: 1
+  irParaLixoDirectamente: 0
   temIntel: 0
   intelAssociado: {fileID: 0}
   isCritical: 1
-  isEncrypted: 1
-  autoDeleteGameMinutes: 100000
-  requiredKeyFragmentIDs:
-  - frag_datacenter
+  isEncrypted: 0
+  autoDeleteGameMinutes: 0
+  requiredKeyFragmentIDs: []
   entregue: 0
   lido: 0
   apagado: 0

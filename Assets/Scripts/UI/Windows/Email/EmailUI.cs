@@ -40,6 +40,7 @@ public class EmailUI : MonoBehaviour
     public Button btnApagar;
     public Button btnRestaurar;
     public Button btnGuardarIntel;
+    public Button btnEnviarRelatorio;
 
     [Header("Email Crítico")]
     public GameObject criticalEmailBanner;         // banner vermelho no topo

@@ -3,7 +3,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EndingUI : MonoBehaviour {
+public class EndingUI : MonoBehaviour
+{
 
     [Header("Painel Filho")]
     [SerializeField] private GameObject endingPanel;         // o filho com toda a UI
@@ -31,6 +32,7 @@ public class EndingUI : MonoBehaviour {
 
     [Header("Intel")]
     [SerializeField] private TextMeshProUGUI txtIntelRecolhida;
+    [SerializeField] private TextMeshProUGUI txtPercentagemFinal;
 
     [Header("Câmaras")]
     [SerializeField] private TextMeshProUGUI txtCamerasDesbloqueadas;
@@ -63,20 +65,23 @@ public class EndingUI : MonoBehaviour {
         "Devias ter agido."
     };
 
-    void Awake() {
+    void Awake()
+    {
         endingPanel.SetActive(false); // esconde o filho — sem CanvasGroup no root, sem blocksRaycasts
     }
 
     void OnEnable() { GameEvent.OnEndingReached += HandleEnding; }
     void OnDisable() { GameEvent.OnEndingReached -= HandleEnding; }
 
-    private void HandleEnding(int ending) {
+    private void HandleEnding(int ending)
+    {
         StartCoroutine(ShowEnding(ending));
     }
 
     // ─── Mostrar ────────────────────────────────────────────────────────────────
 
-    private IEnumerator ShowEnding(int ending) {
+    private IEnumerator ShowEnding(int ending)
+    {
         PlayerController.Instance.canMoveRotate = false;
         UIManager.Instance.ChangeCursorState(CursorLockMode.None);
 
@@ -88,7 +93,8 @@ public class EndingUI : MonoBehaviour {
         endingCanvasGroup.alpha = 0f;
 
         float elapsed = 0f;
-        while (elapsed < fadeInDuration) {
+        while (elapsed < fadeInDuration)
+        {
             elapsed += Time.deltaTime;
             endingCanvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeInDuration);
             yield return null;
@@ -99,23 +105,28 @@ public class EndingUI : MonoBehaviour {
     // ─── Botões do EndingPanel ───────────────────────────────────────────────────
     // Liga ESTES métodos aos botões, não os do GameMenuManager directamente
 
-    public void OnEndingNewGame() {
+    public void OnEndingNewGame()
+    {
         StartCoroutine(HideThen(() => GameMenuManager.Instance.OnNewGameClicked()));
     }
 
-    public void OnEndingMainMenu() {
+    public void OnEndingMainMenu()
+    {
         StartCoroutine(HideThen(() => GameMenuManager.Instance.GoToMainMenu()));
     }
 
-    public void OnEndingQuit() {
+    public void OnEndingQuit()
+    {
         GameMenuManager.Instance.OnQuitClicked(); // quit não precisa de fade
     }
 
     // ─── Fade out + callback ─────────────────────────────────────────────────────
 
-    private IEnumerator HideThen(System.Action callback) {
+    private IEnumerator HideThen(System.Action callback)
+    {
         float elapsed = 0f;
-        while (elapsed < fadeOutDuration) {
+        while (elapsed < fadeOutDuration)
+        {
             elapsed += Time.deltaTime;
             endingCanvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
             yield return null;
@@ -126,7 +137,8 @@ public class EndingUI : MonoBehaviour {
 
     // ─── Populate Stats ──────────────────────────────────────────────────────────
 
-    private void PopulateStats() {
+    private void PopulateStats()
+    {
         // Dia e Tempo
         if (txtDia != null)
             txtDia.text = $"Dia {DayManager.Instance.CurrentDay} / {DayManager.TotalDays}";
@@ -134,7 +146,8 @@ public class EndingUI : MonoBehaviour {
         if (txtHora != null)
             txtHora.text = TimeManager.Instance.GetTimeDisplay();
 
-        if (txtFadiga != null || fadigaBar != null) {
+        if (txtFadiga != null || fadigaBar != null)
+        {
             int stage = Mathf.Clamp(TimeManager.Instance.GetSleepStage(), 0, 3);
             string[] labels = { "Sem fadiga", "Leve", "Moderada", "Severa" };
             if (txtFadiga != null) txtFadiga.text = labels[stage];
@@ -145,14 +158,17 @@ public class EndingUI : MonoBehaviour {
             txtCafes.text = $"{TimeManager.Instance.GetCoffeesTaken()} cafés";
 
         // Suspeita
-        if (txtSuspeita != null || suspeitaBar != null) {
+        if (txtSuspeita != null || suspeitaBar != null)
+        {
             float ratio = SuspicionManager.Instance.GetSuspicionRatio();
             if (txtSuspeita != null) txtSuspeita.text = $"{ratio * 100f:F0}%";
             if (suspeitaBar != null) suspeitaBar.value = ratio;
         }
 
-        if (txtSuspeitaEstado != null) {
-            txtSuspeitaEstado.text = SuspicionManager.Instance.GetCurrentState() switch {
+        if (txtSuspeitaEstado != null)
+        {
+            txtSuspeitaEstado.text = SuspicionManager.Instance.GetCurrentState() switch
+            {
                 SuspicionManager.SuspicionState.None => "Nenhuma",
                 SuspicionManager.SuspicionState.Attention => "Atenção",
                 SuspicionManager.SuspicionState.Investigation => "Investigação",
@@ -162,7 +178,8 @@ public class EndingUI : MonoBehaviour {
         }
 
         // Company Awareness
-        if (txtCompanyAwareness != null || awarenessBar != null) {
+        if (txtCompanyAwareness != null || awarenessBar != null)
+        {
             float ratio = DocumentManager.Instance.GetCompanyAwareness();
             if (txtCompanyAwareness != null) txtCompanyAwareness.text = $"{ratio * 100f:F0}%";
             if (awarenessBar != null) awarenessBar.value = ratio;
@@ -172,8 +189,12 @@ public class EndingUI : MonoBehaviour {
         if (txtIntelRecolhida != null)
             txtIntelRecolhida.text = $"{IntelInventory.Instance.GetTotalIntel()} intel";
 
+        if (txtPercentagemFinal != null)
+            txtPercentagemFinal.text = $"{IntelInventory.Instance.GetTotalPercentage():F0}%";
+
         // Câmaras
-        if (txtCamerasDesbloqueadas != null) {
+        if (txtCamerasDesbloqueadas != null)
+        {
             bool[] unlocked = CameraSystem.Instance.cameraUnlocked;
             int count = 0;
             if (unlocked != null) foreach (bool b in unlocked) if (b) count++;
@@ -188,7 +209,8 @@ public class EndingUI : MonoBehaviour {
         if (txtPisoAtual != null)
             txtPisoAtual.text = $"piso atual: {GameManager.Instance.currentFloor}";
 
-        if (txtPisosDesbloqueados != null) {
+        if (txtPisosDesbloqueados != null)
+        {
             bool[] floors = GameManager.Instance.GetFloorsUnlocked();
             int count = 0;
             if (floors != null) foreach (bool b in floors) if (b) count++;
