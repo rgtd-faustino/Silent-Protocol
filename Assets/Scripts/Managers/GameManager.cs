@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour {
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
-        GameEvent.OnGameOver += HandleExhaustion;
+        GameEvent.OnPlayerExhausted += HandleExhaustion;
 
         // dispara o evento de início de dia e arranca o tutorial no dia 1
         // usamos uma corrotina para esperar o fim deste frame, para garantir que os outros managers já fizeram
@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour {
     void OnDestroy() {
         GameEvent.OnDayEnded -= HandleDayEnd;
         GameEvent.OnGameOver -= HandleGameOver;
-        GameEvent.OnGameOver += HandleExhaustion;
+        GameEvent.OnPlayerExhausted += HandleExhaustion;
     }
 
     private IEnumerator ShowTitleNextFrame() {
