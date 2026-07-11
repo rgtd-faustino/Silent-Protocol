@@ -27,7 +27,7 @@ public class TimeManager : MonoBehaviour {
     private const float DayEndMinute = 1440f;  // 24:00 — fim do dia
 
     private float currentMinutes = 0f;
-    // regista quantas horas de sono em falta o jogador acumulou. Cresce com o tempo (estar acordado desgasta) e baixa quando o jogador dorme
+    // regista quantas horas de sono em falta o jogador acumulou, cresce com o tempo (estar acordado desgasta) e baixa quando o jogador dorme
     private float accumulatedSleep = 0f;
     // conta quantos cafés foram bebidos para calcular o "vício", ou seja, quanto mais cafés, menor o efeito de cada um
     private int coffeesTaken = 0;
@@ -80,13 +80,13 @@ public class TimeManager : MonoBehaviour {
                 GameEvent.DayEnded();
             }
             currentMinutes %= DayEndMinute;
-            ResetDayFlags(); // firedDayStart fica false — vai disparar às 08:00
+            ResetDayFlags(); // firedDayStart fica false, vai disparar às 08:00
 
         }
 
         isNight = currentMinutes >= NightStartMinute || currentMinutes < DayStartMinute;
 
-        // verificar se algum marco do dia foi atingido e disparar o evento correspondente
+        // verificamos se algum marco do dia foi atingido e disparamos o evento correspondente
         FireDayEvents();
 
         // sono acumulado atingiu o estágio severo (3) -> o jogador devia ter dormido; dispara um único evento global
