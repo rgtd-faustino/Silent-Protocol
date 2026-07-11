@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour {
     void OnDestroy() {
         GameEvent.OnDayEnded -= HandleDayEnd;
         GameEvent.OnGameOver -= HandleGameOver;
-        GameEvent.OnPlayerExhausted += HandleExhaustion;
+        GameEvent.OnPlayerExhausted -= HandleExhaustion;
     }
 
     private IEnumerator ShowTitleNextFrame() {
@@ -116,8 +116,7 @@ public class GameManager : MonoBehaviour {
         FireEnding(3);
     }
 
-    // chamado quando o sono acumulado atinge o estágio severo (TimeManager -> GameEvent.OnPlayerExhausted)
-    // o jogador deixou-se ficar sem dormir tempo demais
+    // chamado quando o sono acumulado atinge o estágio severo (TimeManager -> GameEvent.OnPlayerExhausted), quer dizer que o jogador se deixou ficar sem dormir tempo demais
     private void HandleExhaustion() {
         if (endingTriggered) return;
 

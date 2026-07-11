@@ -68,17 +68,10 @@ public class PlayerController : MonoBehaviour
         camScript = cameraTransform.GetComponent<CameraScript>();
         animator = GetComponent<Animator>();
 
-        // registamos o evento para saber quando a noite começa e ativar mecânicas específicas, limpamos a subscrição no OnDestroy
-        GameEvent.OnNightStarted += OnNightStarted;
-
         // fomos buscar a Força ao PlayerStats para calcularmos logo no início um pequeno bónus na velocidade máxima de corrida
         RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
     }
 
-    void OnDestroy()
-    {
-        GameEvent.OnNightStarted -= OnNightStarted;
-    }
 
     void Update()
     {
@@ -216,10 +209,6 @@ public class PlayerController : MonoBehaviour
         cc.Move(new Vector3(0, yVelocity, 0) * Time.deltaTime);
     }
 
-    private void OnNightStarted()
-    {
-
-    }
 
     // fornecemos o raio atual ao NPCScript que o vai consumir a cada frame para calcular a distância do som, multiplicamos o valor pelo inverso da Agilidade para dar utilidade ao atributo
     public float GetNoiseRadius()
