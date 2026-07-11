@@ -6,15 +6,15 @@ public class WiresharkManager : MonoBehaviour
 {
     private WiresharkUI ui;
 
-    // pacotes visíveis no stream ao vivo - inseridos no início para simular a chegada de novos pacotes no topo da lista
+    // pacotes visíveis na stream ao vivo, são inseridos no início para simular a chegada de novos pacotes no topo da lista
     private List<PacketData> livePackets = new List<PacketData>();
 
-    // histório organizado por conversaId -> lista de pacotes - construído pelo PacketGenerator no Start
+    // histório organizado por conversaId -> é uma lista de pacotes que é construído pelo PacketGenerator no Start
     private Dictionary<string, List<PacketData>> history = new Dictionary<string, List<PacketData>>();
 
     private PacketData selectedPacket = null;
 
-    // limite do stream ao vivo - manter 50 pacotes é suficiente para a ilusão de atividade sem pesar na memória
+    // mantemos um limite 50 pacotes na stream porque é suficiente para a ilusão de atividade sem pesar na memória
     private const int MaxLivePackets = 50;
 
     void Awake()
@@ -22,7 +22,7 @@ public class WiresharkManager : MonoBehaviour
         ui = GetComponent<WiresharkUI>();
     }
 
-    // chamado pelo PacketGenerator quando um novo pacote chega - insere no início para que os mais recentes fiquem no topo
+    // chamado pelo PacketGenerator quando um novo pacote chega, insere no início para que os mais recentes fiquem no topo
     public void ReceivePacket(PacketData pkt)
     {
         livePackets.Insert(0, pkt);
@@ -33,22 +33,21 @@ public class WiresharkManager : MonoBehaviour
         ui.AddPacketRow(pkt);
     }
 
-    // chamado pelo PacketGenerator no Start com o histórico pré-construído - passa ao WiresharkUI para popular o painel de histórico
+    // chamado pelo PacketGenerator no Start com o histórico pré-construído, depois passa ao WiresharkUI para popular o painel de histórico
     public void SetHistory(Dictionary<string, List<PacketData>> hist)
     {
         history = hist;
         ui.RefreshHistory(history);
     }
 
-    // chamado pelo PacketRowUI quando o jogador clica numa linha - atualiza o painel de detalhe
+    // é chamado pelo PacketRowUI quando o jogador clica numa linha para mostrarmos ao jogador os detalhes do pacote selecionado
     public void SelectPacket(PacketData pkt)
     {
         selectedPacket = pkt;
         ui.ShowPacketDetail(pkt);
     }
 
-    // copia o pacote selecionado para o GameClipboard para que o jogador o possa colar no TerminalManager -
-    // GameClipboard é um estático que persiste entre cenas sem MonoBehaviour
+    // copia o pacote selecionado para o GameClipboard para que o jogador o possa colar no TerminalManager
     public void CopySelectedPacket()
     {
         if (selectedPacket == null)
@@ -63,8 +62,7 @@ public class WiresharkManager : MonoBehaviour
         Debug.Log($"[WiresharkManager] Pacote {selectedPacket.PacketId} copiado para GameClipboard.");
     }
 
-    // chamado pelo botão PEDIR ACK numa conversa do histórico -
-    // aceder a dados históricos de outras conversas é suspeito, por isso aumenta a suspeita temporariamente -
+    // chamado pelo botão PEDIR ACK numa conversa do histórico, aceder a dados históricos de outras conversas é suspeito por isso aumenta a suspeita temporariamente
     // o nível aleatório entre 1 e 2 representa que o sistema pode ou não notar o acesso
     public List<PacketData> RequestHistoryConversation(string conversationId)
     {
@@ -74,7 +72,7 @@ public class WiresharkManager : MonoBehaviour
         float suspicionLevel = Random.Range(1f, 2f);
         SuspicionManager.Instance.IncreaseSuspicion(suspicionLevel, GetInstanceID(), SuspicionManager.SuspicionSource.TerminalAccess);
 
-        // o ACK é um evento pontual - após 2 segundos, a fonte de suspeita é removida e o decay começa
+        // o ACK é um evento pontual, após 2 segundos a fonte de suspeita é removida e o decay começa
         StartCoroutine(StopSuspicionAfterDelay(2f));
 
         Debug.Log($"[WiresharkManager] ACK pedido para {conversationId} - suspeita aumentada.");

@@ -371,7 +371,7 @@ public class NPCScript : InteractableObject {
         }
     }
 
-    // Calcula os vetores com o campo de visão atual. Expandimos o raio máximo mal a lanterna do jogador ative à noite porque a luz chama muita atenção.
+    // calcula os vetores com o campo de visão atual, expandimos o raio máximo se a lanterna do jogador estiver ativada à noite porque a luz chama à atenção
     private bool IsPlayerInFOV() {
         Vector3 dir = playerTransform.position - transform.position;
         dir.y = 0f;
@@ -394,7 +394,7 @@ public class NPCScript : InteractableObject {
         return angle <= fovAngle / 2f;
     }
 
-    // Escalonamos a suspeita conforme a distância para dar uma hipótese do jogador fugir se estiver nos limites da visão do guarda.
+    // aumentamos a suspeita de acordo a distância para dar uma hipótese do jogador fugir se estiver nos limites da visão do guarda
     private float GetSuspicionLevelByDistance(float distance) {
         float third = fovRange / 3f;
         if (distance < third)
@@ -406,10 +406,11 @@ public class NPCScript : InteractableObject {
         return 1f;
     }
 
-    // Corre um intervalo maior que a rotina visual mas só reage se o jogador for barulhento fora dos limites e se o guarda não estiver já a correr para o problema.
+    // corre um intervalo maior que a rotina visual mas só reage se o jogador fizer muito barulho e se o guarda não estiver já a correr para o problema
     private IEnumerator NoiseCheckRoutine() {
         WaitForSeconds wait = new WaitForSeconds(0.2f);
 
+        // e portanto só faz sentido verificar se o jogador também estiver no piso, senão estamos a gastar recursos
         while (true) {
             if (!isFloorActive) { 
                 yield return wait; 
@@ -434,7 +435,7 @@ public class NPCScript : InteractableObject {
         }
     }
 
-    // Adapta o estado local baseado nos limites que rebentam no SuspicionManager. Os guardas reagem proativamente na segunda fase.
+    // sempre que a suspeita é alterada todos os NPC verificam o estado da suspeita para poderem reagir de acordo com o novo estado
     public void OnGlobalSuspicionChanged(SuspicionManager.SuspicionState state) {
         switch (state) {
             case SuspicionManager.SuspicionState.None:
@@ -444,7 +445,7 @@ public class NPCScript : InteractableObject {
                 SetState(NPCState.Attention);
                 break;
             case SuspicionManager.SuspicionState.Investigation:
-                if (npcType == NPCType.Guard)
+                if (npcType == NPCType.Guard) // apenas os guardas investigam
                     SetState(NPCState.Investigate);
                 break;
             case SuspicionManager.SuspicionState.Expulsion:
@@ -453,15 +454,7 @@ public class NPCScript : InteractableObject {
         }
     }
 
-    public void SetPatrolling(bool patrolling) {
-        isPatrolling = patrolling;
-
-        if (patrolling && currentState == NPCState.Idle)
-            SetState(NPCState.Patrol);
-        else if (!patrolling)
-            SetState(NPCState.Idle);
-    }
-
+    // usado para forçar a rota das reuniões quando o evento é triggered
     public void ForceRoute(PatrolRoute route) {
         if (patrolCoroutine != null)
             StopCoroutine(patrolCoroutine);
@@ -471,10 +464,7 @@ public class NPCScript : InteractableObject {
         patrolCoroutine = StartCoroutine(PatrolRoutine());
     }
 
-    public bool IsPlayerVisible() {
-        return PlayerController.Instance.inSusPlace && IsPlayerInFOV();
-    }
-
+    // se o jogador estiver no mesmo piso que este NPC então eles fazem as suas rotas normalmente, senão para de aumentar suspeita (se estivesse) e para de andar
     public void SetFloorActive(bool active) {
         isFloorActive = active;
 
