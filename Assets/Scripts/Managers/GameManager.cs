@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,20 +10,20 @@ public class GameManager : MonoBehaviour
     public int currentFloor = 0;
     public const int TotalDays = 5;
 
-    // pisos desbloqueados por ndice (0=receo, 1=executivo, 2=servidores, 3=sutes, 4=CEO)
+    // pisos desbloqueados por ndice (0=receção, 1=executivo, 2=servidores, 3=sutes, 4=CEO)
     private bool[] floorUnlocked = new bool[5];
 
     [Header("Final do Jogo")]
-    [Tooltip("Percentagem mínima (0-100) para o jogador atingir o final bom.")]
-    [SerializeField] private float endingThreshold = 50f;
-    [Tooltip("Tecla de teste (só ativa no Editor) para forçar o final do relatório sem esperar pelo último dia.")]
-    [SerializeField] private KeyCode debugEndingKey = KeyCode.Z;
+    [SerializeField] private float endingThreshold = 50f; // Percentagem mínima (0-100) para o jogador atingir o final bom.
 
     private bool endingTriggered = false;
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) { 
+            Destroy(gameObject); 
+            return; 
+        }
         Instance = this;
 
     }
@@ -32,7 +33,7 @@ public class GameManager : MonoBehaviour
         // receção, andar executivo e suítes acessíveis desde o início
         UnlockFloor(0);
         UnlockFloor(1);
-        UnlockFloor(3); // suítes (floorNumber 4 -> índice 3)
+        UnlockFloor(3);
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
@@ -46,23 +47,11 @@ public class GameManager : MonoBehaviour
         GameEvent.OnPlayerExhausted -= HandleExhaustion;
     }
 
-#if UNITY_EDITOR
-    void Update()
-    {
-        // tecla de teste, só existe em builds do Editor: força o final do relatório sem precisar de chegar ao último dia
-        if (Input.GetKeyDown(debugEndingKey))
-            TriggerReportEnding();
-    }
-#endif
-
     public void SetCurrentFloor(int floorNumber)
     {
         currentFloor = floorNumber;
-        // guarda nula: se o NPCManager ainda não existir (ou não suportar este índice)
-        // a coroutine DoTravel não morre a meio e o teleporte/fecho do UI acontece na mesma
-        if (NPCManager.Instance != null)
-            NPCManager.Instance.SetActiveFloor(floorNumber);
-        Debug.Log($"[GameManager] Jogador moveu-se para F{floorNumber}.");
+		// para desligar a navegação e a física dos NPC que ficaram noutros andares
+		NPCManager.Instance.SetActiveFloor(floorNumber);
     }
 
     private void HandleDayEnd()

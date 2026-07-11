@@ -155,7 +155,7 @@ public class NPCManager : MonoBehaviour {
             npc.SetPatrolling(patrolling);
     }
 
-    // otimização básica: o GameManager chama isto ao mudar de piso para desligar a navegação e a física dos gajos que ficaram noutros andares
+    // otimização básica: o GameManager chama isto ao mudar de piso para desligar a navegação e a física dos NPC que ficaram noutros andares
     public void SetActiveFloor(int floor) {
         foreach (NPCScript npc in activeNPCs)
             npc.SetFloorActive(npc.currentFloor == floor);

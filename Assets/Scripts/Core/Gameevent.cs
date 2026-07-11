@@ -39,7 +39,7 @@ public static class GameEvent
     public static void LunchStarted() => OnLunchStarted?.Invoke();
     public static void AfternoonStarted() => OnAfternoonStarted?.Invoke();
     public static void NightStarted() => OnNightStarted?.Invoke(); // o flashLightController usa este evento para dar reset à bateria da lanterna
-    public static void DayEnded() => OnDayEnded?.Invoke();
+    public static void DayEnded() => OnDayEnded?.Invoke(); // gameManager subscreve-se a isto para saber quando o dia troca e quando chega ao último, e para guardar o progresso
     public static void GameOver() => OnGameOver?.Invoke();
     public static void SuspicionStateChanged(SuspicionManager.SuspicionState s) => OnSuspicionStateChanged?.Invoke(s);
     public static void PlayerExhausted() => OnPlayerExhausted?.Invoke();
