@@ -1,7 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
-using static UnityEngine.InputManagerEntry;
 
 public class InteractableObject : MonoBehaviour {
     [HideInInspector] public string objectName = "objeto";

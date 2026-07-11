@@ -1,6 +1,4 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class DayNightLightController : MonoBehaviour {
 
@@ -17,7 +15,7 @@ public class DayNightLightController : MonoBehaviour {
     [Header("Elevação do sol (x = hora normalizada, y = graus -90 a 90)")]
     [SerializeField] private AnimationCurve sunElevationCurve;
 
-    // o zzimute é a direção horizontal para onde o sol aponta, é medida em graus à volta do eixo Y(0°-360°)
+    // o azimute é a direção horizontal para onde o sol aponta, é medida em graus à volta do eixo Y(0°-360°)
     // a 170° coloca o sol ligeiramente a sul
     [SerializeField] private float sunAzimuth = 170f;
 
