@@ -355,12 +355,14 @@ public class NPCScript : InteractableObject {
             if (PlayerController.Instance.inSusPlace && IsPlayerInFOV()) {
                 lastKnownPlayerPosition = playerTransform.position;
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
-                float level = GetSuspicionLevelByDistance(dist);
+                float level = GetSuspicionLevelByDistance(dist); // aumentamos a suspeita de acordo com o quão perto o jogador está do NPC
 
-                if (TimeManager.Instance.isNight && FlashlightController.Instance != null && FlashlightController.Instance.isOn) {
+                // se for de noite e o jogador tiver a sua lanterna ligada aumentamos a suspeita ainda mais
+                if (TimeManager.Instance.isNight && FlashlightController.Instance.isOn) {
                     level = Mathf.Min(3f, level + 1f);
                 }
 
+                // aqui atribuímos a suspeita calculada no suspicionManager e dizemos que é este NCP que está a causar o aumento da suspeita
                 if (level > 0)
                     SuspicionManager.Instance.IncreaseSuspicion(level, GetInstanceID(), SuspicionManager.SuspicionSource.NPCSight);
             }
