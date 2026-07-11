@@ -6,65 +6,66 @@ using UnityEngine.AI;
 // #my_code - Comportamento individual de cada NPC, incluindo lógica de patrulha, deteção e diálogo
 public class NPCScript : InteractableObject {
 
-    public enum NPCType { Colleague, Boss, Receptionist, Guard, Visitor }
-    public enum NPCState { Idle, Patrol, Attention, Investigate, Chase }
+    public enum NPCType { Colleague, Boss, Receptionist, Guard, Visitor } // tipos diferentes de NPC no jogo
+    public enum NPCState { Idle, Patrol, Attention, Investigate, Chase } // possíveis estados em que poderão estar
 
-    // O tipo de NPC dita as rotas que ele pode seguir e certos comportamentos específicos geridos pelo NPCManager.
+    // o tipo de NPC dita as rotas que ele pode seguir
     public NPCType npcType = NPCType.Colleague;
 
-    // Se a flag for false o NPC fica em Idle quando o stealth state regressa ao normal. Foi pensado para NPCs com posição fixa, como a rececionista.
+    // se a flag for false o NPC fica em Idle quando o stealth state regressa ao normal, foi pensado para NPCs com posição fixa, como a rececionista
     private bool isPatrolling = true;
 
+    // campo de visão dos NPC
     private float fovAngle = 90f;
     private float fovRange = 15f;
 
-    // A lanterna liga um buff no FOV dos NPCs durante a noite. Este valor soma-se ao fovRange base para aumentar o alcance da visão deles.
+    // A lanterna liga um buff no FOV dos NPCs durante a noite, este valor soma-se ao fovRange base para aumentar o alcance da visão deles
     [SerializeField] private float lightBonusRange = 10f;
 
-    // Distância máxima em que os guardas conseguem ouvir passos. Comparamos isto com o GetNoiseRadius do PlayerController que muda consoante a postura do jogador.
+    // distância máxima em que os guardas conseguem ouvir passos, comparamos isto com o GetNoiseRadius do PlayerController que muda consoante a postura do jogador
     [SerializeField] private float hearingRadius = 8f;
 
     private Transform playerTransform;
 
-    // Guardamos o último sítio onde o jogador foi visto ou ouvido para mandar o NPC investigar lá diretamente e não vaguear.
+    // guardamos o último sítio onde o jogador foi visto ou ouvido para mandar o NPC investigar lá diretamente e não vaguear
     private Vector3 lastKnownPlayerPosition;
 
     private NavMeshAgent agent;
     private Animator animator;
 
     private Coroutine patrolCoroutine;
-    // O NPCManager precisa de saber em que piso o NPC está para lhe dar rotas apropriadas a essa área.
+    // o NPCManager precisa de saber em que piso o NPC está para lhe dar rotas apropriadas a essa área
     public int currentFloor = 0;
     private PatrolRoute currentRoute;
     public Transform homeBase;
     [SerializeField] private bool despawnAtEnd = false;
 
-    // Usamos esta rota apenas uma vez no spawn para simular comportamentos iniciais antes do loop principal, tipo andar um bocado pelos apartamentos.
-    [HideInInspector] public PatrolRoute startRoute;
+    // esta rota é utilizada para o NPC percorrer uma rota inicial antes de lhe começarem a ser atribuídas rotas ao acaso
+    [HideInInspector] public PatrolRoute startRoute; // usado quando os NCP spawnam no piso dos quartos para vaguearem antes direm pros seus quartos
 
-    // Se o NPC tiver uma rota fixa atribuída ignoramos o sistema aleatório de rotas. O jogador faz sempre este caminho.
-    [HideInInspector] public PatrolRoute assignedRoute;
+    // se o NPC tiver uma rota fixa atribuída ignoramos o sistema aleatório de rotas, pois o jogador faz sempre este caminho
+    [HideInInspector] public PatrolRoute assignedRoute; // usado para os NPC que spawnam na receção terem dir para os elevadores
 
-    // O spawner precisa de saber quando o NPC é destruído para gerir o limite de entidades ativas na cena.
+    // o spawner precisa de saber quando o NPC é destruído para gerir o limite de NPC spawnados (caso seja spawnado por um)
     [HideInInspector] public NPCSpawner spawner;
 
-    // Usado pelo NPCManager para bloquear a saída da rececionista até ela estar na posição de origem.
+    // usado pelo NPCManager para bloquear a saída da rececionista/guarda até estar na posição de origem para apenas um NPC estar a descansar
+    // enquanto o outro continua a "trabalhar"
     [HideInInspector] public bool isAtHome;
-    // O NPCManager consulta isto para garantir que não há dois guardas a descansar ao mesmo tempo.
+    // o NPCManager consulta isto para garantir que não há dois guardas a descansar ao mesmo tempo
     [HideInInspector] public bool isResting;
 
-    // Identifica departamentos específicos. 0 significa sem departamento, muito útil para filtrar NPCs genéricos no piso executivo.
-    [SerializeField] private int departmentID = 0;
+    // identifica departamentos específicos, 0 significa sem departamento, é usado para rotas específicas para NPC de certos departamentos, nomeadamente comer e beber água dentro do seu dep
+    [SerializeField] private int departmentID = 0; 
 
-    // Usamos esta string para validar entregas. Se o ID bater certo com o correctRecipientID da task o documento foi bem entregue.
-    [Header("Entrega de Documentos")]
+    // usamos esta string para validar entregas de documentos, se o ID bater certo com o correctRecipientID da task o documento foi bem entregue
     [SerializeField] private string npcID;
 
-    // Associa os dados da árvore de diálogo ao NPC.
+    // associa os dados da árvore de diálogo ao NPC
     [Header("Diálogo")]
     [SerializeField] private NPCDialogueData dialogueData;
 
-    [Header("Cartões (CanvasGroup em cada card central)")]
+    [Header("Cartões")]
     [SerializeField] private CanvasGroup mainMenuCard;
     [SerializeField] private CanvasGroup charCreationCard;
     [SerializeField] private CanvasGroup pauseCard;
@@ -87,19 +88,20 @@ public class NPCScript : InteractableObject {
 
         StartCoroutine(FOVCheckRoutine());
 
-        // Separamos o check de áudio dos guardas numa corrotina independente para não lixar o cálculo da visão e pesar no CPU.
+        // separamos o check de áudio dos guardas numa corrotina independente para ser mais otimizado
         if (npcType == NPCType.Guard)
             StartCoroutine(NoiseCheckRoutine());
 
-        // Se houver uma rota de arranque configurada lançamos logo isso, senão atiramos a máquina de estados para a patrulha geral.
+        // se houver uma rota de arranque configurada lançamos logo isso, senão atiramos a máquina de estados para a patrulha geral
         if (startRoute != null)
             StartCoroutine(RunStartRoute());
         else
             SetState(NPCState.Patrol);
     }
 
-    // Tratamos aqui a prioridade de entregar documentos sobre iniciar a conversa normal mal o jogador interaja com o jogador.
+    // tratamos aqui a prioridade de entregar documentos sobre iniciar a conversa normal mal o jogador interaja com o jogador
     public override void Interact() {
+        // se o jogador possuir um documento e a tarefa de entregar o mesmo está ativada então entregamos o mesmo a este NPC
         if (PlayerController.Instance.heldDocument != null && TaskManager.Instance.HasActiveTask("Entregar documento")) {
             TryDeliverDocument();
             return;
@@ -110,7 +112,7 @@ public class NPCScript : InteractableObject {
             return;
         }
 
-        // Paramos a patrulha do NavMeshAgent para a malta não bazar a meio da conversa.
+        // se pudermos interagir com ele, paramos a patrulha do NavMeshAgent para não se ir embora a meio da conversa
         if (patrolCoroutine != null) {
             StopCoroutine(patrolCoroutine);
             patrolCoroutine = null;
@@ -120,15 +122,16 @@ public class NPCScript : InteractableObject {
 
         Vector3 dir = (playerTransform.position - transform.position);
         dir.y = 0f;
+
         if (dir != Vector3.zero)
             transform.rotation = Quaternion.LookRotation(dir);
 
+        // começamos o diálogo
         DialogueManager.Instance.OpenDialogue(dialogueData);
-
         DialogueManager.Instance.OnDialogueClose += ResumeAfterDialogue;
     }
 
-    // Resolve a interação de entregar documentos. Valida pelo ID e espeta logo com o aumento do SuspicionManager se for a pessoa errada.
+    // lógica da interação de entregar documento, valida pelo ID e aumenta a suspeita se for a pessoa errada
     private void TryDeliverDocument() {
         DocumentTaskData doc = PlayerController.Instance.heldDocument;
         bool correct = !string.IsNullOrEmpty(npcID) && doc.correctRecipientID == npcID;
@@ -144,14 +147,14 @@ public class NPCScript : InteractableObject {
         }
     }
 
-    // Removemos o listener da framework de diálogos para a retoma do estado não duplicar comportamentos.
+    // removemos o listener da framework de diálogos para a retoma do estado não duplicar comportamentos
     private void ResumeAfterDialogue() {
         DialogueManager.Instance.OnDialogueClose -= ResumeAfterDialogue;
         agent.isStopped = false;
         SetState(isPatrolling ? NPCState.Patrol : NPCState.Idle);
     }
 
-    // Empurra os waypoints iniciais e baralha os destinos. Usamos o WaitForSeconds real para o NPC não ignorar a paragem se as frames quebrarem.
+    // quando o NPC tem uma rota inicial metemo-lo a percorre-la, mas baralhamos os waypoints à mesma
     private IEnumerator RunStartRoute() {
         currentRoute = startRoute;
         currentState = NPCState.Patrol;

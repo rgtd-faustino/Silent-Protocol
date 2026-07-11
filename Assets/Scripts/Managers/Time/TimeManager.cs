@@ -36,8 +36,6 @@ public class TimeManager : MonoBehaviour {
 
     // flags para que cada evento do dia (trabalho, almoço, etc.) só dispare uma vez
     private bool firedWorkStart = false;
-    private bool firedLunch = false;
-    private bool firedAfternoon = false;
     private bool firedNight = false;
 
     private const float MeetingMinute = 1050f; // 17:30

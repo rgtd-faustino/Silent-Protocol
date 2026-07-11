@@ -5,29 +5,32 @@ using static NPCScript;
 // #my_code - Configuração e validação de rotas individuais: probabilidade, loop, descanso, departamento
 public class PatrolRoute : MonoBehaviour {
 
-    // Lista que filtra as entidades permitidas aquando da chamada aleatoria do gestor global de rotas.
+    // quais NPC são permitidos percorrer os waypoints de cada rota
     public NPCType[] allowedTypes;
 
-    // Afina o balanco percentual face as alternativas. Da imenso jeito para definir um bias estatistico nalgumas zonas criticas.
+    // para acrescentar uma certa imprevisibilidade ao jogo fazemos com que cada waypoint possa ser ignorado e passado a frente de acordo com uma probabilidade
     [Range(0f, 1f)]
     public float probability = 1f;
 
-    public float waitTimePerWaypoint = 0f;
+    public float waitTimePerWaypoint = 0f; // quanto tempo o NPC fica em cada waypoint
 
-    // Mantem o script do navmesh a patinar ciclicamente nestes transforms especificos e ignora as conjeturas do EnterPatrol.
+    // isto mantém o NPC a percorrer a rota em loop, por exemplo os guardas a vaguear
     public bool loopWaypoints = false;
 
-    // Bloqueia o NPC no loop de retorno forçando a ida a origem pre gravada em vez de sortear um destino parvo no meio do corredor.
+    // esta variável faz com que o NPC volte ao seu ponto original, por exemplo quando um NPC spawna num piso e volta para o elevador no fim
     public bool returnHome = false;
 
-    // Tag para detetar a ocupacao. O NPCManager valida isto para impedir congregacoes de muitos segurancas num spot unico a passarem tempo.
+    // NPC estacionários por exemplo guardas e rececionistas que têm de ficar no mínimo sempre um a trabalhar, então se uma rota for marcada como de descanso
+    // o código apenas permite que um NPC descanse de cada vez
     public bool isRestRoute = false;
 
-    // Vetor invisivel carregado em runtime com os childs validos da arvore.
+    // conjunto dos waypoints a percorrer
     [HideInInspector] public Transform[] waypoints;
 
-    public int departmentID = 0;
+    public int departmentID = 0; // rotas específicas para NPC de certos departamentos, nomeadamente comer e beber água dentro do seu dep
 
+    // como atribuímos o gameobject parent que tem todos os waypoints gameobjects como filhos percorremos todos eles e vamos atribuindo dinamicamente
+    // em vez de atribuir no inspetor cada um
     void Awake() {
         List<Transform> pts = new List<Transform>();
         for (int i = 0; i < transform.childCount; i++) {
