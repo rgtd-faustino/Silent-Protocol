@@ -7,9 +7,9 @@ public class StatusEffect
 
     // delegate onde passamos a função do TimeManager
     // usamos isto para conseguir intercetar a lógica e injetar debuffs sem precisar de if statements
-    public System.Func<int, int, float, int> modifySleepStage;
+    public System.Func<int, int, float, int> modifySleepStage; 
 
-    public StatusEffect(float duration, System.Func<int, int, float, int> modify)
+    public StatusEffect(float duration, System.Func<int, int, float, int> modify) // (duration, (realStage, currentStage, timerMinutes)
     {
         this.duration = duration;
         modifySleepStage = modify;

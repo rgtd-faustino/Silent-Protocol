@@ -42,7 +42,7 @@ public class DialogueManager : MonoBehaviour
 
         List<DialogueTopic> filtered = FilterTopics(data);
 
-        // a malta decidiu que se a suspeita estiver alta, o NPC arranca logo a espumar da boca com o greeting de confronto em vez do normal
+        // se a suspeita estiver alta, o NPC arranca logo a espumar da boca com o greeting de confronto em vez do normal
         string greetingToUse = data.greetingText;
 
         if (suspicion >= data.suspicionThreshold)

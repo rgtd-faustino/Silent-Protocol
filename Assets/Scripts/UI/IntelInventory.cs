@@ -240,7 +240,7 @@ public class IntelInventory : MonoBehaviour
         AtualizarTotalIntel();
     }
 
-    /// <summary>
+    //
     /// Esvazia a intel recolhida e repõe a UI do dossier, para que um "Novo Jogo" comece
     /// mesmo do zero (sem isto, a intel da partida anterior continuava toda lá).
     /// </summary>

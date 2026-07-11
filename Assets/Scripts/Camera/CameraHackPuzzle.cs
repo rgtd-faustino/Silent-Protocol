@@ -1,9 +1,9 @@
-// #my_code - Lógica central do puzzle de câmaras: recriação do cancelamento de ruído por oposição de fase (sin/cos)
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+// #my_code - Lógica central do puzzle de câmaras: recriação do cancelamento de ruído por oposição de fase (sin/cos)
 public class CameraHackPuzzle : MonoBehaviour {
     public static CameraHackPuzzle Instance;
     public static int HackLevel = 0; // incrementa a cada câmara desbloqueada (0 a 7)

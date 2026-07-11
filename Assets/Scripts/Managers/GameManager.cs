@@ -1,66 +1,85 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
-public class GameManager : MonoBehaviour
-{
+public class GameManager : MonoBehaviour {
     public static GameManager Instance;
 
     public int currentDay = 1;
     public int currentFloor = 0;
     public const int TotalDays = 5;
 
-    // pisos desbloqueados por ndice (0=receção, 1=executivo, 2=servidores, 3=sutes, 4=CEO)
+    // pisos desbloqueados por índice (0=receção, 1=executivo, 2=servidores, 3=suítes, 4=CEO)
     private bool[] floorUnlocked = new bool[5];
 
     [Header("Final do Jogo")]
-    [SerializeField] private float endingThreshold = 50f; // Percentagem mínima (0-100) para o jogador atingir o final bom.
+    [SerializeField] private float endingThreshold = 50f; // percentagem mínima para o jogador atingir o final bom
 
     private bool endingTriggered = false;
 
-    void Awake()
-    {
-        if (Instance != null && Instance != this) { 
-            Destroy(gameObject); 
-            return; 
+    void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
         }
         Instance = this;
-
     }
 
-    void Start()
-    {
+    void Start() {
         // receção, andar executivo e suítes acessíveis desde o início
         UnlockFloor(0);
         UnlockFloor(1);
-        UnlockFloor(3);
+        UnlockFloor(3); 
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
-        GameEvent.OnPlayerExhausted += HandleExhaustion;
+        GameEvent.OnGameOver += HandleExhaustion;
+
+        // dispara o evento de início de dia e arranca o tutorial no dia 1
+        // usamos uma corrotina para esperar o fim deste frame, para garantir que os outros managers já fizeram
+        // o Awake/Start e podem apanhar o evento DayStarted sem problemas de concorrência de inicialização
+        StartCoroutine(ShowTitleNextFrame());
     }
 
-    void OnDestroy()
-    {
+    void OnDestroy() {
         GameEvent.OnDayEnded -= HandleDayEnd;
         GameEvent.OnGameOver -= HandleGameOver;
-        GameEvent.OnPlayerExhausted -= HandleExhaustion;
+        GameEvent.OnGameOver += HandleExhaustion;
     }
 
-    public void SetCurrentFloor(int floorNumber)
-    {
+    private IEnumerator ShowTitleNextFrame() {
+        yield return null;
+        NotifyDayStarted();
+
+        if (currentDay == 1) {
+            // só corremos o tutorial no primeiro dia porque é o primeiro "nível" do jogo
+            TutorialManager.Instance.StartTutorial();
+        }
+    }
+
+    public void SetCurrentFloor(int floorNumber) {
         currentFloor = floorNumber;
-		// para desligar a navegação e a física dos NPC que ficaram noutros andares
-		NPCManager.Instance.SetActiveFloor(floorNumber);
+        // para desligar a navegação e a física dos NPC que ficaram noutros andares
+        NPCManager.Instance.SetActiveFloor(floorNumber);
     }
 
-    private void HandleDayEnd()
-    {
+    // dispara GameEvent.DayStarted
+    // chamado pelo TimeManager às 08:00 ou logo após o jogador dormir
+    // fica centralizado aqui (em vez do TimeManager disparar o evento diretamente) para garantir que nunca dispara depois do jogo já ter terminado
+    // por ex se o jogador adormecer exatamente na última noite
+    public void NotifyDayStarted() {
+        if (endingTriggered) 
+           return;
+
+        GameEvent.DayStarted(currentDay);
+    }
+
+    // ponto único que reage ao fim do dia (disparado via GameEvent.DayEnded() pelo TimeManager).
+    private void HandleDayEnd() {
         SaveProgress();
 
-        if (currentDay >= TotalDays)
-        {
-            // o jogador chegou ao fim — decide o final consoante a percentagem de intel recolhida
+        if (currentDay >= TotalDays) {
+            // o jogador chegou ao fim, decide o final consoante a percentagem de intel recolhida
             Debug.Log("[GameManager] Último dia concluído.");
             TriggerReportEnding();
             return;
@@ -68,16 +87,15 @@ public class GameManager : MonoBehaviour
 
         currentDay++;
         GameEvent.DayChanged(currentDay);
+        // DayStarted NÃO dispara aqui — dispara às 08:00 via NotifyDayStarted() chamado pelo
+        // TimeManager, ou logo após o jogador dormir. Preserva a distinção original entre
+        // "o dia civil mudou" (meia-noite, DayChanged) e "o expediente começou" (08:00 / acordar, DayStarted).
         Debug.Log($"[GameManager] Dia {currentDay} começa.");
     }
 
-    /// <summary>
-    /// Chamado quando o jogador envia o relatório final — pelo botão "Enviar Relatório" no email,
-    /// ou automaticamente no fim do último dia. Decide o final consoante a percentagem de intel
-    /// recolhida: ending 1 = final bom (percentagem >= endingThreshold), ending 2 = final mau.
-    /// </summary>
-    public void TriggerReportEnding()
-    {
+    // chamado quando o jogador envia o relatório final pelo botão "Enviar Relatório" no email,
+    // ou automaticamente no fim do último dia, depois decide o final consoante a percentagem de intel
+    public void TriggerReportEnding() {
         if (endingTriggered) return;
 
         float percentagem = IntelInventory.Instance.GetTotalPercentage();
@@ -87,12 +105,9 @@ public class GameManager : MonoBehaviour
         FireEnding(ending);
     }
 
-    /// <summary>
-    /// Chamado quando a suspeita atinge o máximo (SuspicionManager -> GameEvent.OnGameOver).
-    /// O jogador foi apanhado antes de conseguir agir.
-    /// </summary>
-    private void HandleGameOver()
-    {
+    // chamado quando a suspeita atinge o máximo (SuspicionManager -> GameEvent.OnGameOver)
+    // o jogador foi apanhado antes de conseguir agir
+    private void HandleGameOver() {
         if (endingTriggered) return;
 
         Debug.Log("[GameManager] Apanhado — suspeita atingiu o máximo.");
@@ -101,42 +116,32 @@ public class GameManager : MonoBehaviour
         FireEnding(3);
     }
 
-    /// <summary>
-    /// Chamado quando o sono acumulado atinge o estágio severo (TimeManager -> GameEvent.OnPlayerExhausted).
-    /// O jogador deixou-se ficar sem dormir tempo demais.
-    /// </summary>
-    private void HandleExhaustion()
-    {
+    // chamado quando o sono acumulado atinge o estágio severo (TimeManager -> GameEvent.OnPlayerExhausted)
+    // o jogador deixou-se ficar sem dormir tempo demais
+    private void HandleExhaustion() {
         if (endingTriggered) return;
 
         Debug.Log("[GameManager] Exaustão — sono acumulado atingiu o estágio severo.");
         FireEnding(4);
     }
 
-    /// <summary>
-    /// Ponto único de disparo do final: garante que só um final acontece por partida,
-    /// independentemente de qual das três causas o acionou primeiro.
-    /// </summary>
-    private void FireEnding(int ending)
-    {
-        if (endingTriggered) return;
+    // ponto único de disparo do final: garante que só um final acontece por partida, independentemente de qual das três causas o acionou primeiro
+    private void FireEnding(int ending) {
+        if (endingTriggered) 
+            return;
+
         endingTriggered = true;
         GameEvent.EndingReached(ending);
     }
 
-    public void UnlockFloor(int index)
-    {
+    public void UnlockFloor(int index) {
         if (index < 0 || index >= floorUnlocked.Length) return;
         floorUnlocked[index] = true;
         Debug.Log($"[GameManager] Piso {index} desbloqueado.");
     }
 
-    /// <summary>
-    /// Repõe currentDay, currentFloor, pisos desbloqueados, contribuições para finais e a
-    /// flag de final já disparado, para que um "Novo Jogo" comece mesmo do zero.
-    /// </summary>
-    public void ResetForNewGame()
-    {
+    // repõe currentDay, currentFloor, pisos desbloqueados, contribuições para finais e a flag de final já disparado para que um "Novo Jogo" comece do zero
+    public void ResetForNewGame() {
         currentDay = 1;
         currentFloor = 0;
         endingTriggered = false;
@@ -153,14 +158,14 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] Estado reiniciado para um novo jogo.");
     }
 
-    public bool IsFloorUnlocked(int index)
-    {
-        if (index < 0 || index >= floorUnlocked.Length) return false;
+    public bool IsFloorUnlocked(int index) {
+        if (index < 0 || index >= floorUnlocked.Length) 
+            return false;
+
         return floorUnlocked[index];
     }
 
-    private void SaveProgress()
-    {
+    private void SaveProgress() {
         if (SaveManager.Instance != null)
             SaveManager.Instance.Save();
 
@@ -173,27 +178,22 @@ public class GameManager : MonoBehaviour
         new List<string>(), new List<string>(), new List<string>()
     };
 
-    public void RegisterEndingContribution(int endingIndex, string sourceID)
-    {
-        if (endingIndex < 0 || endingIndex >= 3) return;
-        if (!endingContributions[endingIndex].Contains(sourceID))
-        {
+    public void RegisterEndingContribution(int endingIndex, string sourceID) {
+        if (endingIndex < 0 || endingIndex >= 3) 
+            return;
+
+        if (!endingContributions[endingIndex].Contains(sourceID)) {
             endingContributions[endingIndex].Add(sourceID);
             Debug.Log($"[GameManager] Contribuição para final {endingIndex}: {sourceID}. Total: {endingContributions[endingIndex].Count}");
         }
     }
 
-    public int GetEndingContributionCount(int endingIndex)
-    {
-        if (endingIndex < 0 || endingIndex >= 3) return 0;
-        return endingContributions[endingIndex].Count;
-    }
-
     // getters e setters para o SaveManager
+    public void SetCurrentDay(int day) {
+        currentDay = day;
+    }
     public bool[] GetFloorsUnlocked() { return (bool[])floorUnlocked.Clone(); }
-
-    public void SetFloorsUnlocked(bool[] floors)
-    {
+    public void SetFloorsUnlocked(bool[] floors) {
         if (floors == null || floors.Length != floorUnlocked.Length) return;
         System.Array.Copy(floors, floorUnlocked, floorUnlocked.Length);
     }

@@ -34,10 +34,10 @@ public class PlayerController : MonoBehaviour
     [Tooltip("Transform para onde o jogador é teleportado ao começar um Novo Jogo (ex: a receção). Arrasta aqui no Inspector.")]
     [SerializeField] private Transform defaultSpawnPoint;
 
-    // Colocamos isto a false a partir dos scripts de UI quando abrimos o PC ou tentamos abrir uma fechadura, bloqueando assim o input do jogador. Os mesmos scripts repõem a variável a true no fim.
+    // colocamos isto a false a partir dos scripts de UI quando abrimos o PC ou tentamos abrir uma fechadura, bloqueando assim o input do jogador. Os mesmos scripts repõem a variável a true no fim
     public bool canMoveRotate = true;
 
-    // Fica a true quando o jogador pisa num trigger de uma zona restrita. O NPCScript acede diretamente a isto para saber se deve aumentar a barra de suspeita dos guardas.
+    // fica a true quando o jogador pisa num trigger de uma zona restrita. O NPCScript acede diretamente a isto para saber se deve aumentar a barra de suspeita dos guardas
     [HideInInspector] public bool inSusPlace = false;
 
     [SerializeField] private float normalNoiseRadius = 5f;
@@ -63,20 +63,16 @@ public class PlayerController : MonoBehaviour
         Instance = this;
     }
 
-    void Start()
-    {
+    void Start() {
         cc = GetComponent<CharacterController>();
         camScript = cameraTransform.GetComponent<CameraScript>();
         animator = GetComponent<Animator>();
 
-        // Registamos o evento para saber quando a noite começa e ativar mecânicas específicas, limpamos a subscrição no OnDestroy.
+        // registamos o evento para saber quando a noite começa e ativar mecânicas específicas, limpamos a subscrição no OnDestroy
         GameEvent.OnNightStarted += OnNightStarted;
 
-        // Fomos buscar a Força ao PlayerStats para calcularmos logo no início um pequeno bónus na velocidade máxima de corrida.
-        if (PlayerStats.Instance != null)
-        {
-            RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
-        }
+        // fomos buscar a Força ao PlayerStats para calcularmos logo no início um pequeno bónus na velocidade máxima de corrida
+        RUN_SPEED = 8f + (PlayerStats.Instance.GetForca() * 0.15f);
     }
 
     void OnDestroy()
@@ -90,6 +86,7 @@ public class PlayerController : MonoBehaviour
         {
             if (EmailUI.AlgumEmailAberto)
                 return;
+
             IntelInventory.Instance.ToggleDossier();
         }
 
@@ -106,7 +103,7 @@ public class PlayerController : MonoBehaviour
             TimeManager.Instance.Coffee();
     }
 
-    // Bloqueamos a corrida se o jogador estiver agachado. Comunicamos com o TutorialManager para dar o passo como concluído se estiver na fase certa.
+    // bloqueamos a corrida se o jogador estiver agachado. Comunicamos com o TutorialManager para dar o passo como concluído se estiver na fase certa
     private void HandleRunning()
     {
         bool wasRunning = isRunning;
@@ -128,10 +125,8 @@ public class PlayerController : MonoBehaviour
         SoundManager.Instance.PlaySound(SoundManager.Instance.audioSource2D, SoundManager.Instance.apanharPapel);
     }
 
-    /// <summary>
-    /// Repõe documentos na mão, cartões desbloqueados, posse da lanterna e teleporta o jogador
-    /// para o defaultSpawnPoint, para que um "Novo Jogo" comece mesmo do zero.
-    /// </summary>
+    // repõe documentos na mão, cartões desbloqueados, posse da lanterna e teleporta o jogador
+    // para o defaultSpawnPoint, para que um "Novo Jogo" comece do zero
     public void ResetForNewGame()
     {
         heldDocument = null;
@@ -154,7 +149,8 @@ public class PlayerController : MonoBehaviour
         Debug.Log("[PlayerController] Estado reiniciado para um novo jogo.");
     }
 
-    // Usámos GetAxisRaw em vez de GetAxis para anularmos a aceleração nativa do Unity. Dá uma sensação muito mais responsiva nos controlos de movimento.
+    // usámos GetAxisRaw em vez de GetAxis para anularmos a aceleração nativa do Unity
+    // dá uma sensação muito mais responsiva nos controlos de movimento
     private void HandleMovement()
     {
         float x = Input.GetAxisRaw("Horizontal");
@@ -169,14 +165,14 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("Z", z * animSpeed, 0.1f, Time.deltaTime);
     }
 
-    // Tratamos apenas da rotação horizontal. O olhar vertical ficou isolado no CameraScript para o modelo do jogador não inclinar.
+    // tratamos apenas da rotação horizontal, o olhar vertical ficou isolado no CameraScript para o modelo do jogador não inclinar
     private void HandleRotation()
     {
         float mouseX = Input.GetAxis("Mouse X") * camScript.mouseSensitivity * Time.deltaTime;
         transform.Rotate(Vector3.up * mouseX);
     }
 
-    // Tivemos de adaptar a altura e o centro do collider dependendo da pose da animação para garantir que a hitbox física bate certo com a malha 3D. Os valores foram definidos empiricamente.
+    // tivemos de adaptar a altura e o centro do collider dependendo da pose da animação para garantir que a hitbox física bate certo com a malha 3D, os valores foram definidos empiricamente
     private void HandleCrouch()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -225,7 +221,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    // Fornecemos o raio atual ao NPCScript que o vai consumir a cada frame para calcular a distância do som. Multiplicamos o valor pelo inverso da Agilidade para dar utilidade ao atributo.
+    // fornecemos o raio atual ao NPCScript que o vai consumir a cada frame para calcular a distância do som, multiplicamos o valor pelo inverso da Agilidade para dar utilidade ao atributo
     public float GetNoiseRadius()
     {
         float radius = normalNoiseRadius;

@@ -3,8 +3,7 @@ using TMPro;
 using UnityEngine;
 
 // #my_code - Ciclo dia/noite e gestão do estado de fadiga acumulada do jogador
-public class TimeManager : MonoBehaviour
-{
+public class TimeManager : MonoBehaviour {
 
     public static TimeManager Instance;
 
@@ -24,8 +23,6 @@ public class TimeManager : MonoBehaviour
 
     private const float DayStartMinute = 480f;   // 08:00 — dia começa
     private const float WorkStartMinute = 540f;   // 09:00 — começam as tarefas
-    private const float LunchMinute = 750f;   // 12:30 — pausa de almoço
-    private const float AfternoonMinute = 840f;   // 14:00 — tarde de trabalho
     private const float NightStartMinute = 1320f; // 22:00 — começa a noite
     private const float DayEndMinute = 1440f;  // 24:00 — fim do dia
 
@@ -51,10 +48,8 @@ public class TimeManager : MonoBehaviour
     // garante que GameEvent.PlayerExhausted() só dispara uma vez por "período" de fadiga severa
     // (fica true assim que o estágio 3 é atingido e só volta a false depois de o jogador dormir)
     private bool firedExhaustion = false;
-    void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
+    void Awake() {
+        if (Instance != null && Instance != this) {
             Destroy(gameObject); return;
         }
 
@@ -62,15 +57,13 @@ public class TimeManager : MonoBehaviour
 
     }
 
-    void Start()
-    {
+    void Start() {
         // O jogo começa às 08:00
         SetCurrentMinutes(DayStartMinute);
         UpdateDisplay();
     }
 
-    void Update()
-    {
+    void Update() {
         // a velocidade depende se é dia ou noite
         float speed = isNight ? nightSpeed : daySpeed;
         float deltaMinutes = speed * 0.1f * Time.deltaTime * debugSpeedMultiplier;
@@ -81,10 +74,8 @@ public class TimeManager : MonoBehaviour
         accumulatedSleep += deltaMinutes / 60f;
 
         // para que o tempo dê reset ao fim de 24 horas
-        if (currentMinutes >= DayEndMinute)
-        {
-            if (!firedDayEnd)
-            {
+        if (currentMinutes >= DayEndMinute) {
+            if (!firedDayEnd) {
                 firedDayEnd = true;
                 GameEvent.DayEnded();
             }
@@ -99,16 +90,14 @@ public class TimeManager : MonoBehaviour
         FireDayEvents();
 
         // sono acumulado atingiu o estágio severo (3) -> o jogador devia ter dormido; dispara um único evento global
-        if (!firedExhaustion && GetSleepStage() >= 3)
-        {
+        if (!firedExhaustion && GetSleepStage() >= 3) {
             firedExhaustion = true;
             GameEvent.PlayerExhausted();
         }
 
         // atualizar cada efeito de status ativo
         // percorremos ao contrário para poder remover elementos da lista durante a iteração (para não dar erros ao mexer em arrays sob alteração durante loops)
-        for (int i = activeEffects.Count - 1; i >= 0; i--)
-        {
+        for (int i = activeEffects.Count - 1; i >= 0; i--) {
             if (activeEffects[i].UpdateEffect(deltaMinutes))
                 activeEffects.RemoveAt(i);
         }
@@ -119,44 +108,27 @@ public class TimeManager : MonoBehaviour
 
     // em vez do TimeManager chamar diretamente o TaskManager ou o NPCManager quando chega a hora do almoço, dispara um evento global via GameEvent
     // qualquer script que precise de reagir a esses momentos subscreve esse evento, o TimeManager não sabe (nem precisa de saber) quem são esses scripts
-    private void FireDayEvents()
-    {
-        if (!firedWorkStart && currentMinutes >= WorkStartMinute)
-        {
+    private void FireDayEvents() {
+        if (!firedWorkStart && currentMinutes >= WorkStartMinute) {
             firedWorkStart = true;
             GameEvent.WorkHoursStarted(); // avisa o TaskManager para criar as tarefas do dia
         }
-        if (!firedLunch && currentMinutes >= LunchMinute)
-        {
-            firedLunch = true;
-            GameEvent.LunchStarted(); // usado para rotinas de NPC, futuras cutscenes, etc.
-        }
-        if (!firedAfternoon && currentMinutes >= AfternoonMinute)
-        {
-            firedAfternoon = true;
-            GameEvent.AfternoonStarted(); // avisa o TaskManager para criar as tarefas da tarde
-        }
-        if (!firedNight && currentMinutes >= NightStartMinute)
-        {
+        if (!firedNight && currentMinutes >= NightStartMinute) {
             firedNight = true;
             GameEvent.NightStarted(); // avisa o PlayerController (lanterna), NPCs, etc.
         }
-        if (!firedMeeting && currentMinutes >= MeetingMinute)
-        {
+        if (!firedMeeting && currentMinutes >= MeetingMinute) {
             firedMeeting = true;
             NPCManager.Instance.TriggerMeeting(); // avisa o GameManager para chamar todos os NPCs para a reunião
         }
-        if (!firedDayStart && currentMinutes >= DayStartMinute)
-        {
+        if (!firedDayStart && currentMinutes >= DayStartMinute) {
             firedDayStart = true;
-            Debug.Log($"FireDayEvents: DayStart disparado! Dia atual: {DayManager.Instance.CurrentDay}");
-            DayManager.Instance.OnDayEnded();//para dar a daymanager disparar o envento de dizer que o dia mudou
+            GameManager.Instance.NotifyDayStarted();
         }
     }
 
     // reseta as flags no início de um novo dia (chamado após Sleep)
-    private void ResetDayFlags()
-    {
+    private void ResetDayFlags() {
 
         firedWorkStart = firedLunch = firedAfternoon = firedNight = firedMeeting = firedDayEnd = firedDayStart = false;
     }
@@ -164,8 +136,7 @@ public class TimeManager : MonoBehaviour
 
     // calcula quantas horas o jogador ainda pode dormir antes das 08:00, usado pelo UIManager para validar a hora de acordar introduzida
     // pelo jogador (não pode acordar depois do início do dia de trabalho)
-    public float GetMaxSleepHours()
-    {
+    public float GetMaxSleepHours() {
         if (currentMinutes < DayStartMinute)
             return (DayStartMinute - currentMinutes) / 60f;
         else
@@ -173,8 +144,7 @@ public class TimeManager : MonoBehaviour
     }
 
     // formata os minutos internos como "HH:MM" para mostrar no ecrã
-    public string GetTimeDisplay()
-    {
+    public string GetTimeDisplay() {
         int h = (int)(currentMinutes / 60f);
         int m = (int)(currentMinutes % 60f);
         return $"{h:00}:{m:00}"; // :00 garante sempre dois dígitos (ex: "08:05" em vez de "8:5")
@@ -182,15 +152,13 @@ public class TimeManager : MonoBehaviour
 
     public float GetCurrentTimeInHours() => currentMinutes / 60f;
 
-    public void SetCurrentMinutes(float minutes)
-    {
+    public void SetCurrentMinutes(float minutes) {
         currentMinutes = minutes;
     }
 
 
     // aplica os efeitos de uma noite de sono: avança o tempo para a hora de acordar e recalcula a fadiga acumulada
-    public void Sleep(float wakeUpHours)
-    {
+    public void Sleep(float wakeUpHours) {
         float wakeUpMinutes = wakeUpHours * 60f;
         float sleepHours;
 
@@ -201,8 +169,7 @@ public class TimeManager : MonoBehaviour
 
         if (sleepHours >= 7f)
             accumulatedSleep = 0f;
-        else
-        {
+        else {
             float recoveryRatio = sleepHours / 7f;
             accumulatedSleep = Mathf.Max(0f, accumulatedSleep * (1f - recoveryRatio));
         }
@@ -214,7 +181,7 @@ public class TimeManager : MonoBehaviour
         Debug.Log($"Dormiu {sleepHours:F1}h. Sono acumulado: {accumulatedSleep:F2}h");
 
         GameEvent.DayEnded();
-        DayManager.Instance.OnDayEnded();
+        GameManager.Instance.NotifyDayStarted();
 
     }
 
@@ -223,8 +190,7 @@ public class TimeManager : MonoBehaviour
     // o efeito diminui com o vício (coffeesTaken)
     // a lógica do efeito é passada como uma função lambda para que o TimeManager não precise de saber os detalhes
     // e apenas aplique o que o efeito disser
-    public void Coffee()
-    {
+    public void Coffee() {
         int baseStage = GetSleepStage();
 
         // café não faz nada se o jogador não está com fadiga.
@@ -242,8 +208,7 @@ public class TimeManager : MonoBehaviour
         StatusEffect coffeeEffect = new StatusEffect(duration, (realStage, currentStage, timerMinutes) => {
             if (realStage == 1) return 0; // fadiga leve: café elimina completamente
 
-            if (realStage == 2)
-            {
+            if (realStage == 2) {
                 // fadiga moderada: café resolve no início, piora no fim
                 if (timerMinutes < duration * 0.25f)
                     return 1;
@@ -253,8 +218,7 @@ public class TimeManager : MonoBehaviour
                 return 1;
             }
 
-            if (realStage == 3)
-            {
+            if (realStage == 3) {
                 // fadiga severa: café atenua no início, piora depois
                 if (timerMinutes < duration * 0.5f)
                     return 1;
@@ -271,21 +235,17 @@ public class TimeManager : MonoBehaviour
         Debug.Log($"Café bebido às {GetTimeDisplay()}. Duração: {duration}min. Vício: {GetCoffeeStage()}");
     }
 
-    // nível de vício em café: 0 a 3.
-    public int GetCoffeeStage()
-    {
-        return Mathf.Min(coffeesTaken / 3, 3);
+   
+    public int GetCoffeeStage() {
+        return Mathf.Min(coffeesTaken / 3, 3); // nível de vício em café: 0 a 3.
     }
 
     // o estágio de sono real, calculado apenas com base na fadiga acumulada
-    // os limiares (19h, 42h, 50h) representam horas de sono em dívida,
-    // não horas acordado, mas "desfasamento" entre sono ideal e sono real
+    // os limiares (19h, 42h, 50h) representam horas de sono em dívida, não horas acordado, mas "desfasamento" entre sono ideal e sono real
     // 0 = sem fadiga, 1 = leve, 2 = moderada, 3 = severa.
-    public int GetSleepStage()
-    {
+    public int GetSleepStage() {
         float resistanceBonus = 0f;
-        if (PlayerStats.Instance != null)
-        {
+        if (PlayerStats.Instance != null) {
             resistanceBonus = (PlayerStats.Instance.GetResistencia() - 1) * 2f;
         }
 
@@ -298,13 +258,11 @@ public class TimeManager : MonoBehaviour
     // o que o jogo usa para consequências (animações lentas, erros, etc.)
     // não é o sono real, mas o sono "percebido" — depois de aplicar todos os efeitos ativos (café, etc.).
     // separá-lo do GetSleepStage garante que o café não "engana" a fadiga real, só mascara os efeitos temporariamente
-    public int GetEffectiveSleepStage()
-    {
+    public int GetEffectiveSleepStage() {
         int baseStage = GetSleepStage();
         int stage = baseStage;
 
-        foreach (var effect in activeEffects)
-        {
+        foreach (var effect in activeEffects) {
             if (effect.timer < effect.duration)
                 stage = effect.modifySleepStage(baseStage, stage, effect.timer);
         }
@@ -312,8 +270,7 @@ public class TimeManager : MonoBehaviour
         return Mathf.Clamp(stage, 0, 3);
     }
 
-    private void UpdateDisplay()
-    {
+    private void UpdateDisplay() {
         string time = GetTimeDisplay();
         timeDisplay.text = time;
         timeDisplayInComputer.text = time;
@@ -322,8 +279,7 @@ public class TimeManager : MonoBehaviour
 
 
     // para converter o tempo real usado no tempo de espera por waypoint
-    public float ToRealSeconds(float gameMinutes)
-    {
+    public float ToRealSeconds(float gameMinutes) {
         float speed = isNight ? nightSpeed : daySpeed;
         return gameMinutes / (speed * 0.1f * debugSpeedMultiplier);
     }
@@ -336,12 +292,8 @@ public class TimeManager : MonoBehaviour
     public void SetAccumulatedSleep(float value) { accumulatedSleep = value; }
     public void SetCoffeesTaken(int value) { coffeesTaken = value; }
 
-    /// <summary>
-    /// Repõe o relógio às 08:00 do dia 1, limpa fadiga/cafés/efeitos ativos e as flags de
-    /// eventos do dia, para que um "Novo Jogo" comece mesmo do zero.
-    /// </summary>
-    public void ResetForNewGame()
-    {
+    // repõe o relógio às 08:00 do dia 1, limpa fadiga/cafés/efeitos ativos e as flags de eventos do dia para que um "Novo Jogo" comece do zero
+    public void ResetForNewGame() {
         SetCurrentMinutes(DayStartMinute);
         accumulatedSleep = 0f;
         coffeesTaken = 0;

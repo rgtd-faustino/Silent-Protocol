@@ -5,18 +5,12 @@ using UnityEngine.UI;
 
 public class EmailUI : MonoBehaviour
 {
-    //--------------------------------------------------------------- //
-    // Referência ao manager LOCAL deste PC                                  //
-    //--------------------------------------------------------------- //
 
     [Header("Manager deste PC")]
     [Tooltip("Arrasta aqui o PCEmailManager do mesmo PC. Se estiver no mesmo " +
              "GameObject pode deixar em branco — é auto-detectado.")]
     public PCEmailManager emailManager;
 
-    //--------------------------------------------------------------- //
-    // Referências de UI                                                     //
-    //--------------------------------------------------------------- //
 
     [Header("Painel Raiz")]
     public GameObject emailAppPanel;
@@ -43,17 +37,14 @@ public class EmailUI : MonoBehaviour
     public Button btnEnviarRelatorio;
 
     [Header("Email Crítico")]
-    public GameObject criticalEmailBanner;         // banner vermelho no topo
+    public GameObject criticalEmailBanner; // banner vermelho no topo
     public TextMeshProUGUI txtAutoDeleteCountdown; // "Auto-delete em 4m 30s"
-    public GameObject encryptedOverlay;            // cobre o corpo do email
-    public TextMeshProUGUI txtEncryptedHint;       // "Precisas de 2 fragmentos"
+    public GameObject encryptedOverlay; // cobre o corpo do email
+    public TextMeshProUGUI txtEncryptedHint; // "Precisas de 2 fragmentos"
     public Button btnDecrypt;
-    public Button btnForward;                      // reencaminhar -> final Denúncia
-    public Button btnDestroyEmail;                 // destruir -> final Lealdade
+    public Button btnForward; // reencaminhar -> final Denúncia
+    public Button btnDestroyEmail; // destruir -> final Lealdade
 
-    //--------------------------------------------------------------- //
-    // Estado interno                                                        //
-    //--------------------------------------------------------------- //
     // permite saber se algum email está aberto
     public static bool AlgumEmailAberto = false;
     private enum Vista { Inbox, Lixo }
@@ -62,13 +53,10 @@ public class EmailUI : MonoBehaviour
     private List<GameObject> entradasAtivas = new List<GameObject>();
     private HashSet<EmailItem> intelJaGuardada = new HashSet<EmailItem>();
 
-    //--------------------------------------------------------------- //
-    // Unity                                                                 //
-    //--------------------------------------------------------------- //
 
     void Awake()
     {
-        // Auto-detecta o manager se não foi atribuído no Inspector
+        // auto-detecta o manager se não foi atribuído no Inspector
         if (emailManager == null)
             emailManager = GetComponent<PCEmailManager>();
 
@@ -90,7 +78,7 @@ public class EmailUI : MonoBehaviour
         btnRestaurar.onClick.AddListener(RestaurarEmailAtual);
         btnGuardarIntel.onClick.AddListener(GuardarIntelAtual);
 
-        // "Enviar Relatório" só existe no PC do jogador — este script é reutilizado por todos os PCs,
+        // "Enviar Relatório" só existe no PC do jogador —> este script é reutilizado por todos os PCs,
         // por isso só regista o listener se o botão estiver mesmo atribuído no Inspector
         if (btnEnviarRelatorio != null) btnEnviarRelatorio.onClick.AddListener(EnviarRelatorioAtual);
 
@@ -112,7 +100,9 @@ public class EmailUI : MonoBehaviour
 
     void OnDestroy()
     {
-        if (emailManager == null) return;
+        if (emailManager == null) 
+            return;
+
         emailManager.OnEmailRecebido -= OnEmailRecebido;
         GameEvent.OnCriticalEmailExpired -= OnCriticalEmailExpired;
     }
@@ -121,7 +111,7 @@ public class EmailUI : MonoBehaviour
     {
         if (emailAppPanel != null && emailAppPanel.activeSelf)
         {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_email"))
+            if (TutorialManager.Instance.IsCurrentStepGate("tut_email"))
             {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
@@ -139,7 +129,7 @@ public class EmailUI : MonoBehaviour
             {
                 int m = Mathf.FloorToInt(restante / 60f);
                 int s = Mathf.FloorToInt(restante % 60f);
-                txtAutoDeleteCountdown.text = $"⚠ AUTO-DELETE EM {m}m {s:00}s";
+                txtAutoDeleteCountdown.text = $"AUTO-DELETE EM {m}m {s:00}s";
             }
             else if (restante < 0f)
             {
@@ -148,9 +138,6 @@ public class EmailUI : MonoBehaviour
         }
     }
 
-    //--------------------------------------------------------------- //
-    // API pública                                                           //
-    //--------------------------------------------------------------- //
 
     public void ToggleApp()
     {
@@ -176,10 +163,6 @@ public class EmailUI : MonoBehaviour
         }
     }
 
-    //--------------------------------------------------------------- //
-    // Vista / Lista                                                         //
-    //--------------------------------------------------------------- //
-
     private void MudarVista(Vista vista)
     {
         vistaAtual = vista;
@@ -193,9 +176,7 @@ public class EmailUI : MonoBehaviour
         foreach (var go in entradasAtivas) Destroy(go);
         entradasAtivas.Clear();
 
-        List<EmailItem> emails = vistaAtual == Vista.Inbox
-            ? emailManager.GetInbox()
-            : emailManager.GetLixo();
+        List<EmailItem> emails = vistaAtual == Vista.Inbox ? emailManager.GetInbox() : emailManager.GetLixo();
 
         foreach (var email in emails)
             CriarEntrada(email);
@@ -216,10 +197,6 @@ public class EmailUI : MonoBehaviour
         go.GetComponent<Button>().onClick.AddListener(() => AbrirEmail(email));
     }
 
-    //--------------------------------------------------------------- //
-    // Detalhe                                                               //
-    //--------------------------------------------------------------- //
-
     private void AbrirEmail(EmailItem email)
     {
         emailSelecionado = email;
@@ -230,9 +207,7 @@ public class EmailUI : MonoBehaviour
         txtTitulo.text = email.titulo;
         txtRemetente.text = $"{email.remetenteNome}  <{email.remetente}>";
         txtDataHora.text = email.dataHora;
-        txtCorpo.text = (email.isEncrypted && !email.desencriptado)
-            ? "<color=#888888>[ENCRIPTADO — usa os teus fragmentos de chave para desencriptar]</color>"
-            : email.corpo;
+        txtCorpo.text = (email.isEncrypted && !email.desencriptado) ? "<color=#888888>[ENCRIPTADO — usa os teus fragmentos de chave para desencriptar]</color>" : email.corpo;
 
         bool naInbox = vistaAtual == Vista.Inbox;
         // emails críticos não podem ser apagados normalmente — só destruídos pelo botão próprio
@@ -243,7 +218,7 @@ public class EmailUI : MonoBehaviour
 
         var label = btnGuardarIntel.GetComponentInChildren<TextMeshProUGUI>();
         if (label != null)
-            label.text = intelJaGuardada.Contains(email) ? "Intel Guardada ✓" : "▼ GUARDAR INTEL";
+            label.text = intelJaGuardada.Contains(email) ? "Intel Guardada" : "GUARDAR INTEL";
 
         // reset UI crítica
         if (criticalEmailBanner != null) criticalEmailBanner.SetActive(false);
@@ -257,10 +232,6 @@ public class EmailUI : MonoBehaviour
 
         emailDetailPanel.SetActive(true);
     }
-
-    //--------------------------------------------------------------- //
-    // Ações                                                                 //
-    //--------------------------------------------------------------- //
 
     private void ApagarEmailAtual()
     {
@@ -290,7 +261,7 @@ public class EmailUI : MonoBehaviour
 
         btnGuardarIntel.interactable = false;
         var label = btnGuardarIntel.GetComponentInChildren<TextMeshProUGUI>();
-        if (label != null) label.text = "Intel Guardada ✓";
+        if (label != null) label.text = "Intel Guardada";
     }
 
     private void EnviarRelatorioAtual()
@@ -299,10 +270,6 @@ public class EmailUI : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.TriggerReportEnding();
     }
-
-    //--------------------------------------------------------------- //
-    // Badge de não-lidos                                                    //
-    //--------------------------------------------------------------- //
 
     private void AtualizarBadge()
     {
@@ -319,10 +286,6 @@ public class EmailUI : MonoBehaviour
         if (emailAppPanel.activeSelf && vistaAtual == Vista.Inbox)
             AtualizarLista();
     }
-
-    //--------------------------------------------------------------- //
-    // Email Crítico                                                         //
-    //--------------------------------------------------------------- //
 
     private void ConfigurarEmailCritico(EmailItem email)
     {

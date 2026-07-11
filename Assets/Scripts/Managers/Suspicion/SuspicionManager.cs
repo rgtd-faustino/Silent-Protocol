@@ -1,7 +1,7 @@
-// #my_code - Sistema duplo de suspeita: company awareness + suspeita individual por fonte
 using System.Collections.Generic;
 using UnityEngine;
 
+// #my_code - Sistema duplo de suspeita: company awareness + suspeita individual por fonte
 public class SuspicionManager : MonoBehaviour
 {
 
@@ -226,7 +226,7 @@ public class SuspicionManager : MonoBehaviour
         currentSuspicion = ratio * maxSuspicion;
     }
 
-    /// <summary>
+    //
     /// Repõe a suspeita, as fontes ativas e o estado atual a zero, para que um "Novo Jogo"
     /// comece mesmo do zero.
     /// </summary>

@@ -41,10 +41,10 @@ public class SaveData {
     // company awareness
     public float companyAwareness;
 
-    // dayManager
-    public bool finalObjectiveCompleted;
-
     // camaras desbloqueadas
     public bool[] cameraUnlocked;
     public int hackLevel;
+
+    // objetivo final — absorvido do antigo DayManager para dentro do GameManager
+    public bool finalObjectiveCompleted;
 }

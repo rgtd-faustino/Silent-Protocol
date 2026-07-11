@@ -35,7 +35,7 @@ public class SaveManager : MonoBehaviour {
         SaveData data = new SaveData();
 
         // dia e tempo
-        data.currentDay = DayManager.Instance.CurrentDay;
+        data.currentDay = GameManager.Instance.currentDay;
         data.currentMinutes = TimeManager.Instance.GetCurrentMinutes();
         data.accumulatedSleep = TimeManager.Instance.GetAccumulatedSleep();
         data.coffeesTaken = TimeManager.Instance.GetCoffeesTaken();
@@ -80,9 +80,6 @@ public class SaveManager : MonoBehaviour {
         data.cameraUnlocked = CameraSystem.Instance.cameraUnlocked;
         data.hackLevel = CameraHackPuzzle.HackLevel;
 
-        // dayManager
-        data.finalObjectiveCompleted = DayManager.Instance.finalObjectiveCompleted;
-
         // gravar
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(SavePath, json);
@@ -107,8 +104,7 @@ public class SaveManager : MonoBehaviour {
         if (data == null) return;
 
         // dia
-        DayManager.Instance.SetCurrentDay(data.currentDay);
-        DayManager.Instance.finalObjectiveCompleted = data.finalObjectiveCompleted;
+        GameManager.Instance.SetCurrentDay(data.currentDay);
 
         // tempo
         TimeManager.Instance.SetCurrentMinutes(data.currentMinutes);

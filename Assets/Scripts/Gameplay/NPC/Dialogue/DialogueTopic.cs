@@ -17,7 +17,7 @@ public class DialogueTopic : ScriptableObject
 
     public int requiredCharisma = 0;
 
-    // Este vetor dita a consequencia da resposta baseada nos checks.
+    // este vetor dita a consequencia da resposta baseada nos checks.
     [Header("Resultado")]
     public TopicOutcome[] outcomes;
 
@@ -30,7 +30,7 @@ public class DialogueTopic : ScriptableObject
         Confrontation
     }
 
-    // Comparamos em cascata os pormenores estatisticos do boneco face ao que temos nos ficheiros para disparar a melhor recompensa de resposta possivel. O final da lista entra como um fallback bruto se tudo falhar.
+    // comparamos em cascata os pormenores estatisticos do boneco face ao que temos nos ficheiros para disparar a melhor recompensa de resposta possivel. O final da lista entra como um fallback bruto se tudo falhar.
     public TopicOutcome Evaluate()
     {
         int charisma = PlayerStats.Instance.GetCarisma();
@@ -59,15 +59,15 @@ public class TopicOutcome
     [Header("Check")]
     public StatCheck statCheck;
 
-    // Fasquia base que as definicoes do utilizador teem de ultrapassar para esta ramificacao passar limpa no algoritmo principal.
+    // fasquia base que as definicoes do utilizador teem de ultrapassar para esta ramificacao passar limpa no algoritmo principal
     [Range(1, 10)] public int threshold = 5;
     
-    // A sorte ampara os erros reduzindo as consequencias da penalizacao original. Parametro crucial para as buids de charme e sorte.
+    // a sorte ampara os erros reduzindo as consequencias da penalizacao original. Parametro crucial para as buids de charme e sorte
     [Range(0, 3)] public int luckModifier = 1;
 
     public bool suspicionAffects = false;
     
-    // Incrementa brutalmente a dificuldade do check. O pessoal da empresa farta-se de falar se o ambiente andar pesado por causa de coisas estragadas nas secretarias.
+    // incrementa brutalmente a dificuldade do check. O pessoal da empresa farta-se de falar se o ambiente andar pesado por causa de coisas estragadas nas secretarias
     [Range(0, 5)] public int suspicionPenalty = 2;
 
     [Header("Resposta do NPC")]
@@ -89,7 +89,7 @@ public class TopicOutcome
         GiveIntel
     }
 
-    // Calcula os pormenores matematicos em runtime absorvendo toda a info estatistica e verificando se os debuffs quebram a fasquia definida no unity.
+    // calcula os pormenores matematicos em runtime absorvendo toda a info estatistica e verificando se os debuffs quebram a fasquia definida no unity
     public bool CheckPasses(int charisma, int luck, float suspicion)
     {
         if (statCheck == StatCheck.None)

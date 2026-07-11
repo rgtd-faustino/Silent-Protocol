@@ -1,7 +1,7 @@
-// #my_code - Atribuição e verificação de tarefas diárias ao jogador para manter aparência corporativa
 using System.Collections.Generic;
 using UnityEngine;
 
+// #my_code - Atribuição e verificação de tarefas diárias ao jogador para manter aparência corporativa
 public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance;

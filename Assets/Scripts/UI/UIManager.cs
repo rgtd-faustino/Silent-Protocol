@@ -46,7 +46,7 @@ public class UIManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    // O reset dos inputs é necessário porque quando bloqueamos o rato de novo o Unity envia um pico de delta para o Input, o que faz a câmara do PlayerController saltar
+    // o reset dos inputs é necessário porque quando bloqueamos o rato de novo o Unity envia um pico de delta para o Input, o que faz a câmara do PlayerController saltar
     public void ChangeCursorState(CursorLockMode mode)
     {
         Cursor.lockState = mode;
@@ -54,7 +54,7 @@ public class UIManager : MonoBehaviour
         Input.ResetInputAxes();
     }
 
-    // Verificamos no TaskManager se a tarefa de imprimir está ativa para decidir se o botão no ecrã do PC funciona
+    // verificamos no TaskManager se a tarefa de imprimir está ativa para decidir se o botão no ecrã do PC funciona
     public void RefreshPCInterface()
     {
         if (printButton != null)
@@ -64,7 +64,7 @@ public class UIManager : MonoBehaviour
     public void ShowSleepUI() => sleepUI.SetActive(true);
     public void HideSleepUI() => sleepUI.SetActive(false);
 
-    // Congelamos a rotação e o movimento do PlayerController para garantir que o jogador não anda a passear enquanto escolhe as horas
+    // congelamos a rotação e o movimento do PlayerController para garantir que o jogador não anda a passear enquanto escolhe as horas
     public void OpenSleepView(BedScript bed)
     {
         currentBed = bed;
@@ -82,8 +82,8 @@ public class UIManager : MonoBehaviour
         PlayerController.Instance.canMoveRotate = false;
     }
 
-    // Validamos o input de texto e calculamos as horas de sono
-    // Passamos os dados para o TimeManager processar o avanço no tempo global
+    // validamos o input de texto e calculamos as horas de sono
+    // passamos os dados para o TimeManager processar o avanço no tempo global
     public void ConfirmSleep()
     {
         string raw = sleepHoursInput.text.Trim();
@@ -138,8 +138,8 @@ public class UIManager : MonoBehaviour
         PlayerController.Instance.canMoveRotate = true;
     }
 
-    // Fazemos a animação do relógio radial antes de notificar a cama e o TimeManager
-    // Isto dá uma transição suave em vez de saltar de imediato para o dia seguinte
+    // fazemos a animação do relógio radial antes de notificar a cama e o TimeManager
+    // isto dá uma transição suave em vez de saltar de imediato para o dia seguinte
     private IEnumerator SleepSequence(float hours, float wakeUpTimeInHours)
     {
         sleepInputPanel.SetActive(false);
@@ -205,8 +205,8 @@ public class UIManager : MonoBehaviour
 
     public bool IsLockViewOpen() => openLockView.activeSelf;
 
-    // Lida com o input do teclado numérico e comunica com o LockScript
-    // Passamos -1 para cancelar e -2 para apagar o último dígito
+    // lida com o input do teclado numérico e comunica com o LockScript
+    // passamos -1 para cancelar e -2 para apagar o último dígito
     public void OnDigitPressed(int digit)
     {
         if (currentLock == null) return;
@@ -297,7 +297,7 @@ public class UIManager : MonoBehaviour
         currentCodeTry = new int[5];
     }
 
-    // Avança a task no TaskManager quando o jogador clica em imprimir
+    // avança a task no TaskManager quando o jogador clica em imprimir
     public void OnPrinterPrintButton()
     {
         if (!TaskManager.Instance.HasActiveMorningTask("Imprimir documento"))

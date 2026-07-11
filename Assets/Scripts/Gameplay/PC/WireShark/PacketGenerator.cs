@@ -17,7 +17,7 @@ public class PacketGenerator : MonoBehaviour
     [Tooltip("Define se queremos injetar tráfego falso intermitente para dar mais vida à stream de dados.")]
     [SerializeField] private bool generateNoise = true;
 
-    // Conjuntos de IPs e strings de rotina configurados à mão para injetar algum ambiente na rede
+    // conjuntos de IPs e strings de rotina configurados à mão para injetar algum ambiente na rede
     private static readonly string[] NoiseIPs = {
         "192.168.1.10", "192.168.1.22", "10.0.0.5", "10.0.0.44",
         "172.16.0.8", "172.16.0.15", "8.8.8.8", "1.1.1.1"
@@ -32,13 +32,13 @@ public class PacketGenerator : MonoBehaviour
 
     private WiresharkManager manager;
     
-    // Usado como contador progressivo para assegurar que cada pacote tem o seu identificador distinto
+    // usado como contador progressivo para assegurar que cada pacote tem o seu identificador distinto
     private int packetCounter = 0;
 
-    // Guarda e agrupa os pacotes enviados consoante o identificador da conversa para mapear o histórico completo entregue ao WiresharkManager
+    // guarda e agrupa os pacotes enviados consoante o identificador da conversa para mapear o histórico completo entregue ao WiresharkManager
     private Dictionary<string, List<PacketData>> historyConversations = new Dictionary<string, List<PacketData>>();
 
-    // Registo transitório dos pacotes já agendados mas cujo momento no jogo ainda não chegou
+    // registo transitório dos pacotes já agendados mas cujo momento no jogo ainda não chegou
     private List<ScheduledPacket> pendingPackets = new List<ScheduledPacket>();
 
     void Awake()
@@ -56,8 +56,8 @@ public class PacketGenerator : MonoBehaviour
         StartCoroutine(ScheduledPacketLoop());
     }
 
-    // Carrega o planeamento consoante o dia reportado pelo GameManager
-    // Atribui os pacotes antigos diretamente ao histórico e empurra o resto para a fila de espera
+    // carrega o planeamento consoante o dia reportado pelo GameManager
+    // atribui os pacotes antigos diretamente ao histórico e empurra o resto para a fila de espera
     private void LoadDaySchedule()
     {
         NetworkSchedule schedule = GetScheduleForToday();
@@ -92,8 +92,8 @@ public class PacketGenerator : MonoBehaviour
                   $"{pendingPackets.Count} pacote(s) agendado(s).");
     }
 
-    // Corotina encarregada de descarregar os pacotes no exato momento certo
-    // Encaminha os dados para a stream live se a UI estiver visível ou sorrateiramente para o histórico se não estiver
+    // corotina encarregada de descarregar os pacotes no exato momento certo
+    // encaminha os dados para a stream live se a UI estiver visível ou sorrateiramente para o histórico se não estiver
     private IEnumerator ScheduledPacketLoop()
     {
         while (true)
@@ -130,8 +130,8 @@ public class PacketGenerator : MonoBehaviour
         }
     }
 
-    // Engorda a stream com pacotes irrelevantes gerados periodicamente
-    // Estes pacotes não ficam guardados em lado nenhum se a app estiver fechada
+    // engorda a stream com pacotes irrelevantes gerados periodicamente
+    // estes pacotes não ficam guardados em lado nenhum se a app estiver fechada
     private IEnumerator NoiseLoop()
     {
         while (true)
@@ -146,8 +146,8 @@ public class PacketGenerator : MonoBehaviour
         }
     }
 
-    // Instancia os objetos de transmissão final
-    // Comunica com o CryptoHelper para ofuscar o texto se o pacote tiver a tag adequada no scriptable object
+    // instancia os objetos de transmissão final
+    // comunica com o CryptoHelper para ofuscar o texto se o pacote tiver a tag adequada no scriptable object
     private PacketData BuildPacket(ScheduledPacket sp)
     {
         packetCounter++;
@@ -177,7 +177,7 @@ public class PacketGenerator : MonoBehaviour
         };
     }
 
-    // Anexa um pacote ao seu grupo conversacional na coleção baseada em dicionário
+    // anexa um pacote ao seu grupo conversacional na coleção baseada em dicionário
     private void AddToHistory(ScheduledPacket sp)
     {
         PacketData pkt = BuildPacket(sp);
@@ -188,7 +188,7 @@ public class PacketGenerator : MonoBehaviour
         historyConversations[sp.conversationId].Add(pkt);
     }
 
-    // Compõe pacotes fictícios juntando peças de matrizes estáticas criadas ali em cima
+    // compõe pacotes fictícios juntando peças de matrizes estáticas criadas ali em cima
     private PacketData GenerateNoisePacket()
     {
         packetCounter++;
@@ -215,7 +215,7 @@ public class PacketGenerator : MonoBehaviour
         };
     }
 
-    // Apanha o plano de emissões certo para hoje consumindo o estado gerido globalmente
+    // apanha o plano de emissões certo para hoje consumindo o estado gerido globalmente
     private NetworkSchedule GetScheduleForToday()
     {
         int index = GameManager.Instance.currentDay - 1;

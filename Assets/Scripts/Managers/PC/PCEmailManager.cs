@@ -2,19 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Gere a lgica de email de UM PC especfico.
-/// Entrega os emails quando a hora do jogo (GameClock) atinge o spawnHour do asset,
-/// exactamente como o WireShark faz com os ScheduledPackets.
-/// </summary>
-public class PCEmailManager : MonoBehaviour
-{
+public class PCEmailManager : MonoBehaviour {
     [Header("Emails deste PC  (ordem no importa  entregues por hora do jogo)")]
     [SerializeField] private List<EmailItem> emailsDestePc = new List<EmailItem>();
 
-    //--------------------------------------------------------------- //
-    // Listas runtime                                                        //
-    //--------------------------------------------------------------- //
     private List<EmailItem> inbox = new List<EmailItem>();
     private List<EmailItem> lixo = new List<EmailItem>();
 
@@ -24,20 +15,11 @@ public class PCEmailManager : MonoBehaviour
     // timers de auto-delete para emails críticos (minutos de jogo restantes)
     private Dictionary<EmailItem, float> autoDeleteTimers = new Dictionary<EmailItem, float>();
 
-    //--------------------------------------------------------------- //
-    // Eventos (a EmailUI subscreve-os)                                      //
-    //--------------------------------------------------------------- //
     public event System.Action<EmailItem> OnEmailRecebido;
     public event System.Action<EmailItem> OnEmailApagado;
 
-    //--------------------------------------------------------------- //
-    // Unity                                                                 //
-    //--------------------------------------------------------------- //
-
-    void Start()
-    {
-        foreach (var email in emailsDestePc)
-        {
+    void Start() {
+        foreach (var email in emailsDestePc) {
             if (email == null) continue;
             email.ResetarEstadoRuntime();
             pendentes.Add(email);
@@ -71,33 +53,26 @@ public class PCEmailManager : MonoBehaviour
         if (pendentes.Count == 0) return;
 
         float horaAtual = TimeManager.Instance.GetCurrentTimeInHours();
-        int diaAtual = DayManager.Instance.CurrentDay;
+        int diaAtual = GameManager.Instance.currentDay;
 
-        for (int i = pendentes.Count - 1; i >= 0; i--)
-        {
+        for (int i = pendentes.Count - 1; i >= 0; i--) {
             var email = pendentes[i];
-            if (DeveEntregar(email, diaAtual, horaAtual))
-            {
+            if (DeveEntregar(email, diaAtual, horaAtual)) {
                 pendentes.RemoveAt(i);
                 EntregarEmail(email);
             }
         }
     }
 
-    //--------------------------------------------------------------- //
-    // Entrega interna                                                       //
-    //--------------------------------------------------------------- //
     // decide se um email pendente já deve ser entregue, cruzando dia + hora
     // filosofia igual ao IntelPickup: se já passámos o dia marcado, entrega-se já,
     // não fica à espera da hora exacta de um dia que já lá vai
-    private bool DeveEntregar(EmailItem email, int diaAtual, float horaAtual)
-    {
+    private bool DeveEntregar(EmailItem email, int diaAtual, float horaAtual) {
         if (diaAtual > email.diaParaAparecer) return true;
         if (diaAtual < email.diaParaAparecer) return false;
         return horaAtual >= email.spawnHour; // é o próprio dia — respeita a hora
     }
-    private void EntregarEmail(EmailItem email)
-    {
+    private void EntregarEmail(EmailItem email) {
         if (email.entregue) return;
         email.entregue = true;
         email.lido = false;
@@ -116,22 +91,17 @@ public class PCEmailManager : MonoBehaviour
         }
     }
 
-    //--------------------------------------------------------------- //
-    // API pblica                                                           //
-    //--------------------------------------------------------------- //
 
-    /// <summary>Injeta um email em runtime (triggers, eventos de misso, etc.)</summary>
-    public void ReceberEmail(EmailItem email)
-    {
+    // injeta um email em runtime (triggers, eventos de misso, etc.)
+    public void ReceberEmail(EmailItem email) {
         if (inbox.Contains(email) || lixo.Contains(email)) return;
         email.lido = false;
         email.apagado = false;
         EntregarEmail(email);
     }
 
-    /// <summary>Move o email para o Lixo (no apaga definitivamente).</summary>
-    public void ApagarEmail(EmailItem email)
-    {
+    // move o email para o Lixo (no apaga definitivamente)
+    public void ApagarEmail(EmailItem email) {
         if (!inbox.Contains(email)) return;
         inbox.Remove(email);
         email.apagado = true;
@@ -139,15 +109,13 @@ public class PCEmailManager : MonoBehaviour
         OnEmailApagado?.Invoke(email);
     }
 
-    /// <summary>Remove definitivamente do Lixo.</summary>
-    public void ApagarDefinitivamente(EmailItem email)
-    {
+    // remove definitivamente do Lixo
+    public void ApagarDefinitivamente(EmailItem email) {
         lixo.Remove(email);
     }
 
-    /// <summary>Restaura um email do Lixo para a Inbox.</summary>
-    public void RestaurarEmail(EmailItem email)
-    {
+    // restaura um email do Lixo para a Inbox
+    public void RestaurarEmail(EmailItem email) {
         if (!lixo.Contains(email)) return;
         lixo.Remove(email);
         email.apagado = false;
@@ -157,14 +125,13 @@ public class PCEmailManager : MonoBehaviour
     public List<EmailItem> GetInbox() => new List<EmailItem>(inbox);
     public List<EmailItem> GetLixo() => new List<EmailItem>(lixo);
 
-    /// <summary>Devolve minutos de jogo restantes antes do auto-delete. -1 se não aplicável.</summary>
+    // sevolve minutos de jogo restantes antes do auto-delete. -1 se não aplicável
     public float GetAutoDeleteTimeRemaining(EmailItem email) {
         if (autoDeleteTimers.TryGetValue(email, out float t)) return t;
         return -1f;
     }
 
-    public int GetNaoLidos()
-    {
+    public int GetNaoLidos() {
         int count = 0;
         foreach (var e in inbox)
             if (!e.lido) count++;

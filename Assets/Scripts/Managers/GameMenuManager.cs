@@ -101,7 +101,10 @@ public class GameMenuManager : MonoBehaviour {
 
     void Update() {
         float y = menuScanlines.uvRect.y + menuScanlineSpeed * Time.unscaledDeltaTime;
-        if (y > 1f) y -= 1f;
+
+        if (y > 1f) 
+            y -= 1f;
+
         menuScanlines.uvRect = new Rect(0f, y, 1f, 1f);
 
         float pulse = Mathf.Sin(Time.unscaledTime * 1.2f) * 0.5f + 0.5f;
@@ -416,9 +419,9 @@ public class GameMenuManager : MonoBehaviour {
         );
     }
 
-    // Botão "INIT_NEW_SESSION" do Menu Principal (e também usado pelo ecrã de final).
-    // Como o jogo inteiro corre numa única cena (o menu é só um overlay por cima), apagar o
-    // ficheiro de save NÃO chega — os managers continuam com o estado da partida anterior em
+    // botão "INIT_NEW_SESSION" do Menu Principal (e também usado pelo ecrã de final)
+    // como o jogo inteiro corre numa única cena (o menu é só um overlay por cima), apagar o
+    // ficheiro de save não chega —> os managers continuam com o estado da partida anterior em
     // memória. Por isso, "Novo Jogo" tem de repor esse estado explicitamente antes de ir para
     // a criação de personagem, senão o jogador só "volta" para onde estava.
     public void OnNewGameClicked() {
@@ -437,14 +440,9 @@ public class GameMenuManager : MonoBehaviour {
         if (FlashlightController.Instance != null) FlashlightController.Instance.ResetForNewGame();
         if (PlayerController.Instance != null) PlayerController.Instance.ResetForNewGame();
 
-        if (DayManager.Instance != null) {
-            DayManager.Instance.SetCurrentDay(1);
-            DayManager.Instance.finalObjectiveCompleted = false;
-        }
-
         CameraHackPuzzle.HackLevel = 0;
 
-        // NOTA: PlayerStats não precisa de reset aqui — ConfirmStats() já o sobrescreve por
+        // PlayerStats não precisa de reset aqui — ConfirmStats() já o sobrescreve por
         // completo assim que a criação de personagem termina.
     }
 
