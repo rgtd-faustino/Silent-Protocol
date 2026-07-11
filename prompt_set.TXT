@@ -1,17 +1,95 @@
-# Declaração de Uso de Inteligência Artificial Generativa no Projeto "Silent Protocol"
+Prompt[Tendo em conta toda a informação que te forneci sobre o jogo e o respetivo GDD, bem como os ficheiros de código das interfaces que anexei, quero que analises todas as UIs existentes e me ajudes a criar uma identidade visual consistente entre elas. O objetivo é que qualquer interface do jogo pareça fazer parte do mesmo sistema, mantendo uma linguagem visual coerente ao longo de toda a experiência.
 
-De acordo com as diretrizes da unidade curricular, declaramos a utilização de modelos de Inteligência Artificial Generativa como ferramenta de apoio ao longo do desenvolvimento deste projeto. A sua utilização foi estritamente guiada pelo nosso pensamento crítico e validação, incidindo especificamente nas seguintes áreas:
+O jogo é centrado em temas como criptografia, cibersegurança, hacking e infiltração, pelo que todas as sugestões devem refletir essa temática. A identidade visual deve privilegiar tons de verde e preto, com um aspeto tecnológico, moderno e minimalista, semelhante ao de sistemas informáticos, terminais e software relacionado com segurança informática. Evita sugerir alterações que descaracterizem o estilo atual ou que impliquem refazer completamente as interfaces, privilegiando melhorias que possam ser implementadas sobre a base existente.
 
-1. **Documentação e Relatório Técnico:**
-   - **Utilização:** A estruturação, formatação e revisão ortográfica/sintática de 100% do relatório foram apoiadas por IA.
-   - **Validação:** A IA operou unicamente como redator e revisor de informações técnicas fornecidas integralmente por nós. Todo o texto gerado foi cuidadosamente lido, escrutinado e alterado para garantir que espelha exatamente a implementação real em código e as decisões de *Game Design* que tomámos. Nada foi aceite às cegas; assumimos total responsabilidade técnica e autoria sobre o conteúdo final.
+Quero que respondas como um UI/UX Designer especializado em videojogos e interfaces inspiradas em sistemas de hacking e cibersegurança. Analisa as interfaces individualmente e em conjunto, identificando inconsistências ao nível das cores, tipografia, ícones, botões, margens, espaçamentos, alinhamentos, hierarquia visual e restantes componentes da UI. Sempre que encontrares algum problema, explica porque afeta a consistência visual e apresenta uma solução concreta e justificada.
 
-2. **Criação da Narrativa e *Lore* (História):**
-   - **Utilização:** A IA foi utilizada para expandir as ideias base da história e redigir linhas de diálogo, e-mails, notas e outros elementos narrativos presentes no jogo.
-   - **Validação:** A direção narrativa, os temas abordados (espionagem corporativa, vulnerabilidades de redes) e as personagens foram definidos por nós. A IA atuou como um co-argumentista, cuja produção foi filtrada e adaptada para encaixar nas mecânicas do jogo (por exemplo, os ficheiros de pistas e diálogos no *ScriptableObject* `NPCDialogueData`).
+Organiza a resposta por prioridades, distinguindo as alterações mais importantes das melhorias opcionais. Sempre que fizer sentido, dá exemplos práticos de como implementar cada sugestão.
 
-**Conclusão:**
-O uso de IA serviu para acelerar tarefas pesadas de redação e organização estrutural, permitindo-nos focar o nosso tempo na conceção da arquitetura lógica, no desenvolvimento de mecânicas C# e na integração dos sistemas dentro do motor Unity (áreas onde o nosso esforço técnico é demonstrado de forma independente).
+No final, recomenda também referências visuais e palavras-chave que possam facilitar a pesquisa de assets compatíveis com esta identidade gráfica. Sugere termos de pesquisa para plataformas como Unity Asset Store, itch.io, Kenney, OpenGameArt, CraftPix ou Figma Community, indicando que tipos de assets (ícones, fontes, HUDs, cursores, efeitos visuais ou packs de UI) melhor se adequam ao tema de hacking, criptografia e cibersegurança.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[WireSharkUI, ElevadorUI, EndingUI, PhoneCallUI, IntelReadUI, MeetingEavesdropScript]
 
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre o jogo e o respetivo GDD, quero que me ajudes a criar uma interface (UI) para representar a bateria da lanterna. A mecânica da lanterna já está definida, podes ver no código em anexo, pelo que não preciso de sugestões sobre o seu funcionamento, apenas sobre a melhor forma de apresentar visualmente ao jogador a quantidade de bateria disponível.
 
-ABSOLUTAMENTE VITAL, ESTE FICJEIRO TEM DE TER EXEMPLOS DE PROMPTS, NÃO É SUPOSTO SER UMA DECLARAÇÕ
+Pretendo uma interface simples, intuitiva e coerente com o restante HUD do jogo. Em vez de um indicador inspirado em terminais ou software de hacking, gostaria que a bateria fosse representada através de um ícone de uma lanterna, em que a intensidade da luz emitida diminui gradualmente à medida que a bateria se vai esgotando. O objetivo é que o jogador consiga perceber rapidamente o nível de bateria apenas pela aparência do ícone, sem necessidade de ler valores numéricos ou barras de energia muito chamativas.
+
+Responde como um UI/UX Designer especializado em videojogos e interfaces inspiradas em software de segurança informática. Sugere diferentes formas de representar o nível da bateria (por exemplo, barra, indicador segmentado, ícone, elemento circular ou outras alternativas), explicando as vantagens e desvantagens de cada solução em termos de legibilidade, feedback ao jogador e integração com o restante HUD. Sempre que possível, indica qual consideras ser a melhor opção para este tipo de jogo e justifica a tua escolha.
+
+No final, recomenda palavras-chave e referências visuais que possam facilitar a pesquisa de assets em plataformas como Unity Asset Store, itch.io, Kenney, OpenGameArt, CraftPix ou Figma Community. Sugere também que tipos de assets poderão ser úteis, como ícones de bateria, elementos de HUD, indicadores de energia ou packs de interfaces com um estilo futurista, tecnológico ou de hacking.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[FlashlightHUDController]
+
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre o jogo e o respetivo GDD, e considerando o script que anexei, quero que analises a forma como implementei o sistema de encriptação das mensagens.
+
+Atualmente, o meu sistema não utiliza um método de encriptação real. O que fiz foi substituir o conteúdo da mensagem por uma sequência aleatória de caracteres, recorrendo a um dicionário com letras maiúsculas e minúsculas, mantendo apenas o comprimento da mensagem original. Embora o resultado pareça ilegível, não existe qualquer algoritmo de encriptação verdadeiro nem uma chave que permita recuperar o texto original, pelo que o sistema não representa corretamente o funcionamento da criptografia.
+
+Quero que respondas como um programador com experiência em cibersegurança, criptografia e desenvolvimento de jogos na Unity. Analisa a abordagem que utilizei, explica quais são as suas limitações relativamente aos métodos de encriptação reais e indica qual seria a melhor solução para implementar um sistema de encriptação mais realista.
+
+Gostaria também de saber se existem bibliotecas, APIs ou funcionalidades já disponíveis em C#/.NET que possam ser utilizadas na Unity para encriptar e desencriptar mensagens de forma correta, utilizando uma chave de encriptação. Explica quais as alternativas mais adequadas, as suas vantagens e desvantagens e qual recomendarias para um jogo como este, tendo em conta a simplicidade de implementação, a fiabilidade e o desempenho.
+
+Sempre que possível, utiliza exemplos simples para explicar o funcionamento dos algoritmos de encriptação e indica de que forma o meu código atual poderia ser adaptado ou substituído para utilizar um método de criptografia real, preservando a mecânica de jogo que pretendo implementar.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[CryptoHelper]
+
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre o jogo e o respetivo GDD, quero que me ajudes a construir a narrativa principal do jogo através da informação que o jogador vai descobrindo ao longo da aventura.
+
+O objetivo é criar uma história coesa, em que o jogador vai recolhendo informação através de e-mails, documentos internos, relatórios, mensagens, registos de chamadas, notas, agendas e outros elementos espalhados pelos diferentes pisos do edifício. Cada uma destas peças de informação deve contribuir para a narrativa, mas não precisa de revelar imediatamente o seu significado. Pelo contrário, quero que muitas delas pareçam pouco relevantes ou até confusas quando encontradas isoladamente, fazendo sentido apenas quando o jogador já tiver reunido informação suficiente para estabelecer ligações entre elas.
+
+Responde como um Narrative Designer especializado em videojogos de mistério, infiltração e investigação. Cria uma história credível, com personagens bem definidas, motivações claras e um conflito principal que se vá revelando gradualmente. Organiza a narrativa de forma que a informação seja distribuída pelos diferentes tipos de documentos e comunicações, indicando que conteúdo poderia existir em cada e-mail, documento, chamada telefónica, relatório ou mensagem. Explica também em que momento do jogo cada elemento deveria ser encontrado para manter um bom ritmo narrativo e incentivar o jogador a continuar a explorar.
+
+Pretendo que toda a informação recolhida funcione como peças de um puzzle. Individualmente, algumas podem não fazer muito sentido ou até parecer irrelevantes, mas, quando o jogador reunir toda a intel, deverá conseguir compreender completamente a história e chegar a um desfecho lógico, em que todas as pistas encaixam entre si e justificam os acontecimentos do jogo. O objetivo é que o jogador sinta que foi ele próprio a descobrir a verdade ao relacionar toda a informação recolhida, em vez de a história lhe ser simplesmente explicada no final.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[Não aplicável – conteúdo narrativo, sem ficheiros de código]
+
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre este projeto, vou anexar o documento Word que contém o relatório completo e os slides da disciplina, que definem a estrutura e a organização esperadas para o relatório final.
+
+Quero que convertas integralmente o conteúdo do documento Word para LaTeX, organizando-o de acordo com a estrutura, secções e estilo apresentados nos slides da disciplina. O teu papel é apenas adaptar o relatório ao formato LaTeX e reorganizar o conteúdo quando necessário para cumprir a estrutura pretendida, preservando sempre o conteúdo original.
+
+É muito importante que não alteres, reescrevas, simplifiques, resumas ou substituas o texto do relatório. O texto existente deve ser mantido exatamente como foi escrito. Não pretendo que melhores a escrita nem que reformules frases por iniciativa própria. Sempre que considerares que alguma alteração possa ser benéfica, não a faças automaticamente. Em vez disso, identifica essa situação, explica a razão e indica explicitamente qual seria a alteração proposta, para que eu possa decidir se pretendo aceitá-la.
+
+Caso existam partes do relatório que não se enquadrem perfeitamente na estrutura apresentada nos slides, reorganiza apenas a posição dessas secções, mantendo sempre o texto original. Se for necessário dividir ou juntar secções para respeitar a estrutura do relatório, fá-lo sem modificar o conteúdo.
+
+Responde como alguém com experiência em LaTeX e na elaboração de relatórios académicos. Garante que o resultado utiliza uma estrutura limpa, organizada e facilmente editável, recorrendo às secções, subseções, figuras, tabelas, referências e restantes elementos do LaTeX sempre que adequado.
+
+Antes de terminares, verifica cuidadosamente que nenhum parágrafo, frase ou informação do documento original foi removido, substituído ou alterado. Qualquer alteração ao conteúdo, por mais pequena que seja, deve ser explicitamente identificada e justificada, nunca realizada de forma silenciosa. A prioridade máxima é preservar integralmente o texto original, limitando a tua intervenção à conversão para LaTeX e à organização do documento segundo as orientações fornecidas nos slides da disciplina.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[Relatório em LaTeX (conversão do documento Word)]
+
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre o jogo e o respetivo GDD, quero compreender como funcionam os eventos em C# e de que forma podem ser utilizados no desenvolvimento deste projeto em Unity.
+
+Responde como um programador experiente em C#, Unity e arquitetura de software para videojogos. Explica de forma clara e progressiva o conceito de eventos, qual a sua finalidade e em que situações são preferíveis a outras formas de comunicação entre scripts. Gostaria de perceber não só a teoria, mas também a lógica por detrás da sua utilização.
+
+Ensina-me como declarar um evento, como subscrever um método a esse evento, como remover a subscrição quando necessário e como invocar o evento corretamente. Explica o papel do emissor do evento e dos objetos que ficam à espera da sua ocorrência, utilizando exemplos simples e comentados para facilitar a compreensão.
+
+Sempre que possível, relaciona a explicação com situações que possam surgir no desenvolvimento do meu jogo, como atualizar elementos da interface, notificar outros sistemas quando um puzzle é concluído, quando a barra de suspeita é alterada, quando o jogador recolhe uma peça de informação ou quando ocorre qualquer outro acontecimento relevante. O objetivo é perceber em que contextos os eventos tornam o código mais organizado e desacoplado.
+
+No final, apresenta um conjunto de boas práticas, erros comuns a evitar e recomendações sobre quando utilizar eventos e quando optar por outras soluções disponíveis na Unity ou em C#.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[Não aplicável – explicação teórica/conceptual, sem ficheiros de código gerados]
+
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre o jogo e o respetivo GDD, quero perceber como posso utilizar as funções seno (sin) e cosseno (cos) para criar o movimento oscilatório das barras presentes no minijogo das câmaras.
+
+Responde como um programador experiente em Unity, C# e matemática aplicada ao desenvolvimento de videojogos. Explica de forma simples e intuitiva como funcionam as funções seno e cosseno, qual a relação entre ambas e como podem ser utilizadas para criar movimentos periódicos e suaves.
+
+Gostaria de compreender conceitos como amplitude, frequência, velocidade e fase, explicando de que forma cada um destes parâmetros influencia o movimento das barras. Em particular, quero perceber como utilizar a fase para que várias barras oscilem de forma independente, evitando que todas se movam exatamente da mesma maneira ou em simultâneo.
+
+Sempre que possível, apresenta exemplos práticos em C# para Unity, devidamente comentados, mostrando como implementar este comportamento. Explica também como ajustar os diferentes parâmetros para obter movimentos mais rápidos, mais lentos, com maior ou menor amplitude e com diferentes desfasamentos entre barras.
+
+Por fim, relaciona toda a explicação com o contexto do minijogo das câmaras, indicando como esta abordagem pode tornar a jogabilidade mais dinâmica e natural e quais são as boas práticas a seguir ao utilizar funções trigonométricas para criar animações e movimentos em interfaces de videojogos.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[CameraHackPuzzle]
+
+Prompt[Tendo em conta todo o contexto que já te forneci anteriormente sobre o jogo e o respetivo GDD, quero que me ajudes a planear toda a arquitetura do sistema de rotas dos NPC antes de iniciar a implementação. Nesta fase não pretendo começar a programar imediatamente, mas sim definir uma estrutura sólida que facilite o desenvolvimento, a manutenção e a futura expansão do sistema.
+
+Responde como um programador sénior especializado em Unity, C# e arquitetura de software para videojogos. Ajuda-me a identificar todos os scripts que serão necessários, quais as responsabilidades de cada um, como deverão comunicar entre si e quais as variáveis mais importantes que cada script deverá possuir. O objetivo é criar um sistema modular, organizado e facilmente escalável.
+
+Gostaria também que me explicasses qual seria a melhor forma de organizar as rotas e os respetivos waypoints na hierarquia da Unity, como os NPC deverão seguir essas rotas, regressar ao waypoint inicial quando necessário, definir percursos em ciclo ou não, introduzir imprevisibilidade através de probabilidades de escolha dos diferentes waypoints e limitar determinadas rotas apenas a certos tipos de NPC. Explica igualmente como implementar diferentes tipos de rotas, como rotas normais e rotas de descanso, indicando como cada uma deverá influenciar o comportamento do NPC.
+
+Quero ainda planear um sistema de spawners responsável por fazer aparecer NPC nos elevadores e atribuir-lhes automaticamente uma rota adequada. Explica como organizar este sistema para permitir que determinados NPC possam receber uma rota específica, ignorando o sistema automático de atribuição quando necessário, bem como a possibilidade de definir uma rota inicial (StartRoute) que o NPC deverá percorrer antes de começar a receber novas rotas dinamicamente.
+
+Relativamente aos waypoints, indica qual consideras ser a melhor forma de os representar e organizar na cena. Analisa a solução de criar um GameObject para cada rota, contendo todos os waypoints pertencentes a essa rota como filhos, e centralizar todas as rotas num NPCManager, responsável por armazenar as rotas disponíveis e atribuí-las aos diferentes NPC. Explica as vantagens e desvantagens desta abordagem e sugere alternativas caso consideres que existe uma solução mais adequada.
+
+Por fim, apresenta recomendações para otimizar o desempenho do sistema. Gostaria de perceber como evitar processamento desnecessário quando o jogador não se encontra num determinado piso do edifício, por exemplo mantendo os NPC imóveis ou suspendendo temporariamente a atualização das suas rotas até o jogador regressar a essa área. Sempre que possível, justifica cada decisão de arquitetura, explicando porque é vantajosa para um projeto deste tipo e como poderá facilitar a manutenção do código ao longo do desenvolvimento.]
+Ferramenta[Claude]
+Ficheiros Gerados/Alterados=[NPCSpawner, NPCManager, NPCScript]

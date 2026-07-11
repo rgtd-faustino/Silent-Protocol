@@ -18,7 +18,7 @@ MonoBehaviour:
     srcIP: 1:1:1:1
     dstIP: 2:2:2:1
     protocol: TCP
-    isEncrypted: 0
+    isEncrypted: 1
     encryptionType: 0
     plainText: "Os Logs do servidor 2 ainda n\xE3o foram apagados. Tens at\xE9 amanha
       para apagalos- credencias para o PC2. Nx!Maint24"
