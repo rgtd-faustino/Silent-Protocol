@@ -10,14 +10,14 @@ public class PacketData
     public string Protocol;
     public string EncryptionType;
     
-    // A string em formato hexadecimal visualizada na UI da app de rede
+    // a string em formato hexadecimal visualizada na UI da app de rede
     public string EncryptedPayload;
     
-    // Conserva a mensagem limpa internamente para validações do sistema e entrega de intel sem ter de forçar desencriptações redudantes no código
+    // conserva a mensagem limpa internamente para validações do sistema e entrega de intel sem ter de forçar desencriptações redudantes no código
     public string PlainText;
     public string Hash;
     
-    // Posição ordenada na troca de mensagens para sabermos construir a árvore da conversa na interface
+    // posição ordenada na troca de mensagens para sabermos construir a árvore da conversa na interface
     public int MessageIndex;
     public bool IsImportant;
     public float Timestamp;

@@ -1,4 +1,5 @@
 using UnityEngine;
+using static SuspicionManager;
 
 public class LockScript : InteractableObject
 {
@@ -12,7 +13,7 @@ public class LockScript : InteractableObject
 
     private Rigidbody rb;
 
-    // estado da fechadura  lido pelo DoorScript para saber se pode abrir
+    // estado da fechadura lido pelo DoorScript para saber se pode abrir
     public bool isLocked;
 
 
@@ -27,8 +28,8 @@ public class LockScript : InteractableObject
     {
         rb = GetComponent<Rigidbody>();
 
-        // se a fechadura comea destrancada, retira-a da layer Interactable e desativa o script 
-        // caso contrrio o raycast do jogador deteta a fechadura antes da porta, forando sempre dois cliques
+        // se a fechadura começa destrancada, retira-a da layer Interactable e desativa o script 
+        // caso contrário o raycast do jogador deteta a fechadura antes da porta, forçando sempre dois cliques
         if (!isLocked)
         {
             gameObject.layer = LayerMask.NameToLayer("Default");
@@ -44,7 +45,7 @@ public class LockScript : InteractableObject
 
         if (isViewOpen)
         {
-            UIManager.Instance.OpenLockView(this); // passa-se a si prprio para o UIManager poder chamar TryCode()
+            UIManager.Instance.OpenLockView(this); // passa-se a si próprio para o UIManager poder chamar TryCode()
             UIManager.Instance.ChangeCursorState(CursorLockMode.None); // cursor visível e livre para clicar nos botões
             PlayerController.Instance.canMoveRotate = false;
 
@@ -57,15 +58,15 @@ public class LockScript : InteractableObject
         }
     }
 
-    // chamado pelo UIManager quando o jogador carrega no boto de sair da view em vez de adivinhar o cdigo
+    // chamado pelo UIManager quando o jogador carrega no botão de sair da view em vez de adivinhar o código
     public void SyncViewClosed()
     {
         isViewOpen = false;
     }
 
 
-    // chamado pelo UIManager com o array de 5 dgitos introduzidos
-    // quando correto: destrancar, remover da layer Interactable e desativar o script (a fechadura j no  interatvel)
+    // chamado pelo UIManager com o array de 5 dígitos introduzidos
+    // quando correto: destrancar, remover da layer Interactable e desativar o script (a fechadura já não interagível)
     public bool TryCode(int[] attempt)
     {
         for (int i = 0; i < code.Length; i++)
@@ -73,6 +74,7 @@ public class LockScript : InteractableObject
             if (attempt[i] != code[i])
             {
                 Debug.Log("Cdigo errado!");
+                SuspicionManager.Instance.IncreaseSuspicion(1.5f, GetInstanceID(), SuspicionSource.CardCodeDenied); // sobe a suspeita porque o jogador tentou aceder a algo que não devia
                 return false;
             }
         }
@@ -90,7 +92,7 @@ public class LockScript : InteractableObject
         return true;
     }
 
-    // ativa a gravidade aps o delay visual do LED verde (gerido no UIManager), a fechadura cai fisicamente do stio como feedback ao jogador.
+    // ativa a gravidade após o delay visual do LED verde (gerido no UIManager), a fechadura cai fisicamente do stio como feedback ao jogador
     public void DropLock()
     {
         rb.useGravity = true;

@@ -67,9 +67,9 @@ public class WiresharkUI : MonoBehaviour
         UpdateVpnStatus();
     }
 
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
     // Stream ao vivo
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
 
     public void AddPacketRow(PacketData pkt)
     {
@@ -96,9 +96,9 @@ public class WiresharkUI : MonoBehaviour
         StartCoroutine(ScrollToTop());
     }
 
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
     // Detalhe do pacote
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
 
     public void ShowPacketDetail(PacketData pkt)
     {
@@ -137,9 +137,9 @@ public class WiresharkUI : MonoBehaviour
         StartCoroutine(ClearCopyStatusAfter(3f));
     }
 
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
     // Histórico
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
 
     public void RefreshHistory(Dictionary<string, List<PacketData>> hist)
     {
@@ -175,14 +175,14 @@ public class WiresharkUI : MonoBehaviour
             TextMeshProUGUI txt = obj.GetComponentInChildren<TextMeshProUGUI>();
             if (txt != null)
                 txt.text = "[" + pkt.MessageIndex + "] " + pkt.PacketId
-                         + "  " + pkt.SrcIP + " → " + pkt.DstIP
+                         + "  " + pkt.SrcIP + " -> " + pkt.DstIP
                          + "  [" + pkt.EncryptionType + "]";
         }
     }
 
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
     // VPN Bar
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
 
     private void UpdateVpnStatus()
     {
@@ -191,9 +191,9 @@ public class WiresharkUI : MonoBehaviour
             txtVpnStatus.text = "REDE PRIVADA — bloqueada (requer 100pts inteligência)";
     }
 
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
     // Utilitários
-    // ---------------------------------------------------------------
+    //------------------------------------------------------------
 
     private IEnumerator ScrollToTop()
     {

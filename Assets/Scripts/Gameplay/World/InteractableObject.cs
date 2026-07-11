@@ -4,10 +4,9 @@ using UnityEngine;
 public class InteractableObject : MonoBehaviour
 {
     [HideInInspector] public string objectName = "objeto";
-    [Header("Interaction Info")]
     public string tooltipMessage = "E para interagir";
 
-    // a referência do material de glitch tem de ser arrastada à mão no Inspector para cada prefab. isto fica no slot extra do MeshRenderer
+    // a referência do material de glitch tem de ser arrastada à mão no Inspector para cada prefab, isto fica no slot extra do MeshRenderer
     [SerializeField] private Material glitchMaterial;
 
     private MeshRenderer meshRenderer;

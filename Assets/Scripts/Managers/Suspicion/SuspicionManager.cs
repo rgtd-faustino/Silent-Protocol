@@ -45,13 +45,14 @@ public class SuspicionManager : MonoBehaviour
 
     public enum SuspicionSource
     {
-        NPCSight,           // NPC v� o jogador numa zona suspeita
-        RestrictedArea,     // jogador est� numa zona restrita
-        Camera,             // acesso excessivo a c�maras
-        Noise,              // barulho � noite (guarda ouviu o jogador)
+        NPCSight,           // NPC vê o jogador numa zona suspeita
+        RestrictedArea,     // jogador estê numa zona restrita
+        Camera,             // acesso excessivo a câmaras
+        Noise,              // barulho à noite (guarda ouviu o jogador)
         TerminalAccess,     // acesso a terminais fora do posto de trabalho
         DocumentMisfiled,    // documento arquivado no departamento errado
-        Hacking // hackear as camaras para lhes aceder 
+        Hacking, // hackear as camaras para lhes aceder 
+        CardCodeDenied // tentar aceder com um cartão ou código e errar
     }
 
 

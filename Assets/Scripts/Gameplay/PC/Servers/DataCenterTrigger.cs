@@ -6,18 +6,19 @@ public class DataCenterTrigger : InteractableObject
 
     [SerializeField] private TriggerType triggerType;
     [SerializeField] private DialogueCutscene cutscene;
-    
-    // Objeto de Intel que é adicionado ao inventário assim que a cutscene termina
-    [SerializeField] private IntelItem intelToGive;
+    [SerializeField] private IntelItem intelToGive; // objeto de Intel que é adicionado ao inventário assim que a cutscene termina
 
-    // Garante que o jogador não ativa o mesmo diálogo duas vezes ao pisar a zona
+    // garante que o jogador não ativa o mesmo diálogo duas vezes ao pisar a zona
     private bool triggered = false;
 
-    // Avalia o tipo de trigger quando o PlayerController entra na área e comunica com a CutsceneDialogueUI para exibir a sequência
+    // avalia o tipo de trigger quando o PlayerController entra na área e comunica com a CutsceneDialogueUI para mostrar a sequência de linhas de diálogo
     private void OnTriggerEnter(Collider other)
     {
-        if (triggered) return;
-        if (!other.CompareTag("Player")) return;
+        if (triggered) 
+            return;
+
+        if (!other.CompareTag("Player")) 
+            return;
 
         triggered = true;
 

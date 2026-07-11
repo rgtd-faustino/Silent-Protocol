@@ -16,26 +16,18 @@ public class EmailItem : ScriptableObject
 
     [Header("Entrega")]
     public int diaParaAparecer = 1;
-    // float decimal para facilitar contas de horas, o EmailManager bate de frente com o TimeManager.GetCurrentTimeInHours()
-    public float spawnHour;
+    public float spawnHour; // float decimal para facilitar contas de horas, o EmailManager bate de frente com o TimeManager.GetCurrentTimeInHours()
     public bool irParaLixoDirectamente;
 
     [Header("Intel Associada")]
     public bool temIntel;
     public IntelItem intelAssociado;
 
-    [Header("Email Crítico")]
-    [Tooltip("Mostra aviso UI")]
-    public bool isCritical;
+    public bool isCritical; // para ver se é necessário mostrar um aviso na UI
+    public bool isEncrypted; // caso ativo, o corpo fica oculto
+    public float autoDeleteGameMinutes; // minutos até expirar
 
-    [Tooltip("Corpo fica oculto")]
-    public bool isEncrypted;
-
-    [Tooltip("Minutos até expirar")]
-    public float autoDeleteGameMinutes;
-
-    // array com os IDs dos IntelItems que o jogador tem de colecionar. como estão em várias partes do mapa, forçamos exploração
-    [Tooltip("IDs precisos")]
+    // array com os IDs dos IntelItems que o jogador tem de colecionar, como estão em várias partes do mapa forçamos a exploração
     public string[] requiredKeyFragmentIDs;
 
     [HideInInspector] public bool entregue;
@@ -43,12 +35,13 @@ public class EmailItem : ScriptableObject
     [HideInInspector] public bool apagado;
     [HideInInspector] public bool desencriptado;
 
-    // como os ScriptableObjects mantêm valores em memória depois de sairmos do play mode, temos de dar reset antes de cada run
+    // ao longo do jogo algumas variáveis vão mudar por exemplo se o email foi lido e quando saímos do play mode as variáveis ficam iguais
+    // então corremos este método em cada email para dar reset
     public void ResetarEstadoRuntime()
     {
-        entregue      = false;
-        lido          = false;
-        apagado       = false;
+        entregue = false;
+        lido = false;
+        apagado = false;
         desencriptado = false;
     }
 }

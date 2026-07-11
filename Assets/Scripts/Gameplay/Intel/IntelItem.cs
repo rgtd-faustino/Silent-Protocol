@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
-// ScriptableObject de dados de um item de intel - criado via menu Create -> Intel -> Novo Item.
-// cada instancia e um asset separado que o IntelInventory guarda em runtime apos o jogador o apanhar
+// scriptableObject de dados de um item de intel, cada instancia é um asset separado que o IntelInventory guarda em runtime após o jogador o apanhar
 [CreateAssetMenu(menuName = "Intel/Novo Item")]
 public class IntelItem : ScriptableObject
 {
@@ -11,8 +10,8 @@ public class IntelItem : ScriptableObject
     [TextArea] public string conteudo;
 
     [Header("Fragmento de Chave (emails encriptados)")]
-    // se true, este item contribui para desencriptar emails no WireShark.
-    // o CryptoHelper verifica o keyFragmentID contra os fragmentos no inventario para montar a chave completa
+    // se true, este item contribui para desencriptar emails no WireShark
+    // o CryptoHelper verifica o keyFragmentID contra os fragmentos no inventário para montar a chave completa
     public bool isKeyFragment;
     public string keyFragmentID;
 

@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
         // receção, andar executivo e suítes acessíveis desde o início
         UnlockFloor(0);
         UnlockFloor(1);
-        UnlockFloor(3); // suítes (floorNumber 4 → índice 3)
+        UnlockFloor(3); // suítes (floorNumber 4 -> índice 3)
 
         GameEvent.OnDayEnded += HandleDayEnd;
         GameEvent.OnGameOver += HandleGameOver;
@@ -178,7 +178,7 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Progresso guardado (dia {currentDay}).");
     }
 
-    // --- sistema de contribuições para finais ---
+    // sistema de contribuições para finais
     // índice 0 = Denúncia, 1 = Extorsão, 2 = Lealdade
     private List<string>[] endingContributions = new List<string>[3] {
         new List<string>(), new List<string>(), new List<string>()
@@ -200,7 +200,7 @@ public class GameManager : MonoBehaviour
         return endingContributions[endingIndex].Count;
     }
 
-    // --- getters e setters para o SaveManager ---
+    // getters e setters para o SaveManager
     public bool[] GetFloorsUnlocked() { return (bool[])floorUnlocked.Clone(); }
 
     public void SetFloorsUnlocked(bool[] floors)

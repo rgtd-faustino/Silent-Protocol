@@ -10,12 +10,12 @@ public class ElevatorInteractable : InteractableObject {
         tooltipMessage = "E para usar painel do elevador";
     }
 
-    // antes de abrir o UI do elevador validamos o estado do menu para garantir que o jogador nao consegue
-    // usar o elevador durante uma cutscene ou dialogo. o gate do tutorial avanca o passo quando o jogador interage pela primeira vez
     public override void Interact() {
+        // se o jogador estiver no menu de jogar ou seja não estiver em nenhum menu então pode usar o elevador
         if (GameMenuManager.Instance.CurrentState == MenuState.Playing)
         {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_elevator")) {
+            // quando o jogador se deslocar ao elevador e o utilizar o tutorial avança para o próximo step
+            if (TutorialManager.Instance.IsCurrentStepGate("tut_elevator")) {
                 TutorialManager.Instance.CompleteCurrentStep();
             }
             elevatorUI.Open();

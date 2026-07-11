@@ -12,17 +12,18 @@ public class NPCSpawner : MonoBehaviour {
     
     private Transform spawnPoint;
 
-    // Se associarmos uma rota especifica ignoramos o algoritmo do NPCManager e forcamos o NPC a este caminho. E incrivel para controlar loops rigorosos.
+    // se associarmos uma rota especifica ignoramos o algoritmo do NPCManager e forcamos o NPC a este caminho
     [SerializeField] private PatrolRoute assignedRoute;
 
+    // antes do NPC começar a fazer uma rota qualquer irá percorrer esta primeiro
     [SerializeField] private PatrolRoute startRoute;
 
-    // Limita o spawn de instanciacoes infinitas para travar derrapagens de performance no CPU.
+    // limita o número de instances que o spawner pode criar
     [SerializeField] private int maxActive = 3;
 
-    [SerializeField] private float spawnInterval = 30f;
+    [SerializeField] private float spawnInterval = 30f; // intervalo de tempo que vai instanciando NPC
 
-    // Rastreamos as entradas cruzando o OnNPCDestroyed da classe NPCScript. Assim repomos sempre a fauna na sala sem exceder a quota.
+    // quantos NPC foram já instanciados
     private int currentActive = 0;
 
 
@@ -42,13 +43,13 @@ public class NPCSpawner : MonoBehaviour {
                 npc.assignedRoute = assignedRoute;
                 npc.startRoute = startRoute;
                 npc.spawner = this;
-                // Injetamos a homeBase a bruto baseados neste transform. Isto soluciona aquelas paragens onde a malta nao sabia para que elevador devia regressar no final da jornada.
+                // a homebase representa o elevador a que o NPC poderá voltar no fim da sua rota, caso aconteça
                 npc.homeBase = spawnPoint;
             }
         }
     }
 
-    // Apanha o callback do recycle para baixar o tracker de atividade e garantir que o iterador liberta mais espaco na memoria.
+    // apanha o callback do recycle do NPCScript para decrementar o contador
     public void OnNPCDestroyed() {
         currentActive--;
     }

@@ -172,7 +172,6 @@ public class UIManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        currentBed?.OnSleepConfirmed(hours);
         TimeManager.Instance.Sleep(wakeUpTimeInHours);
 
         sleepUI.SetActive(false);

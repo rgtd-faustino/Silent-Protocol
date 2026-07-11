@@ -1,10 +1,11 @@
 using UnityEngine;
+using System.Collections;
 
 public class PCInteractable : InteractableObject
 {
     public GameObject pcCanvas;
     
-    // Controla se a interface do PC está visível ou não para evitar múltiplos inputs
+    // controla se a interface do PC está visível ou não para evitar múltiplos inputs
     private bool isOpen = false;
 
     [Header("Segurança")]
@@ -15,8 +16,8 @@ public class PCInteractable : InteractableObject
     public bool precisaDePin = false;
     public string pinCorreto = "1234";
 
-    // Regista se o jogador já validou as credenciais (cartão ou PIN)
-    // Fica a true após o primeiro sucesso para não voltar a pedir na mesma sessão
+    // regista se o jogador já validou as credenciais (cartão ou PIN)
+    // fica a true após o primeiro sucesso para não voltar a pedir na mesma sessão
     private bool isUnlocked = false;
 
     protected override void Awake()
@@ -26,18 +27,14 @@ public class PCInteractable : InteractableObject
         tooltipMessage = "E para usar computador";
     }
 
-    // Chamado pelo PlayerController via raycast de interação
-    // Decide se abre o PC diretamente ou se reencaminha para o fluxo de segurança
-    public override void Interact()
-    {
-        if (isOpen)
-        {
+    // decide se abre o PC diretamente ou se precisa de ser desbloqueado primeiro
+    public override void Interact() {
+        if (isOpen) {
             ClosePC();
             return;
         }
 
-        if (isUnlocked || (!precisaDeCartao && !precisaDePin))
-        {
+        if (isUnlocked || (!precisaDeCartao && !precisaDePin)) {
             OpenPC();
             return;
         }
@@ -45,7 +42,7 @@ public class PCInteractable : InteractableObject
         TentarDesbloquear();
     }
 
-    // Processa a autenticação em duas fases: primeiro valida o cartão silenciosamente e depois pede o PIN com UI
+    // processa a autenticação em duas fases, primeiro valida o cartão silenciosamente e depois pede o PIN com UI
     private void TentarDesbloquear()
     {
         if (precisaDeCartao && !PlayerController.Instance.HasCardCredential(cardID))
@@ -72,8 +69,8 @@ public class PCInteractable : InteractableObject
         OpenPC();
     }
 
-    // Dá feedback visual temporário na tooltip quando o jogador não tem o cartão certo
-    private System.Collections.IEnumerator AvisoCartaoEmFalta()
+    // dá feedback visual temporário na tooltip quando o jogador não tem o cartão certo
+    private IEnumerator AvisoCartaoEmFalta()
     {
         string original = tooltipMessage;
         tooltipMessage = $"Necessita de {cardName}";
@@ -86,13 +83,10 @@ public class PCInteractable : InteractableObject
             UIManager.Instance.ShowTooltip(tooltipMessage);
     }
 
-    // Bloqueia o movimento e a câmara do jogador e mostra a interface do PC
-    // Aproveita para avisar os componentes do servidor (Server1UI e Server2UI) de que o PC foi reaberto
+    // bloqueia o movimento e a câmara do jogador e mostra a interface do PC
+    // aproveita para avisar os componentes do servidor (Server1UI e Server2UI) de que o PC foi reaberto
     private void OpenPC()
     {
-        Debug.Log($"[PCInteractable] OpenPC chamado! pcCanvas = {pcCanvas.name}, estava ativo antes? {pcCanvas.activeSelf}");
-        pcCanvas.SetActive(true);
-        Debug.Log($"[PCInteractable] pcCanvas.activeSelf agora = {pcCanvas.activeSelf}, activeInHierarchy = {pcCanvas.activeInHierarchy}");
         pcCanvas.SetActive(true);
         PlayerController.Instance.canMoveRotate = false;
         Cursor.lockState = CursorLockMode.None;
@@ -101,9 +95,12 @@ public class PCInteractable : InteractableObject
         isOpen = true;
 
         Server1UI srv1 = pcCanvas.GetComponentInChildren<Server1UI>();
-        if (srv1 != null) srv1.OnOpen();
+        if (srv1 != null) 
+            srv1.OnOpen();
+
         Server2UI srv2 = pcCanvas.GetComponentInChildren<Server2UI>();
-        if (srv2 != null) srv2.OnOpen();
+        if (srv2 != null) 
+            srv2.OnOpen();
     }
 
     private void Update()
@@ -112,7 +109,7 @@ public class PCInteractable : InteractableObject
             ClosePC();
     }
 
-    // Oculta a interface e devolve o controlo ao PlayerController
+    // oculta a interface e devolve o controlo ao PlayerController
     private void ClosePC()
     {
         pcCanvas.SetActive(false);
@@ -122,11 +119,9 @@ public class PCInteractable : InteractableObject
         isOpen = false;
     }
 
-    // Ativa o brilho no modelo do PC se existirem tarefas no TaskManager que dependam dele
+    // ativa o brilho no modelo do PC se existirem tarefas no TaskManager que dependam dele
     protected override bool CheckShouldGlowByDefault()
     {
-        if (TaskManager.Instance == null) return false;
-        return TaskManager.Instance.HasActiveTask("Escrever documento") ||
-               TaskManager.Instance.HasActiveTask("Imprimir documento");
+        return TaskManager.Instance.HasActiveTask("Escrever documento") || TaskManager.Instance.HasActiveTask("Imprimir documento");
     }
 }

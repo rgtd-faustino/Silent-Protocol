@@ -5,18 +5,18 @@ using UnityEngine.UI;
 
 public class EmailUI : MonoBehaviour
 {
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Referência ao manager LOCAL deste PC                                  //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     [Header("Manager deste PC")]
     [Tooltip("Arrasta aqui o PCEmailManager do mesmo PC. Se estiver no mesmo " +
              "GameObject pode deixar em branco — é auto-detectado.")]
     public PCEmailManager emailManager;
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Referências de UI                                                     //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     [Header("Painel Raiz")]
     public GameObject emailAppPanel;
@@ -48,12 +48,12 @@ public class EmailUI : MonoBehaviour
     public GameObject encryptedOverlay;            // cobre o corpo do email
     public TextMeshProUGUI txtEncryptedHint;       // "Precisas de 2 fragmentos"
     public Button btnDecrypt;
-    public Button btnForward;                      // reencaminhar → final Denúncia
-    public Button btnDestroyEmail;                 // destruir → final Lealdade
+    public Button btnForward;                      // reencaminhar -> final Denúncia
+    public Button btnDestroyEmail;                 // destruir -> final Lealdade
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Estado interno                                                        //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // permite saber se algum email está aberto
     public static bool AlgumEmailAberto = false;
     private enum Vista { Inbox, Lixo }
@@ -62,9 +62,9 @@ public class EmailUI : MonoBehaviour
     private List<GameObject> entradasAtivas = new List<GameObject>();
     private HashSet<EmailItem> intelJaGuardada = new HashSet<EmailItem>();
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Unity                                                                 //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     void Awake()
     {
@@ -148,9 +148,9 @@ public class EmailUI : MonoBehaviour
         }
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // API pública                                                           //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     public void ToggleApp()
     {
@@ -176,9 +176,9 @@ public class EmailUI : MonoBehaviour
         }
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Vista / Lista                                                         //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     private void MudarVista(Vista vista)
     {
@@ -216,9 +216,9 @@ public class EmailUI : MonoBehaviour
         go.GetComponent<Button>().onClick.AddListener(() => AbrirEmail(email));
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Detalhe                                                               //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     private void AbrirEmail(EmailItem email)
     {
@@ -258,9 +258,9 @@ public class EmailUI : MonoBehaviour
         emailDetailPanel.SetActive(true);
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Ações                                                                 //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     private void ApagarEmailAtual()
     {
@@ -300,9 +300,9 @@ public class EmailUI : MonoBehaviour
             GameManager.Instance.TriggerReportEnding();
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Badge de não-lidos                                                    //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     private void AtualizarBadge()
     {
@@ -320,9 +320,9 @@ public class EmailUI : MonoBehaviour
             AtualizarLista();
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Email Crítico                                                         //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     private void ConfigurarEmailCritico(EmailItem email)
     {

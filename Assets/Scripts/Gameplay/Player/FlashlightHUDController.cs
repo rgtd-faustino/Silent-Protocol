@@ -34,16 +34,19 @@ public class FlashlightHUDController : MonoBehaviour {
             return;
         }
         Instance = this;
+
         canvasGroup = GetComponent<CanvasGroup>();
-        
-        // Deixamos o objeto ativo no arranque mas cortamos a opacidade. Assim os outros scripts podem encontrar as referências sem termos null pointers ao ligar.
+        // deixamos o objeto ativo no arranque mas metemos transparente (porque o jogador não tem a lanterna ainda)
+        // e assim os outros scripts podem encontrar as referências sem termos problemas de null
         canvasGroup.alpha = 0f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
     }
 
+    // se o jogador não tem lanterna ou não é noite, o HUD não fica visível
     void Update() {
         if (!PlayerController.Instance.hasFlashlight || !TimeManager.Instance.isNight) {
+            // se o HUD já estava visivel anteriormente então passa a ser desligado (provavelmente porque ficou de dia)
             if (canvasGroup.alpha > 0f) {
                 StopAllCoroutines();
                 canvasGroup.alpha = 0f;
@@ -53,6 +56,7 @@ public class FlashlightHUDController : MonoBehaviour {
             return;
         }
 
+        // se chegámos até aquié porque o jogador tem lanterna e é de noite, mas se o HUD ainda estivesse escondido e houvesse bateria então fica visível
         if (canvasGroup.alpha == 0f && FlashlightController.Instance.GetBatteryRatio() > 0f) {
             canvasGroup.alpha = 1f;
         }
@@ -67,18 +71,13 @@ public class FlashlightHUDController : MonoBehaviour {
         canvasGroup.blocksRaycasts = true;
     }
 
-    // Tratamos aqui das cores dinâmicas e da lógica de fade. Lemos o rácio puxado diretamente do FlashlightController para o filamento reagir visualmente.
+    // tratamos aqui das cores dinâmicas e da lógica de fade, lemos o rácio que apanhamos diretamente do FlashlightController para o filamento reagir visualmente
     private void UpdateVisuals(float ratio) {
         filamentLit.fillAmount = ratio;
-
         Color color = GetColor(ratio);
-
         filamentLit.color = color;
-
         bulbBloom.color = new Color(color.r, color.g, color.b, ratio > 0 ? Mathf.Lerp(0.08f, 0.55f, ratio) : 0f);
-
         bulbFill.color = new Color(color.r, color.g, color.b, ratio > 0 ? ratio * 0.15f : 0f);
-
         pctText.text = ratio > 0 ? Mathf.RoundToInt(ratio * 100f) + "%" : "";
         pctText.color = new Color(color.r, color.g, color.b, ratio > 0 ? 0.85f : 0.15f);
 

@@ -5,10 +5,10 @@ public class Server2PC : InteractableObject
     public GameObject pcCanvas;
     [SerializeField] private DialogueCutscene srv2Cutscene;
     
-    // Garante que a cutscene de introdução ao servidor toca apenas na primeira interação
+    // garante que a cutscene de introdução ao servidor toca apenas na primeira interação
     private bool cutsceneTriggered = false;
     
-    // Impede problemas de concorrência na entrada de input e duplicação da interface
+    // impede problemas de concorrência na entrada de input e duplicação da interface
     private bool isOpen = false;
 
     protected override void Awake()
@@ -18,7 +18,7 @@ public class Server2PC : InteractableObject
         tooltipMessage = "E para aceder ao Servidor 2";
     }
 
-    // Interceta a interação inicial para arrancar o diálogo com a CutsceneDialogueUI e depois delega para a abertura do painel
+    // interceta a interação inicial para arrancar o diálogo com a CutsceneDialogueUI e depois delega para a abertura do painel
     public override void Interact()
     {
         if (!cutsceneTriggered)
@@ -38,7 +38,7 @@ public class Server2PC : InteractableObject
         }
     }
 
-    // Trava o PlayerController e liberta o rato para o jogador conseguir clicar na interface do servidor
+    // trava o PlayerController e liberta o rato para o jogador conseguir clicar na interface do servidor
     private void OpenPC()
     {
         pcCanvas.SetActive(true);
@@ -56,7 +56,7 @@ public class Server2PC : InteractableObject
             ClosePC();
     }
 
-    // Remove o painel do servidor e restaura os controlos e a câmara normais
+    // remove o painel do servidor e restaura os controlos e a câmara normais
     private void ClosePC()
     {
         pcCanvas.SetActive(false);

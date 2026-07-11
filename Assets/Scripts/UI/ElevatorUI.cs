@@ -409,7 +409,7 @@ public class ElevatorUI : MonoBehaviour
     {
         detTitle.text = "EM TRÂNSITO";
         detTitle.color = ElevatorColors.Green;
-        detSubtitle.text = $"F{from} → F{to}";
+        detSubtitle.text = $"F{from} -> F{to}";
         detSubtitle.color = ElevatorColors.Muted;
         detDesc.text = "";
         detFeatLabel.text = "";

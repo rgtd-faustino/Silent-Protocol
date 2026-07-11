@@ -24,13 +24,16 @@ public class IntelReadUI : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         painelLeitura.SetActive(false);
     }
 
-    // Abre o painel e tranca o jogo todo para o jogador decidir o que fazer com a informação
-    // Bloqueamos a câmara e a visão dos guardas (blockDetection) para evitar que o jogador seja apanhado a meio da leitura
+    // abre o painel e tranca o jogo todo para o jogador decidir o que fazer com a informação
     public void AbrirLeitura(IntelItem item, System.Action callbackGuardar, System.Action callbackIgnorar)
     {
         itemAtual = item;
@@ -43,7 +46,6 @@ public class IntelReadUI : MonoBehaviour
 
         painelLeitura.SetActive(true);
 
-        CameraScript.Instance.blockDetection = true;
         UIManager.Instance.HideTooltip();
         UIManager.Instance.ChangeCursorState(CursorLockMode.None);
         PlayerController.Instance.canMoveRotate = false;
@@ -58,7 +60,6 @@ public class IntelReadUI : MonoBehaviour
     {
         painelLeitura.SetActive(false);
 
-        CameraScript.Instance.blockDetection = false;
         UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
         PlayerController.Instance.canMoveRotate = true;
     }

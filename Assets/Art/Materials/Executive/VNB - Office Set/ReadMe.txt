@@ -64,7 +64,7 @@ Este package contiene prefabs listos para usar, haciendolo todo mucho mas fácil
 
 [[ ENG ]]
 
---- Description ---
+--- Description
 
 Following another challenge, I decided to create an office set (taking inspiration originally from the same person from the previous park set), this time I decided to come up with a bigger set containing even more stuff to tweak and use in order to populate some office-like scenario, and coming with some different palettes in order to provide more variation, and a modular-like way of creating furniture (no, there are no more models in Unity that the ones and amount I listed, it's the illusion of palettes and modular building lol).
 
@@ -85,8 +85,8 @@ Please make sure to review the asset on itch.io if you found it useful, leave a 
 [Notes]
 * Some models may contain a second material, used to add more variation to certain parts of the model itself.
 
----------- PAID SETS NOW AVAILABLE ----------
-----------         06-2025         ----------
+---------- PAID SETS NOW AVAILABLE-------
+----------         06-2025        -------
 If you liked the first 2 free office sets, want more and also want to support my work, you can check (and maybe buy) my 440+ individual models Office Set #3, with all new furniture options, including lots of new kind of models and multiple textures, with dedicated support! All for $30 (or up to 50% off from time to time)
 ---------- 
 

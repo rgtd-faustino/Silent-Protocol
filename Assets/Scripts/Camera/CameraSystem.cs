@@ -12,17 +12,17 @@ public class CameraSystem : MonoBehaviour
 
     private float overuseThreshold = 30f; // a partir de 30 segundos acumulados a ver câmaras a suspeita começa a subir mais depressa
     private float maxRateMultiplier = 4f; // no pior caso a suspeita sobe 4x mais depressa que o normal
-    private float residualPerSession = 0.15f; // cada vez que o jogador abre as câmaras adiciona 15% de calor residual
+    private float residualPerSession = 0.125f; // cada vez que o jogador abre as câmaras adiciona 12.5% de resíduo
     private float residualPerSwitch = 0.02f; // trocar de câmara adiciona 2%
-    private float residualDecayRate = 0.02f; // o calor residual demora ~50 segundos a desaparecer completamente (1 / 0.02)
+    private float residualDecayRate = 0.02f; // o resíduo demora ~50 segundos a desaparecer completamente (1 / 0.02)
     private float signalRecoveryRate = 0.05f; // o sinal demora ~20 segundos a recuperar completamente (1 / 0.05)
 
     [HideInInspector] public int currentCameraIndex = 0;
-    [HideInInspector] public bool isActive = false; // para ver se o jgoador está atualmente a ver camaras
-    private float cumulativeWatchSeconds = 0f; // quantidade total de segundos vistos nas camaras durante o dia atual
+    [HideInInspector] public bool isActive = false; // para ver se o jogador está atualmente a ver as câmaras
+    private float cumulativeWatchSeconds = 0f; // quantidade total de segundos vistos nas câmaras durante o dia atual
     [HideInInspector] public float residualHeat = 0f; // resíduo por sessão
     [HideInInspector] public float signalIntegrity = 1f;
-    [HideInInspector] public bool[] cameraUnlocked; // para dizer se a camara já está desbloeuqada ou ainda nao
+    [HideInInspector] public bool[] cameraUnlocked; // para dizer se a camara já está desbloeuqada ou ainda não
 
     public SurveillanceCamera ActiveCamera()
     {
@@ -51,7 +51,7 @@ public class CameraSystem : MonoBehaviour
 
     void Start()
     {
-        // inicializar cada camara
+        // inicializar cada câmara
         cameraUnlocked = new bool[allCameras.Length];
 
         foreach (var cam in allCameras)
@@ -66,7 +66,7 @@ public class CameraSystem : MonoBehaviour
         GameEvent.OnDayChanged -= OnDayChangedHandler;
     }
 
-    // função simples para resetar o tempo assistido
+    // para dar reset o tempo assistido
     void OnDayChangedHandler(int unused)
     {
         cumulativeWatchSeconds = 0f;
@@ -79,7 +79,7 @@ public class CameraSystem : MonoBehaviour
             float dt = Time.deltaTime;
             cumulativeWatchSeconds += dt;
 
-            // multiplicador linear após atingir o threshold
+            // multiplicador linear após atingir o threshold (clamp01 ficar entre 0 e 1 se sair dos limites ou então o próprio valor)
             float overuseFactor = Mathf.Clamp01((cumulativeWatchSeconds - overuseThreshold) / (overuseThreshold * 2f));
             float rateMultiplier = Mathf.Lerp(1f, maxRateMultiplier, overuseFactor) + residualHeat; // o resíduo adiciona por cima
 
@@ -92,7 +92,7 @@ public class CameraSystem : MonoBehaviour
         }
         else
         {
-            // camara fechada, deixa de ser uma origem de suspeita e recobre o sinal e resíduo cai
+            // câmara fechada, deixa de ser uma origem de suspeita e recobre o sinal e resíduo cai
             SuspicionManager.Instance.StopIncreasingSuspicion(GetInstanceID());
             signalIntegrity = Mathf.MoveTowards(signalIntegrity, 1f, signalRecoveryRate * Time.deltaTime);
             residualHeat = Mathf.MoveTowards(residualHeat, 0f, residualDecayRate * Time.deltaTime);
@@ -149,16 +149,6 @@ public class CameraSystem : MonoBehaviour
         CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
     }
 
-    public void SwitchToCamera(int index)
-    {
-        if (index < 0 || index >= allCameras.Length)
-            return;
-
-        currentCameraIndex = index;
-        CameraViewUI.Instance.OnCameraChanged(allCameras[currentCameraIndex]);
-    }
-
-
     public bool IsUnlocked(int index)
     {
         return index >= 0 && index < cameraUnlocked.Length && cameraUnlocked[index];
@@ -172,10 +162,7 @@ public class CameraSystem : MonoBehaviour
         cameraUnlocked[index] = true;
     }
 
-    /// <summary>
-    /// Repõe as câmaras para o estado inicial (todas trancadas, sem calor residual nem
-    /// degradação de sinal), para que um "Novo Jogo" comece mesmo do zero.
-    /// </summary>
+    // repõe as câmaras para o estado inicial para um jogo do 0
     public void ResetForNewGame()
     {
         isActive = false;
@@ -183,9 +170,7 @@ public class CameraSystem : MonoBehaviour
         cumulativeWatchSeconds = 0f;
         residualHeat = 0f;
         signalIntegrity = 1f;
-
-        if (allCameras != null)
-            cameraUnlocked = new bool[allCameras.Length];
+        cameraUnlocked = new bool[allCameras.Length];
 
         Debug.Log("[CameraSystem] Estado reiniciado para um novo jogo.");
     }

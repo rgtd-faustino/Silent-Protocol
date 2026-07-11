@@ -46,8 +46,8 @@ public class PacketRowUI : MonoBehaviour
         txtDstIP.text = pkt.DstIP;
         txtProtocol.text = pkt.Protocol;
         txtInfo.text = pkt.IsImportant
-                                ? "!! " + TruncateIP(pkt.SrcIP) + " → " + TruncateIP(pkt.DstIP)
-                                : TruncateIP(pkt.SrcIP) + " → " + TruncateIP(pkt.DstIP);
+                                ? "!! " + TruncateIP(pkt.SrcIP) + " -> " + TruncateIP(pkt.DstIP)
+                                : TruncateIP(pkt.SrcIP) + " -> " + TruncateIP(pkt.DstIP);
         txtEncType.text = pkt.EncryptionType;
 
         txtPacketId.color = ColIdText;

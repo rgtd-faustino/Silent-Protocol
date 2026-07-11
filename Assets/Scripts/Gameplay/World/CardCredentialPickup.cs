@@ -4,16 +4,14 @@ public class CardCredentialPickup : InteractableObject
 {
     public string cardID;
     public string cardName;
-
     public string notificationText = "Cartão de acesso obtido: ";
 
-    [Header("Visibilidade por dia")]
-    // o dia a partir do qual o cartão spawna no mapa. o DayManager gere o dia atual e ativa os cartões quando chegamos lá
+    // o dia a partir do qual o cartão spawna no mapa, o DayManager gere o dia atual e ativa os cartões quando chegamos lá
     public int diaParaAparecer = 1;
 
     private bool isPickedUp = false;
 
-    // a gente regista logo no Awake o listener do OnDayChanged. assim não há problemas de concorrência com o DayManager que possa atualizar o dia entretanto
+    // registamos logo no Awake o listener do OnDayChanged
     protected override void Awake()
     {
         base.Awake();
@@ -28,9 +26,9 @@ public class CardCredentialPickup : InteractableObject
         GameEvent.OnDayChanged -= HandleDayChanged;
     }
 
-    // o Start corre depois de todos os managers fazerem o Awake, portanto temos garantia absoluta que a instância do DayManager já existe na memória
     private void Start()
     {
+        // para mostrarmos apenas quando for suposto, fazemos isto logo no início para desativar/ativar todos os que forem necessários
         gameObject.SetActive(DayManager.Instance.CurrentDay >= diaParaAparecer);
     }
 
@@ -40,10 +38,12 @@ public class CardCredentialPickup : InteractableObject
             gameObject.SetActive(true);
     }
 
-    // este método injeta o ID do cartão diretamente no PlayerController. os CardReaders depois vão validar se o ID está na lista do gajo
+    // este método injeta o ID do cartão diretamente no PlayerController, os CardReaders depois vão validar se o ID está na lista do jogador
     public override void Interact()
     {
-        if (isPickedUp) return;
+        if (isPickedUp) 
+            return;
+
         isPickedUp = true;
 
         PlayerController.Instance.AddCardCredential(cardID);
@@ -55,7 +55,7 @@ public class CardCredentialPickup : InteractableObject
         Destroy(gameObject, 0.1f);
     }
 
-    // forçamos os cartões a brilhar sempre que não foram apanhados para o jogador não andar às cegas a procurar no cenário escuro
+    // forçamos os cartões a brilhar sempre que não forem apanhados para o jogador não andar às cegas a procurar no cenário
     protected override bool CheckShouldGlowByDefault()
     {
         return !isPickedUp;

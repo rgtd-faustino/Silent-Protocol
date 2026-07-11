@@ -69,8 +69,8 @@ public class DialogueManager : MonoBehaviour
         OnDialogueClose?.Invoke();
     }
 
-    // este método é o callback da UI. quando o gajo clica numa opção, avaliamos o resultado e aplicamos os buffs ou debuffs.
-    // usamos uma callback na UI para aplicar a consequência só depois de mostrar a resposta do NPC, senão a barra de suspeita subia antes do gajo ler o insulto
+    // este método é o callback da UI. quando o jogador clica numa opção, avaliamos o resultado e aplicamos os buffs ou debuffs.
+    // usamos uma callback na UI para aplicar a consequência só depois de mostrar a resposta do NPC, senão a barra de suspeita subia antes do jogador ler o insulto
     public void OnTopicSelected(DialogueTopic topic)
     {
         if (topic == null) return;

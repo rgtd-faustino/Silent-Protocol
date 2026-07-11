@@ -3,24 +3,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// Controla a UI do TrashBin de UM PC específico.
 
 public class TrashBinUI : MonoBehaviour
 {
     // flag estática para o PlayerController saber se algum TrashBin está aberto
     public static bool AlgumTrashAberto = false;
 
-    // ------------------------------------------------------------------ //
-    // Manager local                                                         //
-    // ------------------------------------------------------------------ //
 
-    [Header("Manager deste PC")]
-    [Tooltip("Auto-detectado se estiver no mesmo GameObject.")]
+    [Header("Trash manager deste PC")]
     public PCTrashManager trashManager;
-
-    // ------------------------------------------------------------------ //
-    // Referências de UI                                                     //
-    // ------------------------------------------------------------------ //
 
     [Header("Painel Raiz")]
     public GameObject trashAppPanel;
@@ -29,48 +20,40 @@ public class TrashBinUI : MonoBehaviour
     public Button btnFechar;
 
     [Header("Lista")]
-    public Transform listContent;           // Content do ScrollRect da lista
-    public GameObject trashEntryPrefab;     // prefab de cada linha (Button + TxtTitulo)
+    public Transform listContent; // lista de lixos
+    public GameObject trashEntryPrefab; // prefab de cada linha (Button + TxtTitulo)
 
     [Header("Detalhe")]
     public GameObject trashDetailPanel;
-    public GameObject badgeIntel;           // BadgeIntel (ativo só se temIntel)
+    public GameObject badgeIntel; // BadgeIntel (ativo só se temIntel)
     public TextMeshProUGUI txtTitulo;
     public TextMeshProUGUI txtCorpo;
     public Button btnGuardarIntel;
 
-    // ------------------------------------------------------------------ //
-    // Estado interno                                                        //
-    // ------------------------------------------------------------------ //
 
     private TrashItem itemSelecionado = null;
     private List<GameObject> entradasAtivas = new List<GameObject>();
     private HashSet<TrashItem> intelJaGuardada = new HashSet<TrashItem>();
 
-    // ------------------------------------------------------------------ //
-    // Unity                                                                 //
-    // ------------------------------------------------------------------ //
 
     void Awake()
     {
         if (trashManager == null)
             trashManager = GetComponent<PCTrashManager>();
-
-        if (trashManager == null)
-            Debug.LogError($"[TrashBinUI] Nenhum PCTrashManager encontrado em '{gameObject.name}'.", this);
     }
 
     void Start()
     {
-        if (trashManager == null) return;
+        if (trashManager == null) 
+            return;
 
         btnFechar.onClick.AddListener(FecharApp);
         btnGuardarIntel.onClick.AddListener(GuardarIntelAtual);
 
-        trashManager.OnItemRecebido += OnItemRecebido;
+        trashManager.OnItemRecebido += OnItemRecebido; // subscrevemo-nos ao evento de quando o pc trash manager recebe um item no lixo
 
         trashDetailPanel.SetActive(false);
-        AtualizarLista();
+        AtualizarLista(); // e depois atualizamos a lista para instanciar o lixo novo na UI
     }
 
     void OnDestroy()
@@ -79,24 +62,18 @@ public class TrashBinUI : MonoBehaviour
             trashManager.OnItemRecebido -= OnItemRecebido;
     }
 
-    // ------------------------------------------------------------------ //
-    // API pública                                                           //
-    // ------------------------------------------------------------------ //
 
-    public void ToggleApp()
-    {
+    public void ToggleApp() {
         bool abrir = !trashAppPanel.activeSelf;
         trashAppPanel.SetActive(abrir);
         AlgumTrashAberto = abrir;
 
-        if (abrir)
-        {
+        if (abrir) {
             UIManager.Instance.ChangeCursorState(CursorLockMode.None);
             PlayerController.Instance.canMoveRotate = false;
             AtualizarLista();
-        }
-        else
-        {
+
+        } else {
             UIManager.Instance.ChangeCursorState(CursorLockMode.Locked);
             PlayerController.Instance.canMoveRotate = true;
         }
@@ -110,19 +87,19 @@ public class TrashBinUI : MonoBehaviour
         PlayerController.Instance.canMoveRotate = true;
     }
 
-    // ------------------------------------------------------------------ //
-    // Lista                                                                 //
-    // ------------------------------------------------------------------ //
-
+    // para atualizar a lista destruímos tudo e voltamos a criar tudo novamente
     private void AtualizarLista()
     {
-        foreach (var go in entradasAtivas) Destroy(go);
+        foreach (var go in entradasAtivas) 
+            Destroy(go);
+
         entradasAtivas.Clear();
 
         foreach (var item in trashManager.GetItens())
             CriarEntrada(item);
     }
 
+    // sempre que recebemos um lixo novo temos de adicionar à UI o mesmo, então instanciamos um prefab na lista de conteúdos (de lixos)
     private void CriarEntrada(TrashItem item)
     {
         var go = Instantiate(trashEntryPrefab, listContent);
@@ -135,9 +112,6 @@ public class TrashBinUI : MonoBehaviour
         go.GetComponent<Button>().onClick.AddListener(() => AbrirItem(item));
     }
 
-    // ------------------------------------------------------------------ //
-    // Detalhe                                                               //
-    // ------------------------------------------------------------------ //
 
     private void AbrirItem(TrashItem item)
     {
@@ -156,14 +130,10 @@ public class TrashBinUI : MonoBehaviour
 
         var label = btnGuardarIntel.GetComponentInChildren<TextMeshProUGUI>();
         if (label != null)
-            label.text = intelJaGuardada.Contains(item) ? "Intel Guardada ✓" : "▼ GUARDAR INTEL";
+            label.text = intelJaGuardada.Contains(item) ? "Intel Guardada" : "GUARDAR INTEL";
 
         trashDetailPanel.SetActive(true);
     }
-
-    // ------------------------------------------------------------------ //
-    // Ações                                                                 //
-    // ------------------------------------------------------------------ //
 
     private void GuardarIntelAtual()
     {
@@ -175,12 +145,8 @@ public class TrashBinUI : MonoBehaviour
 
         btnGuardarIntel.interactable = false;
         var label = btnGuardarIntel.GetComponentInChildren<TextMeshProUGUI>();
-        if (label != null) label.text = "Intel Guardada ✓";
+        if (label != null) label.text = "Intel Guardada";
     }
-
-    // ------------------------------------------------------------------ //
-    // Eventos                                                               //
-    // ------------------------------------------------------------------ //
 
     private void OnItemRecebido(TrashItem item)
     {

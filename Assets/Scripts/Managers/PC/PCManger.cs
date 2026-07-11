@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PCManager : MonoBehaviour
 {
-    // abre uma janela de app no PC e traz-a para a frente do stack de UI.
+    // abre uma janela de app no PC e mete-a para a frente na UI
     // o SetAsLastSibling garante que a janela ativa fica sempre por cima das outras no canvas
     public void OpenWindow(GameObject window)
     {

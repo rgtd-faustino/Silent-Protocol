@@ -12,9 +12,9 @@ public class PCEmailManager : MonoBehaviour
     [Header("Emails deste PC  (ordem no importa  entregues por hora do jogo)")]
     [SerializeField] private List<EmailItem> emailsDestePc = new List<EmailItem>();
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Listas runtime                                                        //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     private List<EmailItem> inbox = new List<EmailItem>();
     private List<EmailItem> lixo = new List<EmailItem>();
 
@@ -24,15 +24,15 @@ public class PCEmailManager : MonoBehaviour
     // timers de auto-delete para emails críticos (minutos de jogo restantes)
     private Dictionary<EmailItem, float> autoDeleteTimers = new Dictionary<EmailItem, float>();
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Eventos (a EmailUI subscreve-os)                                      //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     public event System.Action<EmailItem> OnEmailRecebido;
     public event System.Action<EmailItem> OnEmailApagado;
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Unity                                                                 //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     void Start()
     {
@@ -84,9 +84,9 @@ public class PCEmailManager : MonoBehaviour
         }
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // Entrega interna                                                       //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // decide se um email pendente já deve ser entregue, cruzando dia + hora
     // filosofia igual ao IntelPickup: se já passámos o dia marcado, entrega-se já,
     // não fica à espera da hora exacta de um dia que já lá vai
@@ -116,9 +116,9 @@ public class PCEmailManager : MonoBehaviour
         }
     }
 
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
     // API pblica                                                           //
-    // ------------------------------------------------------------------ //
+    //--------------------------------------------------------------- //
 
     /// <summary>Injeta um email em runtime (triggers, eventos de misso, etc.)</summary>
     public void ReceberEmail(EmailItem email)

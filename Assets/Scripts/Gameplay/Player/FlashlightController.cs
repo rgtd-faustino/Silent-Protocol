@@ -29,7 +29,7 @@ public class FlashlightController : MonoBehaviour
         currentBattery = maxBattery;
         flashlight.enabled = false;
 
-        // Subescrevemos o evento de início da noite para garantirmos que a bateria reseta a cada novo turno.
+        // subescrevemos o evento de início da noite para garantirmos que a bateria reseta a cada novo turno
         GameEvent.OnNightStarted += OnNightStarted;
     }
 
@@ -38,6 +38,7 @@ public class FlashlightController : MonoBehaviour
         GameEvent.OnNightStarted -= OnNightStarted;
     }
 
+    // só usamos a lanterna quando é de noite
     void Update()
     {
         if (!TimeManager.Instance.isNight)
@@ -49,7 +50,7 @@ public class FlashlightController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F))
             Toggle();
 
-        // Fazemos o drain da bateria consoante os minutos de jogo fornecidos pelo TimeManager, para garantir que o consumo acompanha o tempo interno.
+        // vamos gastando a bateria consoante os minutos de jogo fornecidos pelo TimeManager para garantir que o consumo acompanha o tempo do jogo
         if (isOn)
         {
             float deltaMinutes = TimeManager.Instance.lastDeltaMinutes;
@@ -70,7 +71,7 @@ public class FlashlightController : MonoBehaviour
         else
             TurnOn();
 
-        if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_flashlight"))
+        if (TutorialManager.Instance.IsCurrentStepGate("tut_flashlight"))
         {
             TutorialManager.Instance.CompleteCurrentStep();
         }
@@ -79,13 +80,14 @@ public class FlashlightController : MonoBehaviour
             SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.flashlightToggleOnOff);
     }
 
+    // o NPCScript reage ao estado de ligada para aumentar a probabilidade do jogador ser detetado
     public void TurnOn()
     {
-        // Bloqueamos a luz se for dia ou se o jogador não a tiver. O NPCScript reage ao estado de ligada para aumentar a probabilidade de o jogador ser detetado.
+        // bloqueamos a luz se for dia ou se o jogador não a tiver
         if (currentBattery <= 0f || PlayerController.Instance.hasFlashlight == false || !TimeManager.Instance.isNight)
             return;
-        isOn = true;
 
+        isOn = true;
         flashlight.enabled = true;
     }
 
@@ -102,7 +104,7 @@ public class FlashlightController : MonoBehaviour
         Debug.Log("[Lanterna] Bateria recarregada.");
     }
 
-    // Exposto para o FlashlightHUDController ir buscar a informação e conseguir atualizar as barras visuais sem depender de eventos de UI manhosos.
+    // exposto para o FlashlightHUDController ir apanhar a informação e conseguir atualizar as barras visuais
     public float GetBatteryRatio()
     {
         return currentBattery / maxBattery;
@@ -113,15 +115,12 @@ public class FlashlightController : MonoBehaviour
         currentBattery = ratio * maxBattery;
     }
 
-    /// <summary>
-    /// Repõe a bateria ao máximo e desliga a lanterna, para que um "Novo Jogo" comece mesmo
-    /// do zero.
-    /// </summary>
+    // repõe a bateria ao máximo e desliga a lanterna, para que um "Novo Jogo" comece do zero
     public void ResetForNewGame()
     {
         currentBattery = maxBattery;
         isOn = false;
-        if (flashlight != null) flashlight.enabled = false;
+        flashlight.enabled = false;
 
         Debug.Log("[Lanterna] Estado reiniciado para um novo jogo.");
     }

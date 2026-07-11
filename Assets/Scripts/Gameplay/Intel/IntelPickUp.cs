@@ -6,7 +6,7 @@ public class IntelPickup : InteractableObject
     public IntelItem item;
 
     [Header("Visibilidade por dia")]
-    public int diaParaAparecer = 1; // defines no Inspector por objeto
+    public int diaParaAparecer = 1;
 
     private bool usado = false;
 
@@ -21,7 +21,7 @@ public class IntelPickup : InteractableObject
 
     private void OnDestroy()
     {
-        GameEvent.OnDayChanged -= HandleDayChanged; // desinscreve só quando o objeto morre de vez
+        GameEvent.OnDayChanged -= HandleDayChanged;
     }
 
     private void Start()
@@ -38,12 +38,13 @@ public class IntelPickup : InteractableObject
 
     public override void Interact()
     {
-        if (usado) return;
+        if (usado) 
+            return;
         usado = true;
 
         UIManager.Instance.HideTooltip();
         
-        // som de pegar a intel
+        // som de apanhar a intel
         SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.intelPickup);
 
         IntelReadUI.Instance.AbrirLeitura(

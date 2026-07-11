@@ -121,6 +121,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // para quando o jogador apanha o documento que foi imprimido, passamos as informações do mesmo para este script
     public void PickupDocument(DocumentTaskData data)
     {
         heldDocument = data;

@@ -37,7 +37,6 @@ public class PinEntryUI : MonoBehaviour
         campoPin.Select();
     }
 
-    // liga isto ao OnClick() do botão "Confirmar"
     public void OnConfirmar()
     {
         Debug.Log($"[PinEntryUI] Comparando '{campoPin.text}' com '{pinAlvo}' -> {campoPin.text == pinAlvo}");
@@ -65,7 +64,6 @@ public class PinEntryUI : MonoBehaviour
         }
     }
 
-    // liga isto ao OnClick() do botão "Cancelar"
     public void OnCancelar()
     {
         painel.SetActive(false);

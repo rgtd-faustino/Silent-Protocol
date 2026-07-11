@@ -5,7 +5,7 @@ public class SoundManager : MonoBehaviour {
 
     [Header("Audio Sources")]
     public AudioSource audioSource2D;
-    // fonte separada para sons das cameras de seguranca, assim nao interfere com o feedback de gameplay normal
+    // fonte separada para sons das cameras de seguranca ao ligar o computador, assim não interfere com o feedback de gameplay normal
     public AudioSource audioSource2DCameras;
     public AudioSource gameplayMusicSource;
     public AudioSource menuMusicSource;
@@ -23,8 +23,7 @@ public class SoundManager : MonoBehaviour {
     public AudioClip buttonClick;
     public AudioClip buzzerCorrect;
     public AudioClip buzzerWrong;
-    // versao alternativa de erro - usada no camera hack fail porque o tom e diferente
-    public AudioClip buzzerWrong2;
+    public AudioClip buzzerWrong2; // versão alternativa de erro que é usada no camera hack fail porque o som é diferente
     public AudioClip die;
     public AudioClip alarmExpulsion;
     public AudioClip cameraComputer;
@@ -38,7 +37,7 @@ public class SoundManager : MonoBehaviour {
     public AudioClip travelDingElevator;
     public AudioClip intelPickup;
 
-    // 3D - sons posicionados no mundo, ligados a AudioSources nos proprios GameObjects
+    // 3D -> sons posicionados no mundo, ligados a AudioSources nos próprios GameObjects
     public AudioClip openDoor;
     public AudioClip closeDoor;
     public AudioClip footsteps;
@@ -56,7 +55,7 @@ public class SoundManager : MonoBehaviour {
         Instance = this;
     }
 
-    // parar antes de tocar evita sobreposicao de clips na mesma fonte 2D
+    // parar antes de tocar evita sobreposição de clips na mesma fonte 2D
     public void PlaySound(AudioSource audio, AudioClip clip) {
         audio.clip = clip;
         if (audio.isPlaying)
@@ -64,10 +63,11 @@ public class SoundManager : MonoBehaviour {
         audio.Play();
     }
 
-    // pausa o menu para nao sobrepor com a musica do jogo
+    // pausa o menu para não sobrepor com a musica do jogo
     public void PlayGameplayMusic() {
         menuMusicSource.Pause();
         gameplayMusicSource.clip = gameplayTheme;
+
         if (!gameplayMusicSource.isPlaying)
             gameplayMusicSource.Play();
     }
@@ -75,17 +75,16 @@ public class SoundManager : MonoBehaviour {
     public void PlayMenuMusic() {
         gameplayMusicSource.Pause();
         menuMusicSource.clip = menuTheme;
+
         if (!menuMusicSource.isPlaying)
             menuMusicSource.Play();
     }
 
-    // os passos sao 3D, por isso o AudioSource esta no proprio GameObject do jogador
     public void PlayFootstepSound(GameObject soundObject) {
         AudioSource audio = soundObject.GetComponent<AudioSource>();
         PlaySound(audio, footsteps);
     }
 
-    // reutilizamos PlaySound porque o comportamento de paragem-antes-de-tocar e o mesmo para portas
     public void PlayDoorSound(GameObject soundObject, bool openDoorBool) {
         AudioSource audio = soundObject.GetComponent<AudioSource>();
         PlaySound(audio, openDoorBool ? openDoor : closeDoor);

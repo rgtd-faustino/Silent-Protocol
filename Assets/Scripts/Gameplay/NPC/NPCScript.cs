@@ -42,7 +42,7 @@ public class NPCScript : InteractableObject {
     // Usamos esta rota apenas uma vez no spawn para simular comportamentos iniciais antes do loop principal, tipo andar um bocado pelos apartamentos.
     [HideInInspector] public PatrolRoute startRoute;
 
-    // Se o NPC tiver uma rota fixa atribuída ignoramos o sistema aleatório de rotas. O gajo faz sempre este caminho.
+    // Se o NPC tiver uma rota fixa atribuída ignoramos o sistema aleatório de rotas. O jogador faz sempre este caminho.
     [HideInInspector] public PatrolRoute assignedRoute;
 
     // O spawner precisa de saber quando o NPC é destruído para gerir o limite de entidades ativas na cena.
@@ -98,7 +98,7 @@ public class NPCScript : InteractableObject {
             SetState(NPCState.Patrol);
     }
 
-    // Tratamos aqui a prioridade de entregar documentos sobre iniciar a conversa normal mal o jogador interaja com o gajo.
+    // Tratamos aqui a prioridade de entregar documentos sobre iniciar a conversa normal mal o jogador interaja com o jogador.
     public override void Interact() {
         if (PlayerController.Instance.heldDocument != null && TaskManager.Instance.HasActiveTask("Entregar documento")) {
             TryDeliverDocument();

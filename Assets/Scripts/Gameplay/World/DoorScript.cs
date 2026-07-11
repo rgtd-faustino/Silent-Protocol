@@ -4,11 +4,10 @@ using UnityEngine;
 public class DoorScript : InteractableObject
 {
 
-    private AudioSource audioSource;
-
     [SerializeField] private float anguloAberta = 90f;
     [SerializeField] private float velocidade = 3f;
 
+    private Coroutine animCoroutine; // corrotina que corre a nimação de abrir ou fechar a porta
     private bool isOpen = false;
 
     [Header("Fechadura de Código")]
@@ -17,13 +16,15 @@ public class DoorScript : InteractableObject
     [Header("Bloqueio Eletrónico")]
     [SerializeField] private CardReader cardReaderLock;
 
-    // override em vez de private void  garante que o InteractableObject.Awake() inicializa
-    // o glitch material, o MeshRenderer e as coordenadas baricntricas corretamente
+    // override em vez de private void garante que o InteractableObject.Awake() inicializa
+    // o glitch material, o MeshRenderer e as coordenadas baricêntricas corretamente
     protected override void Awake()
     {
         base.Awake();
         objectName = "Porta";
-        tooltipMessage = "E para abrir/fechar Porta";
+
+        // fazemos uma corrotina para não usarmos um update que seria muito ineficiente
+        StartCoroutine(TooltipUpdateRoutine());
 
         if (lockScript != null && cardReaderLock != null)
         {
@@ -31,42 +32,43 @@ public class DoorScript : InteractableObject
         }
     }
 
-    private void Start() {
-        audioSource = gameObject.GetComponent<AudioSource>();
-    }
-
-    // aviso visível no Inspector mesmo sem correr o jogo, para apanhar o erro em modo de edição
-    private void OnValidate()
-    {
-        if (lockScript != null && cardReaderLock != null)
-        {
-            Debug.LogWarning($"[{gameObject.name}] ATENÇÃO: porta configurada com LockScript e CardReader em simultâneo. Escolhe apenas um.");
+    private IEnumerator TooltipUpdateRoutine() {
+        while (true) {
+            UpdateTooltip();
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
+    private void UpdateTooltip() {
+        if (isOpen) {
+            tooltipMessage = "E - Fechar porta";
+        } else {
+            tooltipMessage = "E - Abrir porta";
+        }
+    }
 
-    public override void Interact()
-    {
-        if (lockScript != null && lockScript.isLocked)
-        {
-            Debug.Log("Ser que consigo destranc-la?");
+    public override void Interact() {
+        if (lockScript != null && lockScript.isLocked) {
+            Debug.Log("Esta porta está bloqueada com um código. Preciso do descobrir!");
             return;
         }
-        if (cardReaderLock != null && !cardReaderLock.isUnlocked)
-        {
-            Debug.Log($"[{gameObject.name}] Esta porta está bloqueada eletronicamente. Preciso de usar o leitor de cartões.");
+
+        if (cardReaderLock != null && !cardReaderLock.isUnlocked) {
+            Debug.Log($"Esta porta está bloqueada com um cartão. Preciso do encontrar!");
             return;
         }
 
         isOpen = !isOpen;
-        SoundManager.Instance.PlayDoorSound(this.gameObject, isOpen);
+        SoundManager.Instance.PlayDoorSound(gameObject, isOpen);
 
-        StopAllCoroutines();
+        if (animCoroutine != null)
+            StopCoroutine(animCoroutine);
 
         Quaternion destino = isOpen ? Quaternion.Euler(0f, anguloAberta, 0f) : Quaternion.Euler(0f, 0f, 0f);
-        StartCoroutine(AnimarPorta(destino));
+        animCoroutine = StartCoroutine(AnimarPorta(destino));
     }
 
+    // animação de abrir ou fechar a porta
     private IEnumerator AnimarPorta(Quaternion destino)
     {
         while (Quaternion.Angle(transform.localRotation, destino) > 0.1f)

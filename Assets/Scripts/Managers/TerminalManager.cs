@@ -66,14 +66,14 @@ public class TerminalManager : MonoBehaviour
 
         ui.AddBlank();
         ui.AddLine("  [INPUT RECEBIDO]", TerminalUI.LineType.Info);
-        ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
+        ui.AddLine(" -------------------------------------", TerminalUI.LineType.Sep);
 
         string preview = pastedContent.Length > 52
             ? pastedContent.Substring(0, 52) + "..."
             : pastedContent;
 
         ui.AddLine("  " + preview, TerminalUI.LineType.Hex);
-        ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
+        ui.AddLine(" -------------------------------------", TerminalUI.LineType.Sep);
         ui.AddLine("  " + pastedContent.Length + " bytes. estrutura encriptada detetada.", TerminalUI.LineType.Dim);
 
         // se o pacote veio do GameClipboard, o tipo de encriptação já é conhecido - o jogador ainda tem de escrever o comando certo
@@ -143,9 +143,9 @@ public class TerminalManager : MonoBehaviour
 
             ui.AddBlank();
             ui.AddLine("  [OUTPUT]", TerminalUI.LineType.Info);
-            ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
+            ui.AddLine(" -------------------------------------", TerminalUI.LineType.Sep);
             ui.AddLine("  " + hexOutput, TerminalUI.LineType.Hex);
-            ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
+            ui.AddLine(" -------------------------------------", TerminalUI.LineType.Sep);
             ui.AddLine("  HASH=" + hashValue, TerminalUI.LineType.Hash);
             ui.AddBlank();
         }
@@ -194,9 +194,9 @@ public class TerminalManager : MonoBehaviour
         decodedText = System.Text.Encoding.UTF8.GetString(bytes).Trim();
         state = TerminalState.Done;
 
-        ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
+        ui.AddLine(" -------------------------------------", TerminalUI.LineType.Sep);
         ui.AddLine("  " + decodedText, TerminalUI.LineType.Plain);
-        ui.AddLine("  ----------------------------------------", TerminalUI.LineType.Sep);
+        ui.AddLine(" -------------------------------------", TerminalUI.LineType.Sep);
         ui.AddBlank();
         ui.AddLine("  HASH=" + hashValue + " registado.", TerminalUI.LineType.Hash);
         ui.AddLine("  pacote decifrado com sucesso.", TerminalUI.LineType.Info);

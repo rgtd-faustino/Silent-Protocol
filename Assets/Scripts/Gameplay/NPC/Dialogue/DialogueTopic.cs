@@ -10,7 +10,7 @@ public class DialogueTopic : ScriptableObject
     [Header("Tipo de topico")]
     public TopicType topicType;
 
-    // Controla o fluxo de respostas visiveis baseado na avaliacao continua de risco no DialogueManager para so mostrar as opcoes certas na pior das situacoes.
+    // controla o fluxo de respostas visiveis baseado na avaliacao continua de risco no DialogueManager para so mostrar as opcoes certas na pior das situacoes.
     [Header("Condicao de aparecimento")]
     public bool requiresHighSuspicion = false;
     [Range(0f, 1f)] public float suspicionThreshold = 0.33f;

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using static SuspicionManager;
 
 public class CardReader : InteractableObject {
 
@@ -21,20 +22,23 @@ public class CardReader : InteractableObject {
         base.Awake();
         objectName = "Leitor de Cartões";
 
+        // mostra a tooltip suposta de acordo com se começa bloqueado ou desbloqueado
         tooltipMessage = isUnlocked ? unlockedTooltip : lockedTooltip;
-        UpdateLedColor(isUnlocked ? ledUnlockedMaterial : ledLockedMaterial);
+        UpdateLedColor(isUnlocked ? ledUnlockedMaterial : ledLockedMaterial); // incializa também a cor correta
     }
 
-    // comunica com o PlayerController para validar se o jogador tem a referência certa da credencial no inventário invisível dele
+    // comunica com o PlayerController para validar se o jogador tem a referência certa da credencial no inventário dele
     public override void Interact() {
         if (isUnlocked) {
             Debug.Log($"[{gameObject.name}] Acesso já está autorizado.");
             return;
         }
 
-        if (isProcessing) return;
+        if (isProcessing) 
+            return;
 
-        if (TutorialManager.Instance != null && TutorialManager.Instance.IsCurrentStepGate("tut_card")) {
+        // caso o tutorial exija que o jogador apanhe um cartão para poder seguir em frente com o mesmo (atualmente não é obrigado)
+        if (TutorialManager.Instance.IsCurrentStepGate("tut_card")) {
             TutorialManager.Instance.CompleteCurrentStep();
         }
 
@@ -45,7 +49,7 @@ public class CardReader : InteractableObject {
         }
     }
 
-    // mal o gajo tem a credencial, espetamos o material verde no LED e chamamos o SoundManager para dar aquele feedback auditivo clássico de sucesso
+    // mal o jogador tem a credencial, metemos o material verde no LED e chamamos o SoundManager para dar o feedback auditivo de sucesso
     private IEnumerator ProcessUnlockRoutine() {
         isProcessing = true;
         isUnlocked = true;
@@ -61,14 +65,15 @@ public class CardReader : InteractableObject {
         isProcessing = false;
     }
 
-    // caso dê erro, o SoundManager chuta um beep chato e o leitor pisca em vermelho para o gajo perceber logo que ainda tem que explorar mais o nível
+    // caso dê erro, o SoundManager faz um beep mau e o leitor pisca em vermelho para o jogador perceber logo que ainda tem que explorar mais
     private IEnumerator ProcessAccessDeniedRoutine() {
         isProcessing = true;
 
         string cardNeeded = cardName;
         Debug.Log($"[{gameObject.name}] Acesso NEGADO! Falta credencial: {cardNeeded}");
 
-        SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.buzzerWrong2);
+        SuspicionManager.Instance.IncreaseSuspicion(1.5f, GetInstanceID(), SuspicionSource.CardCodeDenied); // sobe a suspeita porque o jogador tentou aceder a algo que não devia
+		SoundManager.Instance.audioSource2D.PlayOneShot(SoundManager.Instance.buzzerWrong2);
 
         string originalTooltip = tooltipMessage;
         tooltipMessage = $"Necessita de {cardNeeded}";

@@ -8,9 +8,10 @@ public class DaySchedule : ScriptableObject
     public class ScheduledTask
     {
         [Tooltip("Nome exato da task. Opções: Escrever documento, Imprimir documento, Arquivar documento, Entregar documento")]
+        // nome exato da task que vai haver para o dia em questão, tem que ser exatamente uma destas: Escrever documento, Imprimir documento, Arquivar documento, Entregar documento
         public string taskName;
 
-        // O TaskManager pega neste valor decimal e multiplica por 60 para saber os minutos reais do jogo e cruzar com o TimeManager.
+        // o TaskManager apanha este valor decimal e multiplica por 60 para saber os minutos reais do jogo e cruzar com o TimeManager
         [Tooltip("Hora a que a task aparece (decimal). Exemplo: 13.5 corresponde às 13:30.")]
         [Range(0f, 23.99f)]
         public float spawnHour;
@@ -19,8 +20,8 @@ public class DaySchedule : ScriptableObject
         [Range(0f, 23.99f)]
         public float deadlineHour;
 
-        // Passamos este nível de dificuldade ao TaskManager, que aplica os multiplicadores 0.1, 0.25 ou 0.5 e reencaminha para o SuspicionManager.
-        [Tooltip("Define o impacto na suspeita. Small penaliza pouco, Major penaliza muito.")]
+        // passamos este nível de dificuldade ao TaskManager, que aplica os multiplicadores 0.1, 0.25 ou 0.5 e reencaminha para o SuspicionManager
+        [Tooltip("Define o impacto na suspeita.")]
         public TaskManager.TaskDifficulty difficulty;
     }
 

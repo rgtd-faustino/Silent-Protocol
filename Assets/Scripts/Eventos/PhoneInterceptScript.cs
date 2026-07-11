@@ -1,25 +1,34 @@
+using System.Collections;
 using UnityEngine;
 
 public class PhoneInterceptScript : InteractableObject {
-    [Header("Canais disponíveis neste telefone (máx 3)")]
-    [SerializeField] private PhoneCallData[] callChannels;
+    [SerializeField] private PhoneCallData[] callChannels; // canais disponíveis neste telefone
 
-    [Header("Suspeita instantânea ao interceptar")]
-    // aumenta logo a suspeita assim que o gajo atende, para impedir que fiquem a abusar dos telefones
+    // aumenta logo a suspeita assim que o jogador atende, para impedir que fiquem a abusar dos telefones
     private float suspicionOnUse = 0.04f;
 
-    [Header("Horário activo")]
-    private float activeFromHour = 9f;
-    private float activeUntilHour = 17.5f;
+    // horário em que o telefonema ocorre e o jogador pode escutar
+    public float activeFromHour = 9f;
+    public float activeUntilHour = 17.5f;
 
     protected override void Awake() {
         base.Awake();
         objectName = "Telefone";
-        tooltipMessage = "E - Intercetar chamada";
+
+        // fazemos uma corrotina para não usarmos um update que seria muito ineficiente
+        StartCoroutine(TooltipUpdateRoutine());
+    }
+
+    private IEnumerator TooltipUpdateRoutine() {
+        while (true) {
+            UpdateTooltip();
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
     public override void Interact() {
-        if (PhoneCallUI.IsOpen) return;
+        if (PhoneCallUI.IsOpen)
+            return;
 
         float hora = TimeManager.Instance.GetCurrentTimeInHours();
         if (hora < activeFromHour || hora > activeUntilHour) {
@@ -29,5 +38,15 @@ public class PhoneInterceptScript : InteractableObject {
 
         SuspicionManager.Instance.AddInstantSuspicion(suspicionOnUse);
         PhoneCallUI.Instance.OpenCall(callChannels);
+    }
+
+    private void UpdateTooltip() {
+        float hora = TimeManager.Instance.GetCurrentTimeInHours();
+
+        if (hora >= activeFromHour && hora <= activeUntilHour) {
+            tooltipMessage = "E - Intercetar chamada";
+        } else {
+            tooltipMessage = "Sem chamadas ativas atualmente";
+        }
     }
 }

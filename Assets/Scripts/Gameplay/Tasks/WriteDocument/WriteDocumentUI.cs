@@ -13,7 +13,7 @@ public class WriteDocumentUI : MonoBehaviour {
     [Header("UI do documento")]
     [SerializeField] private TextMeshProUGUI documentTitleText;
     [SerializeField] private TextMeshProUGUI documentBodyText;
-    // Deixamos o botão de submissão sempre ativo intencionalmente. O jogador pode enviar um ficheiro com espaços em branco, o que desencadeia penalizações no SuspicionManager.
+    // deixamos o botão de submissão sempre ativo intencionalmente porque o jogador pode enviar um ficheiro com espaços em branco, o que aumenta a suspeita geral
     [SerializeField] private Button submitButton;
 
     [Header("Botões de escolha (4 botões fixos)")]
@@ -22,19 +22,22 @@ public class WriteDocumentUI : MonoBehaviour {
     private DocumentTaskData currentData;
 
     private string[] chosenWords;
-    // Serve como controlo auxiliar para o loop do OnWordChosen saltar as perguntas que já têm resposta definida.
+    // serve como controlo auxiliar para o loop do OnWordChosen saltar as perguntas que já têm resposta definida
     private bool[] filledSlots;
-    // O índice da lacuna que está a ser resolvida neste momento. Usamos isto para saber onde colocar a tag amarela no texto gerado.
+    // isto é o índice da lacuna que está a ser resolvida neste momento e usamos para saber onde colocar a tag amarela no texto gerado
     private int currentBlankIndex;
 
-    // A ligação no OnEnable garante que consultamos o TaskManager no exato momento em que o PC é aberto. Isto resolve o problema de dessincronização que tínhamos quando o script carregava logo no Start.
+    // a ligação no OnEnable garante que consultamos o TaskManager no exato momento em que o PC é aberto
+    // isto resolve o problema de dessincronização que tínhamos quando o script carregava logo no Start porque não apanhava nenhuma task
     void OnEnable() {
+        // verificamos se existe alguma task
         bool hasMorning = TaskManager.Instance.HasActiveMorningTask("Escrever documento");
         bool hasAfternoon = TaskManager.Instance.HasActiveAfternoonTask("Escrever documento");
 
         if (hasMorning || hasAfternoon) {
             emptyStatePanel.SetActive(false);
             documentPanel.SetActive(true);
+            // se houver então apanhamos os dados e mostramos a UI da tarefa
             OpenDocument(DocumentManager.Instance.GetDocumentForToday());
 
         } else {
@@ -44,6 +47,7 @@ public class WriteDocumentUI : MonoBehaviour {
     }
 
     private void OpenDocument(DocumentTaskData data) {
+        // recolhemos as informações todas de cada texto, opções, etc
         currentData = data;
         chosenWords = new string[data.blanks.Length];
         filledSlots = new bool[data.blanks.Length];
@@ -55,7 +59,8 @@ public class WriteDocumentUI : MonoBehaviour {
         ShowOptionsForCurrentBlank();
     }
 
-    // Optámos por gerar a string toda de novo a cada clique. A nível de performance num texto pequeno é residual, e poupa-nos a imensa chatice de gerir as tags de rich text manualmente via código.
+    // optámos por gerar a string toda de novo a cada clique
+    // a nível de performance num texto pequeno é residual
     private void RefreshBodyText() {
         string body = currentData.bodyText;
 
@@ -73,7 +78,8 @@ public class WriteDocumentUI : MonoBehaviour {
         documentBodyText.text = body;
     }
 
-    // Limpa o painel e baralha as novas opções. Ao fazer reset dos listeners dos botões evitamos comportamentos marados de cliques anteriores passarem para a próxima questão.
+    // limpa o painel e baralha as novas opções
+    // ao fazer reset dos listeners dos botões evitamos comportamentos marados de cliques anteriores passarem para a próxima questão
     private void ShowOptionsForCurrentBlank() {
         foreach (Button btn in choiceButtons)
             btn.gameObject.SetActive(false);
@@ -83,6 +89,7 @@ public class WriteDocumentUI : MonoBehaviour {
 
         BlankSlot blank = currentData.blanks[currentBlankIndex];
 
+        // adicionamos as opções e depois baralhamos para ser imprevisível
         List<string> options = new List<string>();
         options.Add(blank.correctAnswer);
         options.AddRange(blank.wrongOptions);
@@ -90,18 +97,17 @@ public class WriteDocumentUI : MonoBehaviour {
 
         for (int i = 0; i < options.Count && i < choiceButtons.Length; i++) {
             string word = options[i];
-            bool isCorrect = (word == blank.correctAnswer);
 
             choiceButtons[i].gameObject.SetActive(true);
             choiceButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = word;
 
             choiceButtons[i].onClick.RemoveAllListeners();
-            choiceButtons[i].onClick.AddListener(() => OnWordChosen(word, isCorrect));
+            choiceButtons[i].onClick.AddListener(() => OnWordChosen(word));
         }
     }
 
-    // Regista a escolha atual e empurra o índice para a frente. O ciclo while protege-nos caso um dia implementemos navegação livre pelas respostas e o jogador responda fora de ordem.
-    private void OnWordChosen(string word, bool isCorrect) {
+    // regista a escolha atual e empurra o índice para a frente para a próxima lacuna a preencher
+    private void OnWordChosen(string word) {
         chosenWords[currentBlankIndex] = word;
         filledSlots[currentBlankIndex] = true;
 
@@ -112,17 +118,20 @@ public class WriteDocumentUI : MonoBehaviour {
 
         RefreshBodyText();
 
+        // enquanto todas as lacunas não forem preenchidas vamos mostrando as próximas opções, senão acaba a tarefa
         bool allFilled = currentBlankIndex >= currentData.blanks.Length;
 
         if (allFilled) {
             foreach (Button btn in choiceButtons)
                 btn.gameObject.SetActive(false);
+
         } else {
             ShowOptionsForCurrentBlank();
         }
     }
 
-    // Confirma as escolhas finais e empurra os dados para o DocumentManager, que vai tratar de acumular os pesos das decisões narrativas. Depois sinalizamos ao TaskManager para riscar a tarefa da lista.
+    // confirma as escolhas finais e manda os dados para o DocumentManager que vai acumular os pesos das decisões narrativas
+    // depois sinalizamos ao TaskManager para riscar a tarefa da lista
     public void OnSubmit() {
         bool allFilled = true;
 

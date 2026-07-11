@@ -4,23 +4,18 @@ using UnityEngine;
 public class PhoneCallData : ScriptableObject
 {
     [Header("Identificação")]
-    [Tooltip("Label")]
-    public string channelLabel = "EXT-00";
+    public string channelLabel = "EXT-00"; // canal onde vai decorrer a chamada
 
     [Header("Falas do canal (por ordem)")]
-    [Tooltip("Frases")]
     [TextArea(2, 5)]
-    public string[] lines;
+    public string[] lines; // linhas de diálogo que a conversa vai ter
 
     [Header("Linhas com keyword capturável")]
-    [Tooltip("Indices keyword")]
-    public int[] keywordLineIndices;
+    public int[] keywordLineIndices; // se tem alguma keyword importante que possa ser capturada
 
     [Header("Intel por keyword (mesmo índice que keywordLineIndices)")]
-    [Tooltip("Rewards intel")]
-    public IntelItem[] intelRewards;
+    public IntelItem[] intelRewards; // intel que o jogador poderá obter se captar a linha de diálogo que continha a keyword
 
     [Header("Ritmo")]
-    [Tooltip("Espera")]
-    public float lineDelayGameMinutes = 1.5f;
+    public float lineDelayGameMinutes = 1.5f; // tempo de espera por linha de diálogo
 }

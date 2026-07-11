@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ConversationData", menuName = "WireShark/Conversation Data")]
 public class ConversationData : ScriptableObject
 {
-    [Tooltip("Conjunto de conversas que contêm informação relevante para a narrativa.")]
+    // conjunto de conversas no tráfego de pacotes que contêm informação relevante para a narrativa
     public List<ConversationEntry> conversations = new List<ConversationEntry>();
 }
 
@@ -20,11 +20,10 @@ public class ConversationEntry
     public string encryptionType;
 
     [Header("Dia em que aparece")]
-    [Tooltip("O dia da semana no jogo em que esta conversa começa a ser injetada no tráfego.")]
-    public int dayToAppear = 1;
+    public int dayToAppear = 1; // o dia da semana no jogo em que esta conversa começa a ser injetada no tráfego de pacotes
 
     [Header("Mensagens da conversa")]
-    [Tooltip("Lista sequencial dos pacotes que compõem a troca de mensagens.")]
+    // e estas são as linhas de diálogos que compõem a conversa
     public List<MessageEntry> messages = new List<MessageEntry>();
 }
 
@@ -32,12 +31,13 @@ public class ConversationEntry
 public class MessageEntry
 {
     [TextArea(2, 4)]
-    [Tooltip("Texto legível que será ofuscado pelo PacketGenerator em runtime.")]
+    // texto legível que poderá ser ofuscado pelo PacketGenerator
     public string plainText;
 
-    [Tooltip("Se for verdadeiro, o pacote é visível na stream em tempo real. Caso contrário, vai apenas para o histórico.")]
+    // se for verdadeiro, o pacote é visível na stream em tempo real
+    // senão vai apenas para o histórico
     public bool appearsLive = true;
 
-    [Tooltip("Indica se este pacote tem dados cruciais que o jogador deve investigar e guardar.")]
+    // indica se este pacote tem dados cruciais que o jogador deve investigar e guardar
     public bool isImportant = false;
 }

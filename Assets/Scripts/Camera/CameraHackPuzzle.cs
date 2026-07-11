@@ -26,11 +26,13 @@ public class CameraHackPuzzle : MonoBehaviour {
 
     // número de barras
     private int numBands = 8;
-    private float scrollStep = 0.01f; // multiplicado por deltaTime * 60 dá ~0.6 por segundo —> rápido o suficiente mas controlado
+    // multiplicado por deltaTime * 60 dá ~0.6 por segundo —> rápido o suficiente mas controlado (para subir/descer a barra)
+    private float scrollStep = 0.01f;
 
     private float tolerance; // o quão perto pode estar a barra do jogador comparando à original
-    private float holdRequired;
-    private float timeLimit;
+    private float holdRequired; // tempo requerido seguido que a barra tem de aguentar como certa
+    private float timeLimit; // tempo que o jogador tem para resolver o mini jogo de acordo com o seu nível de intelectual
+    // estas variáveis definem o quão as barras vermelhas (não concluídas) oscilam em altura e o quão rapidamente se movem
     private float oscillationAmplitude;
     private float oscillationSpeed;
 
@@ -42,7 +44,7 @@ public class CameraHackPuzzle : MonoBehaviour {
     private float[] jamPattern; // padrão do tamanho das barras do sinal original
     private float[] playerVals; // valores que o jogador terá de meter em cada barra para espelhar o inverso das barras do sinal original
     private int selectedBand = 0; // barra atualmente a ser mudada pelo jogador
-    private float holdTimer;
+    private float holdTimer; // quantidade de tempo que todas as barras têm de ficar corretas para passar o mini jogo
     private float countdown;
     [HideInInspector] public bool active;
     private bool finished;
@@ -84,7 +86,7 @@ public class CameraHackPuzzle : MonoBehaviour {
 
     public void Open(int camIndex) {
         hackingCameraIndex = camIndex;
-        ApplyDifficulty(HackLevel);
+        ApplyDifficulty(HackLevel); // aplicamos o nível do mini jogo de acordo com a quantidade de câmaras já hackeadas
 
         jamPattern = GeneratePattern(camIndex); // criamos o padrão do tamanho das barras do sinal original
         playerVals = new float[numBands];
@@ -119,8 +121,8 @@ public class CameraHackPuzzle : MonoBehaviour {
         float t = Mathf.Clamp01(level / 7f);
 
         tolerance = Mathf.Lerp(0.13f, 0.055f, t); // tolerância aperta
-        timeLimit = Mathf.Lerp(45f, 28f, t); // menos tempo
-        timeLimit += PlayerStats.Instance.GetIntelecto() * 1.5f; // Atributo Intelecto: Aumenta o tempo disponível para o minijogo
+        timeLimit = Mathf.Lerp(40f, 28f, t); // menos tempo
+        timeLimit += PlayerStats.Instance.GetIntelecto() * 1.5f; // atributo intelecto aumenta o tempo disponível para o minijogo
 
         holdRequired = Mathf.Lerp(1.0f, 2.8f, t); // mais tempo a manter
         oscillationAmplitude = Mathf.Lerp(0f, 0.07f, t); // JAM começa estático, oscila mais
@@ -170,6 +172,7 @@ public class CameraHackPuzzle : MonoBehaviour {
         }
     }
 
+    // velocidade a que a barra muda de altura de acordo com a quantidade de tempo que a tecla fica premida
     private void HandleKeyboardAdjust() {
         bool up = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
         bool down = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow);
@@ -192,7 +195,7 @@ public class CameraHackPuzzle : MonoBehaviour {
         // primeira passagem: calcular a ressonância global
         float resonance = 0f;
         for (int i = 0; i < numBands; i++) {
-            float diff = Mathf.Abs(playerVals[i] - InverseOf(i));
+            float diff = Mathf.Abs(playerVals[i] - InverseOf(i)); // abs porque só queremos saber o valor total real positivo da diferença
 
             if (diff <= tolerance)
                 resonance += 1f;
@@ -207,7 +210,7 @@ public class CameraHackPuzzle : MonoBehaviour {
 
         for (int i = 0; i < numBands; i++) {
             float jamVal = GetJamValue(i);
-            float diff = Mathf.Abs(playerVals[i] - (1f - jamVal));
+            float diff = Mathf.Abs(playerVals[i] - (1f - jamVal)); // para que seja sempre positivo porque só queremos saber o valor real total
             bool matched = diff <= tolerance;
 
             // barra vermelha com glitch quando ressonância é baixa
@@ -267,7 +270,8 @@ public class CameraHackPuzzle : MonoBehaviour {
                 StartCoroutine(Succeed());
 
         } else {
-            holdTimer = Mathf.Max(0f, holdTimer - Time.deltaTime * 1.5f); // desce 1.5x mais depressa do que sobe para penalizar sair da posição
+            // se o jogador já não tiver as barras todas corretas o contador volta a regressar ao 0 1.5x mais depressa do que sobe para penalizar sair da posição
+            holdTimer = Mathf.Max(0f, holdTimer - Time.deltaTime * 1.5f);
         }
     }
 

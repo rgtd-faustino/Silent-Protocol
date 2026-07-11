@@ -41,11 +41,14 @@ public class PlayerStats : MonoBehaviour {
         Instance = this;
     }
 
-    // A UI de criação da personagem injeta aqui os pontos distribuídos no início da run. Fica alojado neste singleton para que qualquer classe como o PlayerController consiga consultar os atributos e mudar as mecânicas na hora.
+    // a UI de criação da personagem injeta aqui os pontos distribuídos no início da run
+    // fica alojado neste singleton para que qualquer classe como o PlayerController consiga consultar os atributos e mudar as mecânicas
     public void SetStats(int[] newStats) {
-        if (newStats == null || newStats.Length != 7) 
+        if (newStats == null || newStats.Length != 7)
             return;
 
+        // copiamos os valores para dentro do array Stats já existente em vez de substituir a referência (Stats = newStats)
+        // para que qualquer script que já tenha guardado uma referência a Stats continue válido e veja os valores atualizados
         System.Array.Copy(newStats, Stats, 7);
     }
 }
