@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
+using static UnityEngine.InputManagerEntry;
 
 public class InteractableObject : MonoBehaviour {
     [HideInInspector] public string objectName = "objeto";
@@ -60,7 +62,15 @@ public class InteractableObject : MonoBehaviour {
         mpb.SetFloat("_Intensity", 0f);
         meshRenderer.SetPropertyBlock(mpb, glitchMatIndex);
 
-        // arranca a corrotina que verifica periodicamente se este objeto deve estar a brilhar
+    }
+    //Se algum ou outro InteractableObject tiver o Awake() executado antes do Awake() do CameraScript correr e definir Instance = this,
+    //então CameraScript.Instance ainda é null nesse instante, por isso comecamos a StartCoroutine no Start() em vez do Awake() para garantir
+    //que a corrotina só começa depois do CameraScript estar pronto
+    protected virtual void Start()
+    {
+        if (meshRenderer == null || glitchMatIndex == -1)
+            return;
+
         StartCoroutine(GlowUpdateRoutine());
     }
 

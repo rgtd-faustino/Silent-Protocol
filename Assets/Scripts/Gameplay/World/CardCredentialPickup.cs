@@ -20,8 +20,9 @@ public class CardCredentialPickup : InteractableObject {
         GameEvent.OnDayChanged -= HandleDayChanged;
     }
 
-    private void Start() {
-        // para mostrarmos apenas quando for suposto, fazemos isto logo no início para desativar/ativar todos os que forem necessários
+    protected override void Start()
+    {
+        base.Start();
         gameObject.SetActive(GameManager.Instance.currentDay >= diaParaAparecer);
     }
 
@@ -31,17 +32,15 @@ public class CardCredentialPickup : InteractableObject {
     }
 
     // este método injeta o ID do cartão diretamente no PlayerController, os CardReaders depois vão validar se o ID está na lista do jogador
-    public override void Interact() {
-        if (isPickedUp)
-            return;
+    public override void Interact()
+    {
+        if (isPickedUp) return;
         isPickedUp = true;
         PlayerController.Instance.AddCardCredential(cardID);
         Debug.Log($"[CardCredentialPickup] Cartão recolhido: {cardName} (ID: {cardID})");
         UIManager.Instance.HideTooltip();
-        gameObject.SetActive(false);
-        Destroy(gameObject, 0.1f);
+        Destroy(gameObject, 0.1f); // já não fazemos SetActive(false) aqui
     }
-
     // forçamos os cartões a brilhar sempre que não forem apanhados para o jogador não andar às cegas a procurar no cenário
     protected override bool CheckShouldGlowByDefault() {
         return !isPickedUp;

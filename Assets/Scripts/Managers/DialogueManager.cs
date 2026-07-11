@@ -12,7 +12,8 @@ public class DialogueManager : MonoBehaviour
 
     private NPCDialogueData currentData;
     private bool isOpen = false;
-
+    // guardamos aqui o outcome pendente para o callback nomeado conseguir aceder-lhe depois
+    private TopicOutcome pendingOutcome;
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -76,16 +77,15 @@ public class DialogueManager : MonoBehaviour
         if (topic == null) return;
 
         TopicOutcome outcome = topic.Evaluate();
+        pendingOutcome = outcome; // guardamos para o callback usar
 
-        DialogueUI.Instance.ShowNPCResponse(outcome.npcResponse, () => {
-            ApplyConsequence(outcome);
-
-            // os tópicos de confronto têm de fechar sempre a conversa no fim, porque o NPC passa-se da cabeça e recusa-se a falar mais
-            if (topic.topicType == DialogueTopic.TopicType.Confrontation)
-                CloseDialogue();
-            else
-                DialogueUI.Instance.ReturnToTopics();
-        },outcome);
+        DialogueUI.Instance.ShowNPCResponse(outcome.npcResponse, OnDialogueResponseFinished, outcome);
+    }
+    // callback nomeado, chamado quando o jogador prime E depois do NPC acabar de "falar"
+    private void OnDialogueResponseFinished()
+    {
+        ApplyConsequence(pendingOutcome);
+        CloseDialogue();
     }
 
     // cortamos as opções se o jogador não tiver carisma suficiente ou se o tópico exigir uma situação de alta suspeita para aparecer.

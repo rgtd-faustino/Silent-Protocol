@@ -47,6 +47,16 @@ public class DialogueUI : MonoBehaviour
         closeButton.onClick.AddListener(OnClosePressed);
         dialoguePanel.SetActive(false);
     }
+    //verifica se o painel de diálogo está ativo e se o jogador pressionou a tecla E para avançar no diálogo
+    void Update()
+    {
+        if (!dialoguePanel.activeSelf) return;
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            OnContinuePressed();
+        }
+    }
 
     // Inicializamos a interface de diálogo com os dados base que vêm do DialogueManager
     // Passar o greeting diretamente simplifica o fluxo inicial sem precisarmos de construir um tópico vazio e artificial

@@ -95,7 +95,10 @@ public class CameraScript : MonoBehaviour
     // para o jogador conseguir detetar objetos com os quais pode interagir
     // começa por mandar um ray para a frente usando uma esfera, se algo tiver sido apanhado pela mesma que tenha o script interactable object
     // ou que seja filho por hierarquia atribuímos o currentTarget a esse gameObject
+
     void DetectInteractable() {
+        if (PlayerController.Instance.canMoveRotate == false)
+            return;
         Ray ray = new Ray(transform.position, transform.forward);
 
         if (Physics.SphereCast(ray, 0.25f, out RaycastHit hit, interactionDistance, interactableLayer)) {
