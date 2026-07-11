@@ -41,10 +41,10 @@ public class NPCScript : InteractableObject {
     [SerializeField] private bool despawnAtEnd = false;
 
     // esta rota é utilizada para o NPC percorrer uma rota inicial antes de lhe começarem a ser atribuídas rotas ao acaso
-    [HideInInspector] public PatrolRoute startRoute; // usado quando os NCP spawnam no piso dos quartos para vaguearem antes direm pros seus quartos
+    [HideInInspector] public PatrolRoute startRoute; // usado por exemplo quando os NCP spawnam no piso dos quartos para vaguearem antes direm pros seus quartos
 
     // se o NPC tiver uma rota fixa atribuída ignoramos o sistema aleatório de rotas, pois o jogador faz sempre este caminho
-    [HideInInspector] public PatrolRoute assignedRoute; // usado para os NPC que spawnam na receção terem dir para os elevadores
+    [HideInInspector] public PatrolRoute assignedRoute; // usado por exemplo para os NPC que spawnam na receção terem dir para os elevadores
 
     // o spawner precisa de saber quando o NPC é destruído para gerir o limite de NPC spawnados (caso seja spawnado por um)
     [HideInInspector] public NPCSpawner spawner;
@@ -169,6 +169,7 @@ public class NPCScript : InteractableObject {
             shuffled[rand] = temp;
         }
 
+        // passamos wwaypoints à frente para imprevisibilidade
         for (int i = 0; i < currentRoute.waypoints.Length; i++) {
             if (Random.value < 0.75f)
                 continue;
@@ -185,15 +186,18 @@ public class NPCScript : InteractableObject {
             }
         }
 
+        // depois de fazer a rota começam a patrulhar
         EnterPatrol();
     }
 
     private void Update() {
         if (currentState == NPCState.Investigate) {
             if (!agent.pathPending && agent.remainingDistance < 0.5f)
+                // quando os NPC estão a investigar deslocam-se para o último local onde esteve o jogador, quando chegarem podem voltar ao estado anterior
                 SetState(isPatrolling ? NPCState.Patrol : NPCState.Idle);
         }
 
+        // se estiverem em CHASE é perseguirem sempre o jogador
         if (currentState == NPCState.Chase)
             agent.SetDestination(playerTransform.position);
     }
@@ -210,7 +214,7 @@ public class NPCScript : InteractableObject {
         if (currentState == newState)
             return;
 
-        // Resetar a corrotina é fulcral antes da mudança senão arriscamos os gajos irem para os waypoints enquanto estão num chase state.
+        // damos reset à corrotina antes da mudança senão arriscamos os NPC irem para os waypoints enquanto estão no estado de chase
         if (patrolCoroutine != null) {
             StopCoroutine(patrolCoroutine);
             patrolCoroutine = null;
@@ -218,17 +222,18 @@ public class NPCScript : InteractableObject {
 
         currentState = newState;
 
+        // dependendo do estado mudamos as suas animações
         int animState;
         switch (newState) {
             case NPCState.Chase:
-                animState = 2;
+                animState = 2; // correr
                 break;
             case NPCState.Patrol:
             case NPCState.Investigate:
-                animState = 1;
+                animState = 1; // andar
                 break;
             default:
-                animState = 0;
+                animState = 0; // idle
                 break;
         }
 
@@ -248,17 +253,20 @@ public class NPCScript : InteractableObject {
     }
 
     private void EnterPatrol() {
+        // os NPC rececionistas não fazem patrol se pelo menos uma já estiver numa rota de descansar
         if (npcType == NPCType.Receptionist && !NPCManager.Instance.CanReceptionistLeave()) {
             SetState(NPCState.Idle);
             return;
         }
 
+        // se o NPC não tiver uma rota específica a fazer sempre, apanha uma ao acaso
         if (assignedRoute != null) {
             currentRoute = assignedRoute;
+
         } else {
             currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, departmentID, currentRoute);
 
-            // Garantimos que não há conflito no canto de repouso recarregando a rota se o sistema achar que o limite já foi atingido.
+            // se o NPC for um guarda e já estiver na rota de descanso e não puder entrar nela (não vai porque já está nela) então excluímos as rotas de descanso
             if (npcType == NPCType.Guard && currentRoute.isRestRoute && !NPCManager.Instance.CanGuardRest()) {
                 currentRoute = NPCManager.Instance.GetRandomRoute(npcType, currentFloor, departmentID, currentRoute, excludeRest: true);
             }
@@ -268,10 +276,12 @@ public class NPCScript : InteractableObject {
         patrolCoroutine = StartCoroutine(PatrolRoutine());
     }
 
+    // agora que o NPC já tem atribuída uma rota selecionada ao acaso, poderá começar a percorre-la
     private IEnumerator PatrolRoutine() {
         agent.isStopped = false;
 
         do {
+            // baralhamos os waypoints todos para imprevisibilidade
             Transform[] shuffled = (Transform[])currentRoute.waypoints.Clone();
             for (int i = shuffled.Length - 1; i > 0; i--) {
                 int rand = Random.Range(0, i + 1);
@@ -280,6 +290,7 @@ public class NPCScript : InteractableObject {
                 shuffled[rand] = temp;
             }
 
+            // enquanto o NPC estiver a percorrer waypoints mantemo-lo a andar, se já tiver chegado fica idle o tempo definido na rota em questão
             for (int i = 0; i < currentRoute.waypoints.Length; i++) {
                 animator.SetInteger("State", 1);
                 agent.SetDestination(shuffled[i].position);
@@ -294,8 +305,9 @@ public class NPCScript : InteractableObject {
                 }
             }
 
-        } while (currentRoute.loopWaypoints && currentState == NPCState.Patrol);
+        } while (currentRoute.loopWaypoints && currentState == NPCState.Patrol); // apenas se tiver no estado de patrol E se for para fazer a rota em loop
 
+        // se não for em loop verificamos se o NPC pode voltar ao início
         if (currentRoute.returnHome) {
             animator.SetInteger("State", 1);
             agent.SetDestination(homeBase.position);
@@ -306,6 +318,8 @@ public class NPCScript : InteractableObject {
             animator.SetInteger("State", 0);
         }
 
+        // se ainda estiver em patrol e tiver chegado ao último waypoint verificamos se é destruído (por exemplo chegou ao elevador de volta)
+        // ou percorre outra rota
         if (currentState == NPCState.Patrol) {
             if (despawnAtEnd)
                 Destroy(gameObject);
@@ -327,7 +341,8 @@ public class NPCScript : InteractableObject {
         agent.isStopped = false;
     }
 
-    // Fazemos um check em ciclos de 100ms para poupar na fatura da renderização e acedemos logo ao trigger do PlayerController para detetar invasões.
+    // isto verifica o campo de vista do NPC, só é ativado se o jogador estiver no mesmo piso, senão não faz sentido verificar
+    // é usado para ver se o jogador está num local onde não devia estar
     private IEnumerator FOVCheckRoutine() {
         WaitForSeconds wait = new WaitForSeconds(0.1f);
 
@@ -342,9 +357,7 @@ public class NPCScript : InteractableObject {
                 float dist = Vector3.Distance(transform.position, playerTransform.position);
                 float level = GetSuspicionLevelByDistance(dist);
 
-                if (TimeManager.Instance.isNight &&
-                    FlashlightController.Instance != null &&
-                    FlashlightController.Instance.isOn) {
+                if (TimeManager.Instance.isNight && FlashlightController.Instance != null && FlashlightController.Instance.isOn) {
                     level = Mathf.Min(3f, level + 1f);
                 }
 
