@@ -86,7 +86,6 @@ public class PCEmailManager : MonoBehaviour {
 
             if (email.isCritical && email.autoDeleteGameMinutes > 0f) {
                 autoDeleteTimers[email] = email.autoDeleteGameMinutes;
-                GameEvent.CriticalEmailAvailable(email.emailID);
             }
         }
     }
